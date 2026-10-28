@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Check, Copy } from 'lucide-react';
+import Reveal from './Reveal.jsx';
 import SectionHeading from './SectionHeading.jsx';
 
 const IDENTITY = {
@@ -73,12 +74,12 @@ function IdentityCard({ onNotify }) {
   };
 
   return (
-    <div className="relative">
+    <div className="relative min-w-0 max-w-full">
       <div
         aria-hidden="true"
         className="absolute -inset-4 rounded-[2rem] bg-gradient-to-br from-electric/10 via-transparent to-plasma/20 blur-2xl"
       />
-      <div className="relative overflow-hidden rounded-2xl border border-slate-800/80 bg-[#060a12]/90 shadow-2xl backdrop-blur-md">
+      <div className="relative min-w-0 max-w-full overflow-hidden rounded-2xl border border-slate-800/80 bg-[#060a12]/90 shadow-2xl backdrop-blur-md">
         <div className="flex items-center justify-between gap-4 border-b border-slate-800/80 px-4 py-3">
           <div className="flex min-w-0 items-center gap-3">
             <span className="flex shrink-0 gap-1.5">
@@ -101,17 +102,17 @@ function IdentityCard({ onNotify }) {
           </button>
         </div>
 
-        <div className="flex">
+        <div className="flex min-w-0">
           <div
             aria-hidden="true"
-            className="select-none border-r border-slate-800/70 px-3 py-4 text-right font-mono text-[11px] leading-6 text-slate-700"
+            className="shrink-0 select-none border-r border-slate-800/70 px-3 py-4 text-right font-mono text-[11px] leading-6 text-slate-700"
           >
             {Array.from({ length: LINE_COUNT }, (_, index) => (
               <div key={index}>{String(index + 1).padStart(2, '0')}</div>
             ))}
           </div>
 
-          <pre className="flex-1 overflow-x-auto py-4 pl-4 pr-5 font-mono text-[11.5px] leading-6 text-slate-300">
+          <pre className="min-w-0 flex-1 overflow-x-auto py-4 pl-4 pr-5 font-mono text-[11.5px] leading-6 text-slate-300">
             <span className="text-slate-500">{'{'}</span>
             {'\n  '}
             <span className="text-cyan-300">&quot;handle&quot;</span>
@@ -191,8 +192,8 @@ export default function About({ onNotify }) {
   return (
     <section id="about" className="relative scroll-mt-24 py-24 sm:py-28">
       <div className="container-x">
-        <div className="grid items-start gap-12 lg:grid-cols-[1fr_1fr] lg:gap-16">
-          <div className="animate-rise">
+        <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-12 lg:grid-cols-[1fr_1fr] lg:gap-16">
+          <Reveal className="min-w-0">
             <SectionHeading
               index="03"
               label="Men haqimda"
@@ -229,11 +230,11 @@ export default function About({ onNotify }) {
                 </li>
               ))}
             </ul>
-          </div>
+          </Reveal>
 
-          <div className="animate-rise [animation-delay:120ms]">
+          <Reveal delay={120} className="min-w-0">
             <IdentityCard onNotify={onNotify} />
-          </div>
+          </Reveal>
         </div>
       </div>
     </section>

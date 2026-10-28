@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { ArrowUpRight, Github, MapPin, MessageCircle, Send } from 'lucide-react';
+import Reveal from './Reveal.jsx';
 import SectionHeading from './SectionHeading.jsx';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
@@ -97,8 +98,8 @@ export default function Contact({ onNotify }) {
             className="pointer-events-none absolute -bottom-32 -left-20 h-80 w-80 rounded-full bg-plasma/10 blur-[120px]"
           />
 
-          <div className="relative grid gap-12 lg:grid-cols-[0.95fr_1.05fr] lg:gap-16">
-            <div>
+          <div className="relative grid grid-cols-[minmax(0,1fr)] gap-12 lg:grid-cols-[0.95fr_1.05fr] lg:gap-16">
+            <Reveal className="min-w-0">
               <SectionHeading
                 index="04"
                 label="Aloqa"
@@ -160,13 +161,12 @@ export default function Contact({ onNotify }) {
                   24 soat ichida javob
                 </span>
               </p>
-            </div>
-
-            <form
-              onSubmit={handleSubmit}
-              noValidate
-              className="rounded-2xl border border-slate-800/80 bg-ink-950/50 p-5 backdrop-blur sm:p-6"
-            >
+            </Reveal>            <Reveal delay={120} className="min-w-0">
+              <form
+                onSubmit={handleSubmit}
+                noValidate
+                className="min-w-0 rounded-2xl border border-slate-800/80 bg-ink-950/50 p-5 backdrop-blur sm:p-6"
+              >
               <div className="space-y-5">
                 <Field id="name" label="Ism" error={errors.name}>
                   <input
@@ -230,7 +230,8 @@ export default function Contact({ onNotify }) {
               <p className="mt-3 text-center font-mono text-[10px] uppercase tracking-[0.18em] text-slate-600">
                 spam yoʻq · toʻgʻridan-toʻgʻri javob
               </p>
-            </form>
+              </form>
+            </Reveal>
           </div>
         </div>
       </div>

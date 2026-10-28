@@ -10,6 +10,7 @@
 
   body {
     @apply bg-ink-900 font-sans text-slate-300 antialiased;
+    overflow-x: clip;
     text-rendering: optimizeLegibility;
   }
 
@@ -52,7 +53,7 @@
 
 @layer components {
   .container-x {
-    @apply mx-auto w-full max-w-6xl px-6 sm:px-8;
+    @apply mx-auto w-full min-w-0 max-w-6xl px-6 sm:px-8;
   }
 
   .mono-label {
@@ -90,6 +91,7 @@
       linear-gradient(to right, rgba(148, 163, 184, 0.07) 1px, transparent 1px),
       linear-gradient(to bottom, rgba(148, 163, 184, 0.07) 1px, transparent 1px);
     background-size: 64px 64px;
+    animation: grid-pan 48s linear infinite;
   }
 
   .mask-fade-top {
@@ -104,6 +106,15 @@
 
   .no-scrollbar::-webkit-scrollbar {
     display: none;
+  }
+}
+
+@keyframes grid-pan {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 64px 64px;
   }
 }
 

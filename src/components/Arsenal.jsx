@@ -1,4 +1,5 @@
 import { Code2, Database, Terminal } from 'lucide-react';
+import Reveal from './Reveal.jsx';
 import SectionHeading from './SectionHeading.jsx';
 
 const GROUPS = [
@@ -45,20 +46,22 @@ export default function Arsenal() {
   return (
     <section id="arsenal" className="relative scroll-mt-24 py-24 sm:py-28">
       <div className="container-x">
-        <SectionHeading
-          index="02"
-          label="Texnologiyalar"
-          title="Har bir qatlam uchun toʻgʻri vosita."
-          description="Ataylab ixcham tanlangan va chuqur qoʻllaniladigan texnologiyalar toʻplami — 3D sahnalardan realtime maʼlumotlar bazasi va avtomatlashtirishgacha."
-        />
+        <Reveal>
+          <SectionHeading
+            index="02"
+            label="Texnologiyalar"
+            title="Har bir qatlam uchun toʻgʻri vosita."
+            description="Ataylab ixcham tanlangan va chuqur qoʻllaniladigan texnologiyalar toʻplami — 3D sahnalardan realtime maʼlumotlar bazasi va avtomatlashtirishgacha."
+          />
+        </Reveal>
 
-        <div className="mt-10 grid gap-5 sm:gap-6 md:grid-cols-3">
-          {GROUPS.map((group) => {
+        <div className="mt-10 grid grid-cols-1 gap-5 sm:gap-6 md:grid-cols-3">
+          {GROUPS.map((group, index) => {
             const Icon = group.icon;
             return (
+              <Reveal key={group.title} delay={index * 100} className="h-full min-w-0">
               <div
-                key={group.title}
-                className={`group relative flex animate-rise flex-col overflow-hidden rounded-2xl border border-slate-800/80 bg-slate-900/40 p-6 backdrop-blur-md transition duration-500 hover:-translate-y-1 ${group.accent.hover}`}
+                className={`group relative flex h-full flex-col overflow-hidden rounded-2xl border border-slate-800/80 bg-slate-900/40 p-6 backdrop-blur-md transition duration-500 hover:-translate-y-1 ${group.accent.hover}`}
               >
                 <span className="absolute right-5 top-5 font-mono text-[10px] tracking-[0.2em] text-slate-700">
                   /{group.index}
@@ -84,6 +87,7 @@ export default function Arsenal() {
                   {String(group.items.length).padStart(2, '0')} ta vosita ishlatilmoqda
                 </p>
               </div>
+              </Reveal>
             );
           })}
         </div>

@@ -12,13 +12,13 @@ export default function Hero({ onEnter3D }) {
     <section id="top" className="relative isolate overflow-hidden pb-20 pt-32 sm:pb-28 sm:pt-36">
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10">
         <div className="absolute inset-0 grid-lines mask-fade-top opacity-60" />
-        <div className="absolute -top-40 left-1/2 h-[520px] w-[820px] -translate-x-1/2 rounded-full bg-electric/[0.07] blur-[130px]" />
-        <div className="absolute right-0 top-1/3 h-[400px] w-[400px] rounded-full bg-plasma/[0.10] blur-[120px]" />
+        <div className="absolute -top-40 left-1/2 h-[520px] w-[820px] -translate-x-1/2 animate-glow-pulse rounded-full bg-electric/[0.07] blur-[130px]" />
+        <div className="absolute right-0 top-1/3 h-[400px] w-[400px] animate-glow-pulse rounded-full bg-plasma/[0.10] blur-[120px] [animation-delay:3s]" />
         <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-b from-transparent to-ink-900" />
       </div>
 
       <div className="container-x relative">
-        <div className="mx-auto flex max-w-4xl flex-col items-center text-center">
+        <div className="mx-auto flex max-w-4xl animate-rise flex-col items-center text-center">
           <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/[0.06] px-3.5 py-1.5">
             <span className="relative flex h-1.5 w-1.5">
               <span className="absolute inline-flex h-full w-full animate-pulse-ring rounded-full bg-emerald-400" />
@@ -51,7 +51,7 @@ export default function Hero({ onEnter3D }) {
           </div>
         </div>
 
-        <div className="mx-auto mt-14 max-w-5xl rounded-2xl border border-slate-800/80 bg-slate-900/30 p-2 backdrop-blur-md">
+        <div className="mx-auto mt-14 max-w-5xl animate-rise rounded-2xl border border-slate-800/80 bg-slate-900/30 p-2 backdrop-blur-md [animation-delay:180ms]">
           <div className="grid grid-cols-2 gap-px overflow-hidden rounded-xl bg-slate-800/60 md:grid-cols-4">
             {METRICS.map((metric) => {
               const Icon = metric.icon;

@@ -62,6 +62,10 @@ export default {
           '0%, 100%': { opacity: '1' },
           '50%': { opacity: '0' },
         },
+        'glow-pulse': {
+          '0%, 100%': { opacity: '0.5' },
+          '50%': { opacity: '0.9' },
+        },
       },
       animation: {
         'gradient-x': 'gradient-x 8s ease infinite',
@@ -73,6 +77,7 @@ export default {
         'fade-in': 'fade-in 0.25s ease-out both',
         'drawer-in': 'drawer-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both',
         blink: 'blink 1.1s step-end infinite',
+        'glow-pulse': 'glow-pulse 10s ease-in-out infinite',
       },
     },
   },

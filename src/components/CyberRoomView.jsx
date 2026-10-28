@@ -1,5 +1,23 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
+import {
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  ChevronUp,
+  Footprints,
+  Maximize2,
+  Minimize2,
+  Monitor,
+  MousePointer2,
+  Pause,
+  Play,
+  RotateCcw,
+  X,
+  ZoomIn,
+  ZoomOut,
+} from 'lucide-react';
+import ComputerScreen from './ComputerScreen.jsx';
 
 const VIEWS = [
   {
@@ -46,7 +64,51 @@ const PINS = [
   { id: 'telegram-automation', label: 'Telegram Bot', anchor: [-1.95, 1.95, 0.2] },
 ];
 
-const VIEW_MAP = Object.fromEntries(VIEWS.map((view) => [view.key, view]));
+const SEAT_VIEW = {
+  key: 'seat',
+  label: 'Stol oldi',
+  target: [0, 1.82, -0.65],
+  radius: 2.2,
+  mobileRadius: 3.6,
+  theta: 0,
+  phi: 1.58,
+};
+
+const VIEW_MAP = Object.fromEntries([...VIEWS, SEAT_VIEW].map((view) => [view.key, view]));
+
+function WalkPadButton({ direction, label, icon: Icon, onInput }) {
+  const handleStart = (event) => {
+    event.preventDefault();
+    if (event.currentTarget.setPointerCapture) {
+      try {
+        event.currentTarget.setPointerCapture(event.pointerId);
+      } catch {
+        /* pointer capture is best-effort */
+      }
+    }
+    onInput(direction, true);
+  };
+
+  const handleEnd = (event) => {
+    event.preventDefault();
+    onInput(direction, false);
+  };
+
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      onPointerDown={handleStart}
+      onPointerUp={handleEnd}
+      onPointerCancel={handleEnd}
+      onPointerLeave={handleEnd}
+      onContextMenu={(event) => event.preventDefault()}
+      className="grid h-10 w-10 touch-none select-none place-items-center rounded-lg border border-slate-700/70 bg-slate-900/80 text-slate-300 transition active:scale-95 active:border-electric/50 active:bg-electric/20 active:text-white"
+    >
+      <Icon size={16} />
+    </button>
+  );
+}
 
 function roundedRect(ctx, x, y, width, height, radius) {
   ctx.beginPath();
@@ -402,22 +464,139 @@ function drawFloorGlow(ctx, width, height) {
   ctx.fillRect(0, 0, width, height);
 }
 
-export default function CyberRoomView({ onOpenProject }) {
+export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
   const mountRef = useRef(null);
   const pinRefs = useRef({});
   const cameraApiRef = useRef(null);
   const openProjectRef = useRef(onOpenProject);
+  const walkInputRef = useRef({ forward: false, back: false, left: false, right: false });
   const [activeView, setActiveView] = useState('desk');
   const [webglError, setWebglError] = useState(false);
+  const [autoTour, setAutoTour] = useState(false);
+  const [walkMode, setWalkMode] = useState(false);
+  const [computerOpen, setComputerOpen] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [pointerLocked, setPointerLocked] = useState(false);
+  const [canPointerLock] = useState(
+    () => typeof document !== 'undefined' && 'pointerLockElement' in document
+  );
+  const [canFullscreen] = useState(
+    () =>
+      typeof document !== 'undefined' &&
+      typeof document.documentElement.requestFullscreen === 'function'
+  );
 
   useEffect(() => {
     openProjectRef.current = onOpenProject;
   }, [onOpenProject]);
 
-  const focusView = (key) => {
+  const focusView = useCallback((key) => {
+    setAutoTour(false);
     setActiveView(key);
     cameraApiRef.current?.focus(key);
-  };
+  }, []);
+
+  const setWalkInput = useCallback((direction, active) => {
+    if (walkInputRef.current) walkInputRef.current[direction] = active;
+  }, []);
+
+  const toggleWalk = useCallback(() => {
+    setAutoTour(false);
+    if (walkMode) {
+      cameraApiRef.current?.stopWalk();
+      setWalkMode(false);
+      setActiveView('desk');
+    } else {
+      cameraApiRef.current?.startWalk();
+      setWalkMode(true);
+    }
+  }, [walkMode]);
+
+  const exitWalk = useCallback(() => {
+    cameraApiRef.current?.stopWalk();
+    setWalkMode(false);
+    setActiveView('desk');
+  }, []);
+
+  const sitAtComputer = useCallback(() => {
+    cameraApiRef.current?.sit();
+    setWalkMode(false);
+    setComputerOpen(true);
+  }, []);
+
+  const closeComputer = useCallback(() => {
+    setComputerOpen(false);
+    setActiveView('desk');
+    cameraApiRef.current?.focus('desk');
+  }, []);
+
+  const toggleFullscreen = useCallback(async () => {
+    if (typeof document === 'undefined') return;
+    try {
+      if (document.fullscreenElement) {
+        await document.exitFullscreen();
+      } else if (document.documentElement.requestFullscreen) {
+        await document.documentElement.requestFullscreen();
+      }
+    } catch {
+      /* Fullscreen can be refused by the browser; the room keeps working. */
+    }
+  }, []);
+
+  useEffect(() => {
+    const handleFullscreenChange = () => setIsFullscreen(Boolean(document.fullscreenElement));
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, []);
+
+  useEffect(() => {
+    const handleKey = (event) => {
+      if (event.metaKey || event.ctrlKey || event.altKey) return;
+      const key = event.key.toLowerCase();
+      if (computerOpen || drawerOpen) return;
+      if (walkMode) {
+        if (key === 'escape' && !pointerLocked) exitWalk();
+        else if (key === 'e') sitAtComputer();
+        return;
+      }
+      if (key === '1') focusView('teachermuzaffar');
+      else if (key === '2') focusView('echoes-of-room-404');
+      else if (key === '3') focusView('telegram-automation');
+      else if (key === '0' || key === 'r') focusView('desk');
+      else if (key === '+' || key === '=') cameraApiRef.current?.zoom(0.88);
+      else if (key === '-' || key === '_') cameraApiRef.current?.zoom(1.14);
+      else if (key === 't') setAutoTour((value) => !value);
+      else if (key === 'f') toggleFullscreen();
+    };
+
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [
+    focusView,
+    toggleFullscreen,
+    walkMode,
+    computerOpen,
+    drawerOpen,
+    pointerLocked,
+    exitWalk,
+    sitAtComputer,
+  ]);
+
+  useEffect(() => {
+    if (!autoTour) return undefined;
+
+    let index = 0;
+    const step = () => {
+      index = (index + 1) % VIEWS.length;
+      const view = VIEWS[index];
+      setActiveView(view.key);
+      cameraApiRef.current?.focus(view.key);
+    };
+
+    step();
+    const timer = window.setInterval(step, 5200);
+    return () => window.clearInterval(timer);
+  }, [autoTour]);
 
   useEffect(() => {
     const mount = mountRef.current;
@@ -765,6 +944,27 @@ export default function CyberRoomView({ onOpenProject }) {
       phase: index * 1.8,
     }));
 
+    const dustCount = 240;
+    const dustPositions = new Float32Array(dustCount * 3);
+    for (let index = 0; index < dustCount; index += 1) {
+      dustPositions[index * 3] = (Math.random() - 0.5) * 13;
+      dustPositions[index * 3 + 1] = 0.25 + Math.random() * 4.2;
+      dustPositions[index * 3 + 2] = -4.2 + Math.random() * 4.6;
+    }
+    const dustGeometry = new THREE.BufferGeometry();
+    dustGeometry.setAttribute('position', new THREE.BufferAttribute(dustPositions, 3));
+    const dustMaterial = new THREE.PointsMaterial({
+      color: '#7df9ff',
+      size: 0.028,
+      transparent: true,
+      opacity: 0.55,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending,
+      toneMapped: false,
+    });
+    const dust = new THREE.Points(dustGeometry, dustMaterial);
+    scene.add(dust);
+
     const initialView = VIEW_MAP.desk;
     const compact = window.innerWidth < 768;
     const cameraState = {
@@ -778,6 +978,36 @@ export default function CyberRoomView({ onOpenProject }) {
       goalPhi: initialView.phi,
     };
 
+    const WALK_EYE = 1.62;
+    const walkState = {
+      active: false,
+      position: new THREE.Vector3(0, WALK_EYE, 3.4),
+      yaw: 0,
+      pitch: 0,
+      bob: 0,
+    };
+    const walkKeys = { forward: false, back: false, left: false, right: false, sprint: false };
+
+    const resetWalkInput = () => {
+      walkKeys.forward = false;
+      walkKeys.back = false;
+      walkKeys.left = false;
+      walkKeys.right = false;
+      walkKeys.sprint = false;
+
+      const input = walkInputRef.current;
+      if (input) {
+        input.forward = false;
+        input.back = false;
+        input.left = false;
+        input.right = false;
+      }
+    };
+
+    const isWalkBlocked = (x, z) =>
+      (Math.abs(x) < 3.0 && z > -1.05 && z < 1.15) ||
+      (x > -4.05 && x < -2.95 && z > -1.7 && z < -0.55);
+
     const focus = (key) => {
       const view = VIEW_MAP[key] ?? initialView;
       const mobile = window.innerWidth < 768;
@@ -786,7 +1016,94 @@ export default function CyberRoomView({ onOpenProject }) {
       cameraState.goalTheta = view.theta;
       cameraState.goalPhi = view.phi;
     };
-    cameraApiRef.current = { focus };
+
+    const clampRadius = (value) => {
+      const mobile = window.innerWidth < 768;
+      return THREE.MathUtils.clamp(value, mobile ? 2.1 : 1.35, mobile ? 9 : 8);
+    };
+
+    const zoom = (factor) => {
+      cameraState.goalRadius = clampRadius(cameraState.goalRadius * factor);
+    };
+
+    const startWalk = () => {
+      const direction = new THREE.Vector3();
+      camera.getWorldDirection(direction);
+
+      walkState.active = true;
+      walkState.position.copy(camera.position);
+      walkState.position.x = THREE.MathUtils.clamp(walkState.position.x, -4.35, 4.35);
+      walkState.position.z = THREE.MathUtils.clamp(walkState.position.z, -3.1, 6.6);
+      if (isWalkBlocked(walkState.position.x, walkState.position.z)) {
+        walkState.position.x = 0;
+        walkState.position.z = 1.2;
+      }
+      walkState.yaw = Math.atan2(-direction.x, -direction.z);
+      walkState.pitch = THREE.MathUtils.clamp(
+        Math.asin(THREE.MathUtils.clamp(direction.y, -1, 1)),
+        -0.55,
+        0.4
+      );
+      walkState.bob = 0;
+      resetWalkInput();
+    };
+
+    const syncOrbitFromWalk = () => {
+      const cosPitch = Math.cos(walkState.pitch);
+      const direction = new THREE.Vector3(
+        -Math.sin(walkState.yaw) * cosPitch,
+        Math.sin(walkState.pitch),
+        -Math.cos(walkState.yaw) * cosPitch
+      );
+
+      cameraState.target.copy(walkState.position).addScaledVector(direction, 3);
+      cameraState.goalTarget.copy(cameraState.target);
+
+      const offset = camera.position.clone().sub(cameraState.target);
+      const spherical = new THREE.Spherical().setFromVector3(offset);
+      cameraState.radius = cameraState.goalRadius = spherical.radius;
+      cameraState.theta = cameraState.goalTheta = spherical.theta;
+      cameraState.phi = cameraState.goalPhi = THREE.MathUtils.clamp(
+        spherical.phi,
+        1.05,
+        1.52
+      );
+    };
+
+    const releasePointerLock = () => {
+      if (document.pointerLockElement === canvas && document.exitPointerLock) {
+        document.exitPointerLock();
+      }
+    };
+
+    const lockPointer = () => {
+      if (!walkState.active || document.pointerLockElement === canvas) return;
+      try {
+        const request = canvas.requestPointerLock?.();
+        if (request && typeof request.catch === 'function') request.catch(() => {});
+      } catch {
+        /* Pointer lock is best-effort and needs browser support. */
+      }
+    };
+
+    const stopWalk = () => {
+      if (!walkState.active) return;
+      releasePointerLock();
+      syncOrbitFromWalk();
+      walkState.active = false;
+      resetWalkInput();
+      focus('desk');
+    };
+
+    const sit = () => {
+      releasePointerLock();
+      if (walkState.active) syncOrbitFromWalk();
+      walkState.active = false;
+      resetWalkInput();
+      focus('seat');
+    };
+
+    cameraApiRef.current = { focus, zoom, startWalk, stopWalk, sit, lockPointer };
 
     const initialOffset = new THREE.Vector3().setFromSphericalCoords(
       cameraState.radius,
@@ -800,22 +1117,26 @@ export default function CyberRoomView({ onOpenProject }) {
     const raycaster = new THREE.Raycaster();
     const pointer = new THREE.Vector2();
 
-    const pick = (clientX, clientY) => {
+    const hitTest = (clientX, clientY) => {
       const rect = canvas.getBoundingClientRect();
       pointer.x = ((clientX - rect.left) / rect.width) * 2 - 1;
       pointer.y = -((clientY - rect.top) / rect.height) * 2 + 1;
       raycaster.setFromCamera(pointer, camera);
       const intersections = raycaster.intersectObjects(clickTargets, false);
-      if (intersections.length > 0) {
-        const projectId = intersections[0].object.userData.projectId;
-        if (projectId) openProjectRef.current?.(projectId);
-      }
+      return intersections.find((intersection) => intersection.object.userData.projectId) ?? null;
+    };
+
+    const pick = (clientX, clientY) => {
+      const hit = hitTest(clientX, clientY);
+      if (hit) openProjectRef.current?.(hit.object.userData.projectId);
     };
 
     const handlePointerDown = (event) => {
+      if (document.pointerLockElement === canvas) return;
       if (event.pointerType === 'mouse' && event.button !== 0) return;
       drag.active = true;
       drag.moved = false;
+      setAutoTour(false);
       drag.x = event.clientX;
       drag.y = event.clientY;
       drag.startX = event.clientX;
@@ -831,13 +1152,21 @@ export default function CyberRoomView({ onOpenProject }) {
     };
 
     const handlePointerMove = (event) => {
-      if (!drag.active) return;
+      if (!drag.active) {
+        canvas.style.cursor = hitTest(event.clientX, event.clientY) ? 'pointer' : 'grab';
+        return;
+      }
       const deltaX = event.clientX - drag.x;
       const deltaY = event.clientY - drag.y;
       drag.x = event.clientX;
       drag.y = event.clientY;
       if (Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY) > 8) {
         drag.moved = true;
+      }
+      if (walkState.active) {
+        walkState.yaw -= deltaX * 0.0032;
+        walkState.pitch = THREE.MathUtils.clamp(walkState.pitch - deltaY * 0.0026, -0.6, 0.45);
+        return;
       }
       cameraState.goalTheta -= deltaX * 0.005;
       cameraState.goalPhi = THREE.MathUtils.clamp(
@@ -854,10 +1183,75 @@ export default function CyberRoomView({ onOpenProject }) {
       if (!drag.moved) pick(event.clientX, event.clientY);
     };
 
+    const handlePointerLeave = () => {
+      if (!drag.active) canvas.style.cursor = 'grab';
+    };
+
+    const handleWheel = (event) => {
+      if (walkState.active || Math.abs(event.deltaY) < 1) return;
+      event.preventDefault();
+      setAutoTour(false);
+      const factor = event.deltaY > 0 ? 1.08 : 0.92;
+      cameraState.goalRadius = clampRadius(cameraState.goalRadius * factor);
+    };
+
     canvas.addEventListener('pointerdown', handlePointerDown);
     canvas.addEventListener('pointermove', handlePointerMove);
     canvas.addEventListener('pointerup', handlePointerEnd);
     canvas.addEventListener('pointercancel', handlePointerEnd);
+    canvas.addEventListener('pointerleave', handlePointerLeave);
+    canvas.addEventListener('wheel', handleWheel, { passive: false });
+
+    const walkKeyMap = {
+      w: 'forward',
+      arrowup: 'forward',
+      s: 'back',
+      arrowdown: 'back',
+      a: 'left',
+      arrowleft: 'left',
+      d: 'right',
+      arrowright: 'right',
+    };
+
+    const handleWalkKeyDown = (event) => {
+      if (!walkState.active) return;
+      const key = event.key.toLowerCase();
+      if (key === 'shift') walkKeys.sprint = true;
+      const direction = walkKeyMap[key];
+      if (direction) {
+        event.preventDefault();
+        walkKeys[direction] = true;
+      }
+    };
+
+    const handleWalkKeyUp = (event) => {
+      const key = event.key.toLowerCase();
+      if (key === 'shift') walkKeys.sprint = false;
+      const direction = walkKeyMap[key];
+      if (direction) walkKeys[direction] = false;
+    };
+
+    const handleWalkBlur = () => resetWalkInput();
+
+    const handlePointerLockChange = () => {
+      setPointerLocked(document.pointerLockElement === canvas);
+    };
+
+    const handleLockedMouseMove = (event) => {
+      if (!walkState.active || document.pointerLockElement !== canvas) return;
+      walkState.yaw -= event.movementX * 0.0024;
+      walkState.pitch = THREE.MathUtils.clamp(
+        walkState.pitch - event.movementY * 0.0024,
+        -0.7,
+        0.5
+      );
+    };
+
+    document.addEventListener('pointerlockchange', handlePointerLockChange);
+    document.addEventListener('mousemove', handleLockedMouseMove);
+    window.addEventListener('keydown', handleWalkKeyDown);
+    window.addEventListener('keyup', handleWalkKeyUp);
+    window.addEventListener('blur', handleWalkBlur);
 
     let frameId = null;
     let elapsed = 0;
@@ -874,19 +1268,96 @@ export default function CyberRoomView({ onOpenProject }) {
       elapsed += delta;
       const ease = 1 - Math.exp(-6 * delta);
 
-      cameraState.target.lerp(cameraState.goalTarget, ease);
-      cameraState.radius += (cameraState.goalRadius - cameraState.radius) * ease;
-      cameraState.theta += (cameraState.goalTheta - cameraState.theta) * ease;
-      cameraState.phi += (cameraState.goalPhi - cameraState.phi) * ease;
-      cameraState.phi = THREE.MathUtils.clamp(cameraState.phi, 1.02, 1.54);
+      const orbitFov = window.innerWidth < 768 ? 58 : 46;
 
-      offsetVector.setFromSphericalCoords(cameraState.radius, cameraState.phi, cameraState.theta);
-      camera.position.copy(cameraState.target).add(offsetVector);
-      camera.lookAt(cameraState.target);
+      if (walkState.active) {
+        const input = walkInputRef.current ?? {
+          forward: false,
+          back: false,
+          left: false,
+          right: false,
+        };
+        const forwardInput =
+          (walkKeys.forward || input.forward ? 1 : 0) - (walkKeys.back || input.back ? 1 : 0);
+        const strafeInput =
+          (walkKeys.right || input.right ? 1 : 0) - (walkKeys.left || input.left ? 1 : 0);
+        const moving = forwardInput !== 0 || strafeInput !== 0;
+
+        let moved = false;
+        if (moving) {
+          const length = Math.hypot(forwardInput, strafeInput);
+          const speed = (walkKeys.sprint ? 3.4 : 2.0) * delta;
+          const sin = Math.sin(walkState.yaw);
+          const cos = Math.cos(walkState.yaw);
+          const beforeX = walkState.position.x;
+          const beforeZ = walkState.position.z;
+
+          const nextX = THREE.MathUtils.clamp(
+            beforeX + ((forwardInput / length) * -sin + (strafeInput / length) * cos) * speed,
+            -4.35,
+            4.35
+          );
+          if (!isWalkBlocked(nextX, walkState.position.z)) {
+            walkState.position.x = nextX;
+          }
+
+          const nextZ = THREE.MathUtils.clamp(
+            beforeZ + ((forwardInput / length) * -cos + (strafeInput / length) * -sin) * speed,
+            -3.1,
+            6.6
+          );
+          if (!isWalkBlocked(walkState.position.x, nextZ)) {
+            walkState.position.z = nextZ;
+          }
+
+          moved =
+            Math.abs(walkState.position.x - beforeX) > 0.0001 ||
+            Math.abs(walkState.position.z - beforeZ) > 0.0001;
+          if (moved) walkState.bob += delta * (walkKeys.sprint ? 11 : 8);
+        }
+
+        const targetEye = WALK_EYE + (moved ? Math.sin(walkState.bob) * 0.018 : 0);
+        walkState.position.y +=
+          (targetEye - walkState.position.y) * (1 - Math.exp(-8 * delta));
+
+        const cosPitch = Math.cos(walkState.pitch);
+        camera.position.copy(walkState.position);
+        camera.lookAt(
+          camera.position.x - Math.sin(walkState.yaw) * cosPitch,
+          camera.position.y + Math.sin(walkState.pitch),
+          camera.position.z - Math.cos(walkState.yaw) * cosPitch
+        );
+
+        const walkFov = window.innerWidth < 768 ? 66 : 60;
+        if (Math.abs(camera.fov - walkFov) > 0.01) {
+          camera.fov += (walkFov - camera.fov) * ease;
+          camera.updateProjectionMatrix();
+        }
+      } else {
+        cameraState.target.lerp(cameraState.goalTarget, ease);
+        cameraState.radius += (cameraState.goalRadius - cameraState.radius) * ease;
+        cameraState.theta += (cameraState.goalTheta - cameraState.theta) * ease;
+        cameraState.phi += (cameraState.goalPhi - cameraState.phi) * ease;
+        cameraState.phi = THREE.MathUtils.clamp(cameraState.phi, 1.02, 1.54);
+
+        offsetVector.setFromSphericalCoords(
+          cameraState.radius,
+          cameraState.phi,
+          cameraState.theta
+        );
+        camera.position.copy(cameraState.target).add(offsetVector);
+        camera.lookAt(cameraState.target);
+
+        if (Math.abs(camera.fov - orbitFov) > 0.01) {
+          camera.fov += (orbitFov - camera.fov) * ease;
+          camera.updateProjectionMatrix();
+        }
+      }
 
       const viewportWidth = mount.clientWidth || 1;
       const viewportHeight = mount.clientHeight || 1;
       const pinTop = window.innerWidth < 768 ? 150 : 96;
+      const pinBottom = window.innerWidth < 768 ? 190 : 150;
 
       pinObjects.forEach((pin) => {
         const element = pinRefs.current[pin.id];
@@ -902,7 +1373,7 @@ export default function CyberRoomView({ onOpenProject }) {
           x > 24 &&
           x < viewportWidth - 24 &&
           y > pinTop &&
-          y < viewportHeight - 140;
+          y < viewportHeight - pinBottom;
 
         element.style.transform = `translate3d(${x}px, ${y}px, 0) translate(-50%, -100%)`;
         element.style.opacity = visible ? '1' : '0';
@@ -914,6 +1385,10 @@ export default function CyberRoomView({ onOpenProject }) {
       });
       signLight.intensity = 5.5 + Math.sin(elapsed * 1.6) * 1.1;
 
+      dust.position.x = Math.sin(elapsed * 0.12) * 0.18;
+      dust.position.y = Math.sin(elapsed * 0.24) * 0.06;
+      dustMaterial.opacity = 0.42 + Math.sin(elapsed * 0.8) * 0.12;
+
       renderer.render(scene, camera);
     };
 
@@ -922,7 +1397,13 @@ export default function CyberRoomView({ onOpenProject }) {
       const height = Math.max(mount.clientHeight, 1);
       renderer.setSize(width, height, false);
       camera.aspect = width / height;
-      camera.fov = window.innerWidth < 768 ? 58 : 46;
+      camera.fov = walkState.active
+        ? window.innerWidth < 768
+          ? 66
+          : 60
+        : window.innerWidth < 768
+          ? 58
+          : 46;
       camera.updateProjectionMatrix();
     };
 
@@ -942,10 +1423,20 @@ export default function CyberRoomView({ onOpenProject }) {
       if (frameId !== null) cancelAnimationFrame(frameId);
       resizeObserver.disconnect();
       document.removeEventListener('visibilitychange', handleVisibility);
+      document.removeEventListener('pointerlockchange', handlePointerLockChange);
+      document.removeEventListener('mousemove', handleLockedMouseMove);
+      window.removeEventListener('keydown', handleWalkKeyDown);
+      window.removeEventListener('keyup', handleWalkKeyUp);
+      window.removeEventListener('blur', handleWalkBlur);
+      releasePointerLock();
+      walkState.active = false;
+      resetWalkInput();
       canvas.removeEventListener('pointerdown', handlePointerDown);
       canvas.removeEventListener('pointermove', handlePointerMove);
       canvas.removeEventListener('pointerup', handlePointerEnd);
       canvas.removeEventListener('pointercancel', handlePointerEnd);
+      canvas.removeEventListener('pointerleave', handlePointerLeave);
+      canvas.removeEventListener('wheel', handleWheel);
       cameraApiRef.current = null;
 
       scene.traverse((object) => {
@@ -999,7 +1490,8 @@ export default function CyberRoomView({ onOpenProject }) {
         </div>
       ) : null}
 
-      <div className="pointer-events-none absolute inset-0 z-10">
+      {walkMode || computerOpen ? null : (
+        <div className="pointer-events-none absolute inset-0 z-10">
         {PINS.map((pin) => (
           <button
             key={pin.id}
@@ -1007,47 +1499,242 @@ export default function CyberRoomView({ onOpenProject }) {
               pinRefs.current[pin.id] = node;
             }}
             type="button"
-            onClick={() => onOpenProject?.(pin.id)}
+            onClick={() => {
+              setAutoTour(false);
+              onOpenProject?.(pin.id);
+            }}
             aria-label={`${pin.label} loyihasini ochish`}
             className="pointer-events-auto absolute left-0 top-0 whitespace-nowrap rounded-full border border-electric/30 bg-ink-900/85 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.1em] text-slate-200 shadow-[0_14px_40px_rgba(0,0,0,0.55)] backdrop-blur-md transition-colors hover:border-electric/60 hover:text-white"
             style={{ opacity: 0, willChange: 'transform' }}
           >
-            <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-electric align-middle shadow-[0_0_8px_rgba(0,242,254,0.9)]" />
+            <span className="mr-1.5 inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-electric align-middle shadow-[0_0_8px_rgba(0,242,254,0.9)] motion-reduce:animate-none" />
             {pin.label}
           </button>
         ))}
-      </div>
+        </div>
+      )}
 
+      {walkMode && !computerOpen ? (
+        <>
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute left-1/2 top-1/2 z-10 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full border border-electric/60 bg-electric/30 shadow-[0_0_10px_rgba(0,242,254,0.9)]"
+          />
+
+          <div className="pointer-events-none absolute bottom-44 left-4 z-20">
+            <div
+              role="group"
+              aria-label="Yurish boshqaruvi"
+              className="pointer-events-auto grid grid-cols-3 grid-rows-3 gap-1.5 rounded-2xl border border-slate-700/60 bg-ink-900/85 p-2 shadow-2xl backdrop-blur-xl"
+            >
+              <span />
+              <WalkPadButton
+                direction="forward"
+                label="Oldinga yurish"
+                icon={ChevronUp}
+                onInput={setWalkInput}
+              />
+              <span />
+              <WalkPadButton
+                direction="left"
+                label="Chapga yurish"
+                icon={ChevronLeft}
+                onInput={setWalkInput}
+              />
+              <span className="grid h-10 w-10 place-items-center font-mono text-[8px] uppercase tracking-[0.08em] text-slate-600">
+                Yur
+              </span>
+              <WalkPadButton
+                direction="right"
+                label="Oʻngga yurish"
+                icon={ChevronRight}
+                onInput={setWalkInput}
+              />
+              <span />
+              <WalkPadButton
+                direction="back"
+                label="Orqaga yurish"
+                icon={ChevronDown}
+                onInput={setWalkInput}
+              />
+              <span />
+            </div>
+          </div>
+        </>
+      ) : null}
+
+      {computerOpen ? null : (
       <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20">
         <div className="bg-gradient-to-t from-ink-950 via-ink-950/70 to-transparent px-3 pb-4 pt-24 sm:px-6 sm:pb-6">
           <div className="mx-auto flex max-w-4xl flex-col items-center gap-3">
-            <div
-              role="group"
-              aria-label="3D kamera manzillari"
-              className="no-scrollbar pointer-events-auto flex max-w-full items-center gap-1 overflow-x-auto rounded-full border border-slate-700/60 bg-ink-900/85 p-1.5 shadow-2xl backdrop-blur-xl"
-            >
-              {VIEWS.map((view) => (
+            {walkMode ? (
+              <div className="pointer-events-auto flex w-full flex-wrap items-center justify-center gap-2">
+                <span className="inline-flex h-9 items-center gap-2 rounded-full border border-electric/25 bg-electric/10 px-3.5 font-mono text-[10px] uppercase tracking-[0.14em] text-electric">
+                  <Footprints size={14} />
+                  Yurish rejimi
+                </span>
                 <button
-                  key={view.key}
                   type="button"
-                  onClick={() => focusView(view.key)}
-                  aria-pressed={activeView === view.key}
-                  className={`whitespace-nowrap rounded-full px-3 py-1.5 text-[10px] font-medium transition sm:px-3.5 sm:text-[11px] ${
-                    activeView === view.key
-                      ? 'bg-electric text-ink-950'
-                      : 'text-slate-400 hover:bg-slate-800/80 hover:text-white'
-                  }`}
+                  onClick={sitAtComputer}
+                  className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-electric to-cyan-300 px-4 py-2.5 text-[12px] font-semibold text-ink-950 shadow-[0_0_30px_-10px_rgba(0,242,254,0.9)] transition hover:scale-[1.02] active:scale-95 sm:text-[13px]"
                 >
-                  {view.label}
+                  <Monitor size={15} />
+                  Kompyuterga oʻtirish
                 </button>
-              ))}
-            </div>
+                {canPointerLock ? (
+                  pointerLocked ? (
+                    <span className="hidden h-9 items-center gap-1.5 rounded-full border border-electric/25 bg-electric/10 px-3.5 text-[10px] font-medium text-electric sm:inline-flex">
+                      <MousePointer2 size={14} />
+                      Esc — qulfdan chiqish
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => cameraApiRef.current?.lockPointer()}
+                      className="hidden h-9 items-center gap-1.5 rounded-full border border-slate-700/70 bg-ink-900/85 px-3.5 text-[11px] font-medium text-slate-300 backdrop-blur-xl transition hover:border-slate-600 hover:text-white sm:inline-flex"
+                    >
+                      <MousePointer2 size={14} />
+                      Sichqonchani qulflash
+                    </button>
+                  )
+                ) : null}
+                <button
+                  type="button"
+                  onClick={exitWalk}
+                  className="inline-flex h-9 items-center gap-1.5 rounded-full border border-slate-700/70 bg-ink-900/85 px-3.5 text-[11px] font-medium text-slate-300 backdrop-blur-xl transition hover:border-slate-600 hover:text-white"
+                >
+                  <X size={14} />
+                  Chiqish
+                </button>
+              </div>
+            ) : (
+              <div className="pointer-events-auto flex w-full flex-wrap items-center justify-center gap-2">
+                <div
+                  role="group"
+                  aria-label="3D kamera manzillari"
+                  className="no-scrollbar flex max-w-full items-center gap-1 overflow-x-auto rounded-full border border-slate-700/60 bg-ink-900/85 p-1.5 shadow-2xl backdrop-blur-xl"
+                >
+                  {VIEWS.map((view) => (
+                    <button
+                      key={view.key}
+                      type="button"
+                      onClick={() => focusView(view.key)}
+                      aria-pressed={activeView === view.key}
+                      className={`whitespace-nowrap rounded-full px-3 py-1.5 text-[10px] font-medium transition sm:px-3.5 sm:text-[11px] ${
+                        activeView === view.key
+                          ? 'bg-electric text-ink-950'
+                          : 'text-slate-400 hover:bg-slate-800/80 hover:text-white'
+                      }`}
+                    >
+                      {view.label}
+                    </button>
+                  ))}
+                </div>
+
+                <div
+                  role="group"
+                  aria-label="3D boshqaruvlari"
+                  className="flex items-center gap-0.5 rounded-full border border-slate-700/60 bg-ink-900/85 p-1.5 shadow-2xl backdrop-blur-xl"
+                >
+                  <button
+                    type="button"
+                    onClick={toggleWalk}
+                    title="Birinchi shaxsda yurish"
+                    className="flex h-8 items-center gap-1.5 rounded-full px-2.5 text-[10px] font-medium text-slate-400 transition hover:bg-slate-800/80 hover:text-white active:scale-95"
+                  >
+                    <Footprints size={14} />
+                    Yurish
+                  </button>
+
+                  <span className="mx-1 h-5 w-px bg-slate-700/70" aria-hidden="true" />
+
+                  <button
+                    type="button"
+                    onClick={() => cameraApiRef.current?.zoom(1.12)}
+                    title="Kichiklashtirish (−)"
+                    aria-label="3D kamerani kichiklashtirish"
+                    className="grid h-8 w-8 place-items-center rounded-full text-slate-400 transition hover:bg-slate-800/80 hover:text-white active:scale-95"
+                  >
+                    <ZoomOut size={15} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => cameraApiRef.current?.zoom(0.88)}
+                    title="Kattalashtirish (+)"
+                    aria-label="3D kamerani kattalashtirish"
+                    className="grid h-8 w-8 place-items-center rounded-full text-slate-400 transition hover:bg-slate-800/80 hover:text-white active:scale-95"
+                  >
+                    <ZoomIn size={15} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => focusView('desk')}
+                    title="Kamerani qayta tiklash (R)"
+                    aria-label="Kamerani qayta tiklash"
+                    className="grid h-8 w-8 place-items-center rounded-full text-slate-400 transition hover:bg-slate-800/80 hover:text-white active:scale-95"
+                  >
+                    <RotateCcw size={14} />
+                  </button>
+
+                  <span className="mx-1 h-5 w-px bg-slate-700/70" aria-hidden="true" />
+
+                  <button
+                    type="button"
+                    onClick={() => setAutoTour((value) => !value)}
+                    aria-pressed={autoTour}
+                    title="Avtomatik kamera sayri (T)"
+                    className={`flex h-8 items-center gap-1.5 rounded-full px-2.5 text-[10px] font-medium transition active:scale-95 ${
+                      autoTour
+                        ? 'bg-electric text-ink-950'
+                        : 'text-slate-400 hover:bg-slate-800/80 hover:text-white'
+                    }`}
+                  >
+                    {autoTour ? <Pause size={13} /> : <Play size={13} />}
+                    <span className="hidden sm:inline">Avto sayr</span>
+                  </button>
+
+                  {canFullscreen ? (
+                    <button
+                      type="button"
+                      onClick={toggleFullscreen}
+                      title={isFullscreen ? 'Toʻliq ekrandan chiqish (F)' : 'Toʻliq ekran (F)'}
+                      aria-label={isFullscreen ? 'Toʻliq ekrandan chiqish' : 'Toʻliq ekranga oʻtish'}
+                      className="grid h-8 w-8 place-items-center rounded-full text-slate-400 transition hover:bg-slate-800/80 hover:text-white active:scale-95"
+                    >
+                      {isFullscreen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
+                    </button>
+                  ) : null}
+                </div>
+              </div>
+            )}
+
             <p className="text-center font-mono text-[9px] uppercase tracking-[0.16em] text-slate-500 sm:text-[10px]">
-              Sudrab aylantiring · monitor yoki pin ustiga bosing
+              {walkMode ? (
+                <>
+                  <span className="sm:hidden">Pastdagi tugmalar bilan yuring · ekranni sudrab qarang</span>
+                  <span className="hidden sm:inline">
+                    WASD yoki strelkalar bilan yuring · sichqoncha bilan qarang · E — oʻtirish
+                  </span>
+                </>
+              ) : (
+                <>
+                  Sudrab aylantiring · gʻildirak bilan zoom
+                  <span className="hidden sm:inline"> · 1–3, R, +/−</span>
+                </>
+              )}
             </p>
           </div>
         </div>
       </div>
+      )}
+
+      {computerOpen ? (
+        <ComputerScreen
+          onClose={closeComputer}
+          onOpenProject={onOpenProject}
+          drawerOpen={drawerOpen}
+        />
+      ) : null}
     </div>
   );
 }

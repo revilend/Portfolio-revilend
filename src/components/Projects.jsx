@@ -1,5 +1,6 @@
 import { ArrowUpRight } from 'lucide-react';
 import { projects } from '../data/projects.js';
+import Reveal from './Reveal.jsx';
 import SectionHeading from './SectionHeading.jsx';
 import StatusBadge from './StatusBadge.jsx';
 
@@ -13,21 +14,22 @@ export default function Projects({ onOpenProject }) {
   return (
     <section id="projects" className="relative scroll-mt-24 py-24 sm:py-28">
       <div className="container-x">
-        <SectionHeading
-          index="01"
-          label="Tanlangan loyihalar"
-          title="Ishlayotgan tizimlar."
-          description="Har biri real muammo uchun qurilgan. Batafsil maʼlumotni oching yoki 3D xonada monitorlar oldiga boring."
-        />
+        <Reveal>
+          <SectionHeading
+            index="01"
+            label="Tanlangan loyihalar"
+            title="Ishlayotgan tizimlar."
+            description="Har biri real muammo uchun qurilgan. Batafsil maʼlumotni oching yoki 3D xonada monitorlar oldiga boring."
+          />
+        </Reveal>
 
-        <div className="mt-10 grid gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-10 grid grid-cols-1 gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
           {projects.map((project, index) => (
-            <article
-              key={project.id}
-              onPointerMove={handleSpotlight}
-              className="group relative flex animate-rise flex-col overflow-hidden rounded-2xl border border-slate-800/80 bg-slate-900/40 p-6 backdrop-blur-md transition duration-500 hover:-translate-y-1 hover:border-electric/30 hover:shadow-[0_36px_90px_-50px_rgba(0,242,254,0.85)]"
-              style={{ animationDelay: `${index * 90}ms` }}
-            >
+            <Reveal key={project.id} delay={index * 90} className="h-full min-w-0">
+              <article
+                onPointerMove={handleSpotlight}
+                className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-slate-800/80 bg-slate-900/40 p-6 backdrop-blur-md transition duration-500 hover:-translate-y-1 hover:border-electric/30 hover:shadow-[0_36px_90px_-50px_rgba(0,242,254,0.85)]"
+              >
               <div
                 aria-hidden="true"
                 className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
@@ -76,11 +78,13 @@ export default function Projects({ onOpenProject }) {
                   />
                 </button>
               </div>
-            </article>
+              </article>
+            </Reveal>
           ))}
         </div>
 
-        <p className="mt-8 font-mono text-[11px] text-slate-600">
+        <Reveal delay={220}>
+          <p className="mt-8 font-mono text-[11px] text-slate-600">
           Koʻproq tajribalar va ochiq kodni{' '}
           <a
             href="https://github.com/revilend"
@@ -90,8 +94,9 @@ export default function Projects({ onOpenProject }) {
           >
             GitHub
           </a>{' '}
-          orqali topishingiz mumkin.
-        </p>
+            orqali topishingiz mumkin.
+          </p>
+        </Reveal>
       </div>
     </section>
   );

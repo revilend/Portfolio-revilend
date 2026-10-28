@@ -3,7 +3,7 @@
 A dark, cinematic portfolio for **Revilend**, a creative developer based in Tashkent. One header switches instantly between:
 
 - **2D Sayt** — a clean, mobile-first portfolio with a hero, metrics, real project cards, tech stack, identity card and contact form.
-- **3D Xona** — a full-screen Three.js cyber-room with a modeled desk, textured monitors, server rack, floating project pins and clickable screens.
+- **3D Xona** — a full-screen Three.js cyber-room with a modeled desk, textured monitors, server rack, floating project pins and clickable screens, plus first-person walking, a seated desk view and an in-monitor project desktop.
 
 Both modes share the same project data and the same slide-in project drawer.
 
@@ -38,6 +38,7 @@ npm run preview  # serve the production build on port 3000
 - Three glassmorphic project cards — click **Batafsil maʼlumot** to open the drawer.
 - Categorized tech stack: Frontend & 3D, Backend & Database, Automation & APIs.
 - Terminal identity card and a validated contact form with success toast.
+- Sections and cards reveal on scroll with a short stagger; the hero glows and the background grid drift slowly. All motion respects `prefers-reduced-motion`.
 
 ### 3D Xona
 
@@ -46,6 +47,13 @@ npm run preview  # serve the production build on port 3000
 - Lighting: ambient 2.8, directional 3.2, cyan desk point light 4.5, purple rim lights, ACES tone mapping at exposure 1.35.
 - Camera FOV is 58 on mobile / 46 on desktop. Drag to orbit with clamped vertical tilt.
 - Quick camera bar: **Stol**, **1. Taʼlim Portali**, **2. 3D Oʻyin**, **3. Telegram Bot**.
+- Wheel zoom, on-screen zoom buttons and a reset control; zoom distance is clamped per breakpoint.
+- **Avto sayr** glides through all four camera presets every 5.2 seconds and stops on manual navigation.
+- Fullscreen mode, floating light motes, pulsing pins and a pointer cursor over clickable monitors.
+- **Yurish** mode: first-person eye-level walking with `WASD` / arrow keys, `Shift` to move faster, drag to look, and an on-screen D-pad for touch layouts. Room bounds and desk/rack collision keep the camera inside the scene.
+- **Sichqonchani qulflash** enables pointer-lock free look on desktop; `Esc` releases the pointer without leaving walk mode.
+- **Kompyuterga oʻtirish** glides the camera into the desk chair and opens **REVILEND OS** — an in-monitor desktop listing all three projects. Each project opens the shared drawer; Escape or the back button returns to the room.
+- Keyboard shortcuts: `1`–`3` project screens, `R` / `0` desk, `+` / `−` zoom, `T` auto tour, `F` fullscreen. In walk mode: `E` to sit, `Esc` to exit.
 - Floating screen-space pins are projected from 3D anchors; clicking a pin or monitor opens the shared drawer.
 - If WebGL is unavailable, the mode shows a clear fallback message.
 
@@ -60,12 +68,14 @@ src/
 │   ├── Hero.jsx             # 2D hero + metrics
 │   ├── Projects.jsx         # featured project card grid
 │   ├── ProjectDrawer.jsx    # shared project drawer (2D + 3D)
-│   ├── CyberRoomView.jsx    # Three.js room, camera, textures, pins
+│   ├── CyberRoomView.jsx    # Three.js room, orbit/walk cameras, textures, pins
+│   ├── ComputerScreen.jsx   # in-monitor REVILEND OS project desktop
 │   ├── Arsenal.jsx          # categorized tech stack
 │   ├── About.jsx            # identity narrative + JSON card
 │   ├── Contact.jsx          # validated form + direct links
 │   ├── Toast.jsx            # success notification
 │   ├── Footer.jsx
+│   ├── Reveal.jsx           # IntersectionObserver scroll reveal
 │   ├── SectionHeading.jsx
 │   └── StatusBadge.jsx
 └── index.css                # Tailwind layers, theme primitives, motion
@@ -82,7 +92,8 @@ src/
 
 ## Accessibility & performance
 
-- Mode switch uses `aria-pressed`; pins and camera presets are real buttons with labels.
+- Mode switch and auto-tour control use `aria-pressed`; pins and camera presets are real buttons with labels.
 - Project drawer supports Escape, restores focus and returns it to the trigger.
 - Room render loop pauses when the tab is hidden; device pixel ratio is capped at 2; all geometries, materials and canvas textures are disposed on unmount.
-- Motion is reduced under `prefers-reduced-motion`.
+- Walk mode has keyboard controls plus a touch D-pad; the sit button opens the project desktop without requiring pointer lock.
+- Scroll reveals, ambient grid motion, auto-tour timing and 3D animations are reduced under `prefers-reduced-motion`.
