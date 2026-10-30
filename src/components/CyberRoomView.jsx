@@ -1,14 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import {
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight,
-  ChevronUp,
+  Armchair,
   Footprints,
   Maximize2,
   Minimize2,
-  Monitor,
   MousePointer2,
   Pause,
   Play,
@@ -22,7 +18,7 @@ import ComputerScreen from './ComputerScreen.jsx';
 const VIEWS = [
   {
     key: 'desk',
-    label: '💻 Stol',
+    label: 'Stol',
     target: [0, 1.52, -0.3],
     radius: 4.7,
     mobileRadius: 6.6,
@@ -76,9 +72,47 @@ const SEAT_VIEW = {
 
 const VIEW_MAP = Object.fromEntries([...VIEWS, SEAT_VIEW].map((view) => [view.key, view]));
 
-function WalkPadButton({ direction, label, icon: Icon, onInput }) {
-  const handleStart = (event) => {
+function VirtualJoystick({ onChange }) {
+  const padRef = useRef(null);
+  const activeRef = useRef(false);
+  const pointerRef = useRef(null);
+  const [thumb, setThumb] = useState({ x: 0, y: 0 });
+
+  const update = useCallback(
+    (event) => {
+      const pad = padRef.current;
+      if (!pad) return;
+      const rect = pad.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      const radius = rect.width * 0.32;
+      let dx = event.clientX - centerX;
+      let dy = event.clientY - centerY;
+      const distance = Math.hypot(dx, dy);
+      if (distance > radius) {
+        dx = (dx / distance) * radius;
+        dy = (dy / distance) * radius;
+      }
+      setThumb({ x: dx, y: dy });
+      onChange(Number((dx / radius).toFixed(3)), Number((dy / radius).toFixed(3)));
+    },
+    [onChange]
+  );
+
+  const end = (event) => {
+    if (!activeRef.current) return;
+    if (event?.pointerId != null && pointerRef.current !== event.pointerId) return;
+    activeRef.current = false;
+    pointerRef.current = null;
+    setThumb({ x: 0, y: 0 });
+    onChange(0, 0);
+  };
+
+  const start = (event) => {
+    if (event.pointerType === 'mouse' && event.button !== 0) return;
     event.preventDefault();
+    activeRef.current = true;
+    pointerRef.current = event.pointerId;
     if (event.currentTarget.setPointerCapture) {
       try {
         event.currentTarget.setPointerCapture(event.pointerId);
@@ -86,27 +120,48 @@ function WalkPadButton({ direction, label, icon: Icon, onInput }) {
         /* pointer capture is best-effort */
       }
     }
-    onInput(direction, true);
+    update(event);
   };
 
-  const handleEnd = (event) => {
+  const move = (event) => {
+    if (!activeRef.current || pointerRef.current !== event.pointerId) return;
     event.preventDefault();
-    onInput(direction, false);
+    update(event);
   };
 
   return (
-    <button
-      type="button"
-      aria-label={label}
-      onPointerDown={handleStart}
-      onPointerUp={handleEnd}
-      onPointerCancel={handleEnd}
-      onPointerLeave={handleEnd}
+    <div
+      ref={padRef}
+      role="group"
+      aria-label="Virtual joystick — yurish uchun"
+      onPointerDown={start}
+      onPointerMove={move}
+      onPointerUp={end}
+      onPointerCancel={end}
+      onLostPointerCapture={end}
       onContextMenu={(event) => event.preventDefault()}
-      className="grid h-10 w-10 touch-none select-none place-items-center rounded-lg border border-slate-700/70 bg-slate-900/80 text-slate-300 transition active:scale-95 active:border-electric/50 active:bg-electric/20 active:text-white"
+      className="relative h-28 w-28 touch-none select-none rounded-full border border-electric/25 bg-[radial-gradient(circle_at_50%_40%,rgba(0,242,254,0.13),rgba(6,12,20,0.92)_62%)] shadow-[0_18px_50px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.1)] backdrop-blur-xl sm:h-32 sm:w-32"
     >
-      <Icon size={16} />
-    </button>
+      <span aria-hidden="true" className="absolute inset-3 rounded-full border border-slate-600/50" />
+      <span aria-hidden="true" className="absolute left-1/2 top-1/2 h-px w-[72%] -translate-x-1/2 -translate-y-1/2 bg-slate-500/20" />
+      <span aria-hidden="true" className="absolute left-1/2 top-1/2 h-[72%] w-px -translate-x-1/2 -translate-y-1/2 bg-slate-500/20" />
+      <span aria-hidden="true" className="absolute left-1/2 top-1.5 -translate-x-1/2 font-mono text-[8px] uppercase tracking-[0.16em] text-slate-500">
+        Old
+      </span>
+      <span aria-hidden="true" className="absolute bottom-1.5 left-1/2 -translate-x-1/2 font-mono text-[8px] uppercase tracking-[0.16em] text-slate-500">
+        Orqa
+      </span>
+      <span
+        aria-hidden="true"
+        className="absolute left-1/2 top-1/2 block transition-transform duration-75"
+        style={{ transform: `translate(-50%, -50%) translate(${thumb.x}px, ${thumb.y}px)` }}
+      >
+        <span className="grid h-12 w-12 place-items-center rounded-full border border-electric/50 bg-gradient-to-br from-electric/30 to-slate-900/90 shadow-[0_0_28px_rgba(0,242,254,0.35),inset_0_1px_0_rgba(255,255,255,0.25)] sm:h-14 sm:w-14">
+          <span className="h-2 w-2 rounded-full bg-electric shadow-[0_0_10px_rgba(0,242,254,0.95)]" />
+        </span>
+      </span>
+      <span className="sr-only">Yurish uchun joystick. Klaviaturada WASD yoki strelkalar ham ishlaydi.</span>
+    </div>
   );
 }
 
@@ -417,6 +472,78 @@ function drawNeonSign(ctx, width, height) {
   ctx.textBaseline = 'alphabetic';
 }
 
+function drawWallPoster(ctx, width, height, accent, label, index) {
+  const background = ctx.createLinearGradient(0, 0, width, height);
+  background.addColorStop(0, '#0a1622');
+  background.addColorStop(0.55, '#060d15');
+  background.addColorStop(1, '#03070b');
+  ctx.fillStyle = background;
+  ctx.fillRect(0, 0, width, height);
+
+  const halo = ctx.createRadialGradient(
+    width * 0.72,
+    height * 0.26,
+    0,
+    width * 0.72,
+    height * 0.26,
+    width * 0.55
+  );
+  halo.addColorStop(0, accent);
+  halo.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.save();
+  ctx.globalAlpha = 0.2;
+  ctx.fillStyle = halo;
+  ctx.fillRect(0, 0, width, height);
+  ctx.restore();
+
+  ctx.strokeStyle = 'rgba(148,163,184,0.10)';
+  ctx.lineWidth = 1;
+  for (let x = 32; x < width; x += 48) {
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, height);
+    ctx.stroke();
+  }
+  for (let y = 32; y < height; y += 48) {
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(width, y);
+    ctx.stroke();
+  }
+
+  ctx.strokeStyle = 'rgba(226,232,240,0.2)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(width * 0.72, height * 0.38, width * 0.24, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.strokeStyle = accent;
+  ctx.globalAlpha = 0.8;
+  ctx.beginPath();
+  ctx.arc(width * 0.72, height * 0.38, width * 0.18, -Math.PI * 0.2, Math.PI * 1.15);
+  ctx.stroke();
+  ctx.globalAlpha = 1;
+
+  ctx.fillStyle = accent;
+  ctx.font = '500 17px monospace';
+  ctx.fillText(label, 38, 64);
+  ctx.fillStyle = '#64748b';
+  ctx.font = '400 13px monospace';
+  ctx.fillText(`SERIES ${index} / REVILEND`, 38, 90);
+
+  ctx.fillStyle = 'rgba(226,232,240,0.07)';
+  ctx.font = '700 280px "Space Grotesk", sans-serif';
+  ctx.fillText(index, 20, height - 112);
+
+  ctx.fillStyle = '#e2e8f0';
+  ctx.font = '600 36px "Space Grotesk", sans-serif';
+  ctx.fillText('REVILEND', 38, height - 84);
+  ctx.fillStyle = 'rgba(148,163,184,0.72)';
+  ctx.font = '500 16px monospace';
+  ctx.fillText('CREATIVE SYSTEMS', 38, height - 54);
+  ctx.fillStyle = accent;
+  ctx.fillRect(38, height - 38, 54, 2);
+}
+
 function drawKeyboard(ctx, width, height) {
   const background = ctx.createLinearGradient(0, 0, 0, height);
   background.addColorStop(0, '#031019');
@@ -469,11 +596,13 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
   const pinRefs = useRef({});
   const cameraApiRef = useRef(null);
   const openProjectRef = useRef(onOpenProject);
-  const walkInputRef = useRef({ forward: false, back: false, left: false, right: false });
+  const walkAxisRef = useRef({ x: 0, y: 0 });
+  const nearDeskRef = useRef(false);
   const [activeView, setActiveView] = useState('desk');
   const [webglError, setWebglError] = useState(false);
   const [autoTour, setAutoTour] = useState(false);
   const [walkMode, setWalkMode] = useState(false);
+  const [nearDesk, setNearDesk] = useState(false);
   const [computerOpen, setComputerOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [pointerLocked, setPointerLocked] = useState(false);
@@ -496,8 +625,11 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
     cameraApiRef.current?.focus(key);
   }, []);
 
-  const setWalkInput = useCallback((direction, active) => {
-    if (walkInputRef.current) walkInputRef.current[direction] = active;
+  const setWalkAxis = useCallback((x, y) => {
+    if (walkAxisRef.current) {
+      walkAxisRef.current.x = x;
+      walkAxisRef.current.y = y;
+    }
   }, []);
 
   const toggleWalk = useCallback(() => {
@@ -505,6 +637,7 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
     if (walkMode) {
       cameraApiRef.current?.stopWalk();
       setWalkMode(false);
+      setNearDesk(false);
       setActiveView('desk');
     } else {
       cameraApiRef.current?.startWalk();
@@ -515,19 +648,23 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
   const exitWalk = useCallback(() => {
     cameraApiRef.current?.stopWalk();
     setWalkMode(false);
+    setNearDesk(false);
     setActiveView('desk');
   }, []);
 
   const sitAtComputer = useCallback(() => {
     cameraApiRef.current?.sit();
     setWalkMode(false);
+    setNearDesk(false);
     setComputerOpen(true);
   }, []);
 
   const closeComputer = useCallback(() => {
     setComputerOpen(false);
+    setWalkMode(true);
     setActiveView('desk');
-    cameraApiRef.current?.focus('desk');
+    // Oʻrindan turgandan soʻng stol oldida, joystick bilan yurishga tayyor holda qaytamiz.
+    cameraApiRef.current?.stand();
   }, []);
 
   const toggleFullscreen = useCallback(async () => {
@@ -556,7 +693,7 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
       if (computerOpen || drawerOpen) return;
       if (walkMode) {
         if (key === 'escape' && !pointerLocked) exitWalk();
-        else if (key === 'e') sitAtComputer();
+        else if (key === 'e' && nearDesk) sitAtComputer();
         return;
       }
       if (key === '1') focusView('teachermuzaffar');
@@ -580,6 +717,7 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
     pointerLocked,
     exitWalk,
     sitAtComputer,
+    nearDesk,
   ]);
 
   useEffect(() => {
@@ -681,6 +819,12 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
     const neonTexture = makeTexture(1600, 360, drawNeonSign);
     const keyboardTexture = makeTexture(1024, 420, drawKeyboard);
     const floorGlowTexture = makeTexture(256, 256, drawFloorGlow);
+    const posterOneTexture = makeTexture(560, 760, (ctx, width, height) =>
+      drawWallPoster(ctx, width, height, '#22d3ee', 'SPATIAL INTERFACES', '01')
+    );
+    const posterTwoTexture = makeTexture(560, 760, (ctx, width, height) =>
+      drawWallPoster(ctx, width, height, '#a78bfa', 'SYSTEM ARCHITECTURE', '02')
+    );
 
     const frameMaterial = new THREE.MeshStandardMaterial({
       color: '#0a121c',
@@ -697,6 +841,21 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
       metalness: 0.75,
       roughness: 0.42,
     });
+    const wallMaterial = new THREE.MeshStandardMaterial({
+      color: '#0a141f',
+      metalness: 0.14,
+      roughness: 0.88,
+    });
+    const trimMaterial = new THREE.MeshStandardMaterial({
+      color: '#050c13',
+      metalness: 0.55,
+      roughness: 0.44,
+    });
+    const rugMaterial = new THREE.MeshStandardMaterial({
+      color: '#06101a',
+      metalness: 0.04,
+      roughness: 0.98,
+    });
 
     const addMesh = (mesh, castShadow = true, receiveShadow = true) => {
       mesh.castShadow = castShadow;
@@ -705,55 +864,163 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
       return mesh;
     };
 
+    const ROOM = {
+      width: 14.4,
+      depth: 12.8,
+      centerZ: 2.2,
+      height: 5.2,
+      backZ: -4.2,
+      frontZ: 8.6,
+    };
+
     const floor = addMesh(
       new THREE.Mesh(
-        new THREE.PlaneGeometry(22, 22),
-        new THREE.MeshStandardMaterial({ color: '#060d16', metalness: 0.92, roughness: 0.24 })
+        new THREE.PlaneGeometry(ROOM.width, ROOM.depth),
+        new THREE.MeshStandardMaterial({ color: '#06101a', metalness: 0.9, roughness: 0.28 })
       ),
       false,
       true
     );
     floor.rotation.x = -Math.PI / 2;
+    floor.position.set(0, 0, ROOM.centerZ);
 
-    const grid = new THREE.GridHelper(22, 44, '#00f2fe', '#0e7490');
-    grid.position.y = 0.012;
+    const grid = new THREE.GridHelper(ROOM.width, 32, '#00f2fe', '#0e7490');
+    grid.scale.z = ROOM.depth / ROOM.width;
+    grid.position.set(0, 0.012, ROOM.centerZ);
     grid.material.transparent = true;
-    grid.material.opacity = 0.42;
+    grid.material.opacity = 0.3;
     grid.material.depthWrite = false;
     grid.material.toneMapped = false;
     scene.add(grid);
 
     const floorGlow = new THREE.Mesh(
-      new THREE.PlaneGeometry(10, 10),
+      new THREE.PlaneGeometry(11, 9),
       new THREE.MeshBasicMaterial({
         map: floorGlowTexture,
         transparent: true,
-        opacity: 0.32,
+        opacity: 0.26,
         blending: THREE.AdditiveBlending,
         depthWrite: false,
         toneMapped: false,
       })
     );
     floorGlow.rotation.x = -Math.PI / 2;
-    floorGlow.position.set(0, 0.015, 0.3);
+    floorGlow.position.set(0, 0.015, 1.2);
     scene.add(floorGlow);
 
-    const wall = addMesh(
-      new THREE.Mesh(
-        new THREE.BoxGeometry(15, 7, 0.2),
-        new THREE.MeshStandardMaterial({ color: '#081018', metalness: 0.4, roughness: 0.78 })
-      ),
+    const rug = addMesh(
+      new THREE.Mesh(new THREE.PlaneGeometry(6.5, 3.8), rugMaterial),
       false,
       true
     );
-    wall.position.set(0, 3.5, -4.1);
+    rug.rotation.x = -Math.PI / 2;
+    rug.position.set(0, 0.018, 2.05);
+
+    const rugInset = new THREE.Mesh(
+      new THREE.PlaneGeometry(5.9, 3.2),
+      new THREE.MeshStandardMaterial({ color: '#0a1722', metalness: 0.03, roughness: 1 })
+    );
+    rugInset.rotation.x = -Math.PI / 2;
+    rugInset.position.set(0, 0.022, 2.05);
+    scene.add(rugInset);
+
+    [-1, 1].forEach((side) => {
+      const rugLine = new THREE.Mesh(
+        new THREE.BoxGeometry(4.9, 0.012, 0.018),
+        new THREE.MeshBasicMaterial({ color: '#0e7490', toneMapped: false })
+      );
+      rugLine.position.set(0, 0.028, 2.05 + side * 1.62);
+      scene.add(rugLine);
+    });
+
+    const backWall = addMesh(
+      new THREE.Mesh(new THREE.BoxGeometry(ROOM.width, ROOM.height, 0.18), wallMaterial),
+      false,
+      true
+    );
+    backWall.position.set(0, ROOM.height / 2, ROOM.backZ);
+
+    const frontWall = addMesh(
+      new THREE.Mesh(new THREE.BoxGeometry(ROOM.width, ROOM.height, 0.18), wallMaterial),
+      false,
+      true
+    );
+    frontWall.position.set(0, ROOM.height / 2, ROOM.frontZ);
+
+    [-1, 1].forEach((side) => {
+      const sideWall = addMesh(
+        new THREE.Mesh(new THREE.BoxGeometry(0.18, ROOM.height, ROOM.depth), wallMaterial),
+        false,
+        true
+      );
+      sideWall.position.set(side * (ROOM.width / 2), ROOM.height / 2, ROOM.centerZ);
+    });
+
+    const ceiling = addMesh(
+      new THREE.Mesh(new THREE.BoxGeometry(ROOM.width, 0.12, ROOM.depth), wallMaterial),
+      false,
+      true
+    );
+    ceiling.position.set(0, ROOM.height + 0.06, ROOM.centerZ);
+
+    [
+      [ROOM.width, 0.12, 0.08, 0, 0.06, ROOM.backZ + 0.14],
+      [ROOM.width, 0.12, 0.08, 0, 0.06, ROOM.frontZ - 0.14],
+      [0.08, 0.12, ROOM.depth, -(ROOM.width / 2) + 0.14, 0.06, ROOM.centerZ],
+      [0.08, 0.12, ROOM.depth, ROOM.width / 2 - 0.14, 0.06, ROOM.centerZ],
+    ].forEach(([width, height, depth, x, y, z]) => {
+      const trim = new THREE.Mesh(new THREE.BoxGeometry(width, height, depth), trimMaterial);
+      trim.position.set(x, y, z);
+      trim.receiveShadow = true;
+      scene.add(trim);
+    });
+
+    for (let index = 0; index < 14; index += 1) {
+      const z = -2.85 + index * 0.43;
+      [-1, 1].forEach((side) => {
+        const slat = new THREE.Mesh(
+          new THREE.BoxGeometry(0.03, 3.4, 0.13),
+          trimMaterial
+        );
+        slat.position.set(side * (ROOM.width / 2 - 0.1), 2.35, z);
+        slat.receiveShadow = true;
+        scene.add(slat);
+      });
+    }
+
+    const coveMaterial = new THREE.MeshBasicMaterial({ color: '#bff8ff', toneMapped: false });
+    [0.9, 4.1].forEach((z, index) => {
+      const strip = new THREE.Mesh(
+        new THREE.BoxGeometry(index === 0 ? 7.4 : 6.2, 0.03, 0.08),
+        coveMaterial
+      );
+      strip.position.set(0, ROOM.height - 0.02, z);
+      scene.add(strip);
+    });
+
+    [-1, 1].forEach((side) => {
+      const cove = new THREE.Mesh(
+        new THREE.BoxGeometry(0.035, 2.5, 0.05),
+        new THREE.MeshBasicMaterial({ color: side < 0 ? '#8b5cf6' : '#22d3ee', toneMapped: false })
+      );
+      cove.position.set(side * (ROOM.width / 2 - 0.13), 2.7, 4.7);
+      scene.add(cove);
+    });
+
+    const ceilingLight = new THREE.PointLight('#bdefff', 3.6, 13, 2);
+    ceilingLight.position.set(0, 4.75, 2.1);
+    scene.add(ceilingLight);
+
+    const frontLight = new THREE.PointLight('#6d8dff', 2.2, 10, 2);
+    frontLight.position.set(0, 3.4, 6.6);
+    scene.add(frontLight);
 
     [-5.6, 5.6].forEach((x) => {
       const bar = new THREE.Mesh(
         new THREE.BoxGeometry(0.035, 2.4, 0.035),
         new THREE.MeshBasicMaterial({ color: '#6d28d9', toneMapped: false })
       );
-      bar.position.set(x, 3.1, -4.0);
+      bar.position.set(x, 3.1, ROOM.backZ + 0.16);
       scene.add(bar);
     });
 
@@ -766,8 +1033,175 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
         toneMapped: false,
       })
     );
-    neonSign.position.set(0, 3.6, -3.96);
+    neonSign.position.set(0, 3.6, ROOM.backZ + 0.16);
     scene.add(neonSign);
+
+    [
+      { texture: posterOneTexture, x: -4.65 },
+      { texture: posterTwoTexture, x: 4.65 },
+    ].forEach(({ texture, x }) => {
+      const posterFrame = new THREE.Mesh(
+        new THREE.BoxGeometry(1.56, 2.06, 0.06),
+        frameMaterial
+      );
+      posterFrame.position.set(x, 3.0, ROOM.backZ + 0.13);
+      posterFrame.castShadow = true;
+      scene.add(posterFrame);
+
+      const poster = new THREE.Mesh(
+        new THREE.PlaneGeometry(1.4, 1.9),
+        new THREE.MeshBasicMaterial({ map: texture, toneMapped: false })
+      );
+      poster.position.set(x, 3.0, ROOM.backZ + 0.17);
+      scene.add(poster);
+    });
+
+    const shelf = addMesh(
+      new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.06, 2.45), frameMaterial),
+      true,
+      true
+    );
+    shelf.position.set(ROOM.width / 2 - 0.29, 2.74, 1.7);
+
+    const bookColors = ['#1d4ed8', '#0f766e', '#7c3aed', '#0e7490', '#334155', '#9f1239'];
+    bookColors.forEach((color, index) => {
+      const bookHeight = 0.25 + (index % 3) * 0.06;
+      const book = new THREE.Mesh(
+        new THREE.BoxGeometry(0.16, bookHeight, 0.09),
+        new THREE.MeshStandardMaterial({ color, metalness: 0.1, roughness: 0.72 })
+      );
+      book.position.set(
+        ROOM.width / 2 - 0.34,
+        2.77 + bookHeight / 2,
+        0.72 + index * 0.3
+      );
+      book.castShadow = true;
+      scene.add(book);
+    });
+
+    const doorGroup = new THREE.Group();
+    doorGroup.position.set(3.35, 0, ROOM.frontZ - 0.16);
+
+    const doorPanel = new THREE.Mesh(
+      new THREE.BoxGeometry(1.54, 2.72, 0.07),
+      new THREE.MeshStandardMaterial({ color: '#0b1722', metalness: 0.38, roughness: 0.62 })
+    );
+    doorPanel.position.y = 1.36;
+    doorPanel.castShadow = true;
+    doorGroup.add(doorPanel);
+
+    [
+      [-0.84, 1.4, 0.1, 2.9],
+      [0.84, 1.4, 0.1, 2.9],
+      [0, 2.84, 1.78, 0.1],
+    ].forEach(([x, y, width, height]) => {
+      const framePart = new THREE.Mesh(
+        new THREE.BoxGeometry(width, height, 0.12),
+        trimMaterial
+      );
+      framePart.position.set(x, y, 0.01);
+      doorGroup.add(framePart);
+    });
+
+    const handle = new THREE.Mesh(
+      new THREE.SphereGeometry(0.065, 16, 16),
+      new THREE.MeshStandardMaterial({ color: '#8b9aab', metalness: 0.9, roughness: 0.22 })
+    );
+    handle.position.set(0.55, 1.28, -0.06);
+    doorGroup.add(handle);
+    scene.add(doorGroup);
+
+    const doorLight = new THREE.PointLight('#4cc2ff', 1.5, 4.5, 2);
+    doorLight.position.set(3.35, 3.15, ROOM.frontZ - 0.5);
+    scene.add(doorLight);
+
+    const plant = new THREE.Group();
+    plant.position.set(5.35, 0, -2.5);
+
+    const pot = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.3, 0.36, 0.52, 20),
+      new THREE.MeshStandardMaterial({ color: '#11212c', metalness: 0.2, roughness: 0.76 })
+    );
+    pot.position.y = 0.26;
+    pot.castShadow = true;
+    plant.add(pot);
+
+    const soil = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.27, 0.27, 0.02, 20),
+      new THREE.MeshStandardMaterial({ color: '#1a120b', roughness: 1 })
+    );
+    soil.position.y = 0.52;
+    plant.add(soil);
+
+    for (let index = 0; index < 9; index += 1) {
+      const angle = (index / 9) * Math.PI * 2;
+      const stemHeight = 0.45 + (index % 3) * 0.2;
+      const stem = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.012, 0.02, stemHeight, 6),
+        new THREE.MeshStandardMaterial({ color: '#1e5f4d', roughness: 0.9 })
+      );
+      stem.position.set(Math.cos(angle) * 0.08, 0.55 + stemHeight / 2, Math.sin(angle) * 0.08);
+      stem.rotation.z = Math.cos(angle) * 0.18;
+      plant.add(stem);
+
+      const leaf = new THREE.Mesh(
+        new THREE.SphereGeometry(0.2, 8, 6),
+        new THREE.MeshStandardMaterial({
+          color: index % 2 === 0 ? '#2d7a62' : '#1f6b54',
+          roughness: 0.86,
+        })
+      );
+      leaf.scale.set(1.35, 0.28, 0.62);
+      leaf.position.set(
+        Math.cos(angle) * 0.33,
+        0.55 + stemHeight,
+        Math.sin(angle) * 0.33
+      );
+      leaf.rotation.z = Math.cos(angle) * 0.6;
+      leaf.castShadow = true;
+      plant.add(leaf);
+    }
+    scene.add(plant);
+
+    const plantLight = new THREE.PointLight('#34d399', 1.2, 4, 2);
+    plantLight.position.set(5.0, 1.2, -2.3);
+    scene.add(plantLight);
+
+    const mug = new THREE.Group();
+    mug.position.set(2.35, 1.075, 0.5);
+    const mugBody = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.11, 0.1, 0.19, 20),
+      new THREE.MeshStandardMaterial({ color: '#0d1a24', metalness: 0.3, roughness: 0.45 })
+    );
+    mugBody.position.y = 0.095;
+    mugBody.castShadow = true;
+    mug.add(mugBody);
+    const mugHandle = new THREE.Mesh(
+      new THREE.TorusGeometry(0.07, 0.018, 8, 16),
+      new THREE.MeshStandardMaterial({ color: '#0d1a24', metalness: 0.3, roughness: 0.45 })
+    );
+    mugHandle.position.set(0.11, 0.1, 0);
+    mugHandle.rotation.y = Math.PI / 2;
+    mug.add(mugHandle);
+    scene.add(mug);
+
+    const notebook = new THREE.Mesh(
+      new THREE.BoxGeometry(0.55, 0.025, 0.4),
+      new THREE.MeshStandardMaterial({ color: '#cbd5e1', roughness: 0.82 })
+    );
+    notebook.position.set(2.3, 1.085, -0.18);
+    notebook.rotation.y = 0.12;
+    notebook.castShadow = true;
+    scene.add(notebook);
+
+    const pen = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.012, 0.012, 0.34, 8),
+      new THREE.MeshStandardMaterial({ color: '#22d3ee', metalness: 0.5, roughness: 0.3 })
+    );
+    pen.position.set(2.52, 1.1, -0.1);
+    pen.rotation.z = Math.PI / 2;
+    pen.rotation.y = 0.35;
+    scene.add(pen);
 
     const deskTop = addMesh(new THREE.Mesh(new THREE.BoxGeometry(6, 0.14, 1.75), deskMaterial));
     deskTop.position.set(0, 1.0, 0);
@@ -944,12 +1378,12 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
       phase: index * 1.8,
     }));
 
-    const dustCount = 240;
+    const dustCount = 260;
     const dustPositions = new Float32Array(dustCount * 3);
     for (let index = 0; index < dustCount; index += 1) {
-      dustPositions[index * 3] = (Math.random() - 0.5) * 13;
-      dustPositions[index * 3 + 1] = 0.25 + Math.random() * 4.2;
-      dustPositions[index * 3 + 2] = -4.2 + Math.random() * 4.6;
+      dustPositions[index * 3] = (Math.random() - 0.5) * 11.8;
+      dustPositions[index * 3 + 1] = 0.3 + Math.random() * 4.5;
+      dustPositions[index * 3 + 2] = -3.8 + Math.random() * 11.4;
     }
     const dustGeometry = new THREE.BufferGeometry();
     dustGeometry.setAttribute('position', new THREE.BufferAttribute(dustPositions, 3));
@@ -979,6 +1413,8 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
     };
 
     const WALK_EYE = 1.62;
+    const WALK_RADIUS = 0.32;
+    const WALK_BOUNDS = { minX: -6.52, maxX: 6.52, minZ: -3.55, maxZ: 7.9 };
     const walkState = {
       active: false,
       position: new THREE.Vector3(0, WALK_EYE, 3.4),
@@ -995,31 +1431,50 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
       walkKeys.right = false;
       walkKeys.sprint = false;
 
-      const input = walkInputRef.current;
-      if (input) {
-        input.forward = false;
-        input.back = false;
-        input.left = false;
-        input.right = false;
+      if (walkAxisRef.current) {
+        walkAxisRef.current.x = 0;
+        walkAxisRef.current.y = 0;
       }
     };
 
-    const isWalkBlocked = (x, z) =>
-      (Math.abs(x) < 3.0 && z > -1.05 && z < 1.15) ||
-      (x > -4.05 && x < -2.95 && z > -1.7 && z < -0.55);
+    // Dumaloq tana radiusi bilan stol va server rack atrofidagi AABB toʻqnashuvi.
+    const isWalkBlocked = (x, z) => {
+      const intersects = (minX, maxX, minZ, maxZ) =>
+        x > minX - WALK_RADIUS &&
+        x < maxX + WALK_RADIUS &&
+        z > minZ - WALK_RADIUS &&
+        z < maxZ + WALK_RADIUS;
+
+      return (
+        intersects(-3.02, 3.02, -0.98, 0.98) ||
+        intersects(-3.98, -3.02, -1.76, -0.54) ||
+        intersects(4.96, 5.74, -2.89, -2.11)
+      );
+    };
+
+    const isNearDeskPosition = (x, z) =>
+      Math.abs(x) < 2.85 && z > 1.14 && z < 2.42;
+
+    const updateNearDesk = () => {
+      if (!walkState.active) return;
+      const near = isNearDeskPosition(walkState.position.x, walkState.position.z);
+      if (near === nearDeskRef.current) return;
+      nearDeskRef.current = near;
+      setNearDesk(near);
+    };
 
     const focus = (key) => {
       const view = VIEW_MAP[key] ?? initialView;
       const mobile = window.innerWidth < 768;
       cameraState.goalTarget.set(...view.target);
-      cameraState.goalRadius = mobile ? view.mobileRadius : view.radius;
-      cameraState.goalTheta = view.theta;
-      cameraState.goalPhi = view.phi;
+      cameraState.goalRadius = clampRadius(mobile ? view.mobileRadius : view.radius);
+      cameraState.goalTheta = THREE.MathUtils.clamp(view.theta, -0.86, 0.86);
+      cameraState.goalPhi = THREE.MathUtils.clamp(view.phi, 1.12, 1.53);
     };
 
     const clampRadius = (value) => {
       const mobile = window.innerWidth < 768;
-      return THREE.MathUtils.clamp(value, mobile ? 2.1 : 1.35, mobile ? 9 : 8);
+      return THREE.MathUtils.clamp(value, mobile ? 2.1 : 1.35, 7.8);
     };
 
     const zoom = (factor) => {
@@ -1032,11 +1487,19 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
 
       walkState.active = true;
       walkState.position.copy(camera.position);
-      walkState.position.x = THREE.MathUtils.clamp(walkState.position.x, -4.35, 4.35);
-      walkState.position.z = THREE.MathUtils.clamp(walkState.position.z, -3.1, 6.6);
+      walkState.position.x = THREE.MathUtils.clamp(
+        walkState.position.x,
+        WALK_BOUNDS.minX,
+        WALK_BOUNDS.maxX
+      );
+      walkState.position.z = THREE.MathUtils.clamp(
+        walkState.position.z,
+        WALK_BOUNDS.minZ,
+        WALK_BOUNDS.maxZ
+      );
       if (isWalkBlocked(walkState.position.x, walkState.position.z)) {
         walkState.position.x = 0;
-        walkState.position.z = 1.2;
+        walkState.position.z = 2.05;
       }
       walkState.yaw = Math.atan2(-direction.x, -direction.z);
       walkState.pitch = THREE.MathUtils.clamp(
@@ -1046,6 +1509,7 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
       );
       walkState.bob = 0;
       resetWalkInput();
+      updateNearDesk();
     };
 
     const syncOrbitFromWalk = () => {
@@ -1065,8 +1529,8 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
       cameraState.theta = cameraState.goalTheta = spherical.theta;
       cameraState.phi = cameraState.goalPhi = THREE.MathUtils.clamp(
         spherical.phi,
-        1.05,
-        1.52
+        1.12,
+        1.53
       );
     };
 
@@ -1092,6 +1556,8 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
       syncOrbitFromWalk();
       walkState.active = false;
       resetWalkInput();
+      nearDeskRef.current = false;
+      setNearDesk(false);
       focus('desk');
     };
 
@@ -1100,10 +1566,24 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
       if (walkState.active) syncOrbitFromWalk();
       walkState.active = false;
       resetWalkInput();
+      nearDeskRef.current = false;
+      setNearDesk(false);
       focus('seat');
     };
 
-    cameraApiRef.current = { focus, zoom, startWalk, stopWalk, sit, lockPointer };
+    const stand = () => {
+      releasePointerLock();
+      walkState.active = true;
+      walkState.position.set(0, WALK_EYE, 2.05);
+      walkState.yaw = 0;
+      walkState.pitch = -0.06;
+      walkState.bob = 0;
+      resetWalkInput();
+      nearDeskRef.current = true;
+      setNearDesk(true);
+    };
+
+    cameraApiRef.current = { focus, zoom, startWalk, stopWalk, sit, stand, lockPointer };
 
     const initialOffset = new THREE.Vector3().setFromSphericalCoords(
       cameraState.radius,
@@ -1168,10 +1648,14 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
         walkState.pitch = THREE.MathUtils.clamp(walkState.pitch - deltaY * 0.0026, -0.6, 0.45);
         return;
       }
-      cameraState.goalTheta -= deltaX * 0.005;
+      cameraState.goalTheta = THREE.MathUtils.clamp(
+        cameraState.goalTheta - deltaX * 0.005,
+        -0.86,
+        0.86
+      );
       cameraState.goalPhi = THREE.MathUtils.clamp(
         cameraState.goalPhi - deltaY * 0.004,
-        1.04,
+        1.12,
         1.53
       );
     };
@@ -1271,40 +1755,46 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
       const orbitFov = window.innerWidth < 768 ? 58 : 46;
 
       if (walkState.active) {
-        const input = walkInputRef.current ?? {
-          forward: false,
-          back: false,
-          left: false,
-          right: false,
-        };
-        const forwardInput =
-          (walkKeys.forward || input.forward ? 1 : 0) - (walkKeys.back || input.back ? 1 : 0);
-        const strafeInput =
-          (walkKeys.right || input.right ? 1 : 0) - (walkKeys.left || input.left ? 1 : 0);
-        const moving = forwardInput !== 0 || strafeInput !== 0;
+        const axis = walkAxisRef.current ?? { x: 0, y: 0 };
+        const forwardInput = THREE.MathUtils.clamp(
+          (walkKeys.forward ? 1 : 0) - (walkKeys.back ? 1 : 0) - axis.y,
+          -1,
+          1
+        );
+        const strafeInput = THREE.MathUtils.clamp(
+          (walkKeys.right ? 1 : 0) - (walkKeys.left ? 1 : 0) + axis.x,
+          -1,
+          1
+        );
+        const inputLength = Math.hypot(forwardInput, strafeInput);
+        const moving = inputLength > 0.06;
 
         let moved = false;
         if (moving) {
-          const length = Math.hypot(forwardInput, strafeInput);
-          const speed = (walkKeys.sprint ? 3.4 : 2.0) * delta;
+          const strength = Math.min(1, inputLength);
+          const directionForward = forwardInput / inputLength;
+          const directionStrafe = strafeInput / inputLength;
+          const speed = (walkKeys.sprint ? 3.4 : 2.0) * strength * delta;
           const sin = Math.sin(walkState.yaw);
           const cos = Math.cos(walkState.yaw);
           const beforeX = walkState.position.x;
           const beforeZ = walkState.position.z;
 
           const nextX = THREE.MathUtils.clamp(
-            beforeX + ((forwardInput / length) * -sin + (strafeInput / length) * cos) * speed,
-            -4.35,
-            4.35
+            beforeX +
+              (directionForward * -sin + directionStrafe * cos) * speed,
+            WALK_BOUNDS.minX,
+            WALK_BOUNDS.maxX
           );
           if (!isWalkBlocked(nextX, walkState.position.z)) {
             walkState.position.x = nextX;
           }
 
           const nextZ = THREE.MathUtils.clamp(
-            beforeZ + ((forwardInput / length) * -cos + (strafeInput / length) * -sin) * speed,
-            -3.1,
-            6.6
+            beforeZ +
+              (directionForward * -cos + directionStrafe * -sin) * speed,
+            WALK_BOUNDS.minZ,
+            WALK_BOUNDS.maxZ
           );
           if (!isWalkBlocked(walkState.position.x, nextZ)) {
             walkState.position.z = nextZ;
@@ -1313,7 +1803,10 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
           moved =
             Math.abs(walkState.position.x - beforeX) > 0.0001 ||
             Math.abs(walkState.position.z - beforeZ) > 0.0001;
-          if (moved) walkState.bob += delta * (walkKeys.sprint ? 11 : 8);
+          if (moved) {
+            walkState.bob += delta * (walkKeys.sprint ? 11 : 8) * Math.max(strength, 0.45);
+          }
+          updateNearDesk();
         }
 
         const targetEye = WALK_EYE + (moved ? Math.sin(walkState.bob) * 0.018 : 0);
@@ -1338,7 +1831,8 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
         cameraState.radius += (cameraState.goalRadius - cameraState.radius) * ease;
         cameraState.theta += (cameraState.goalTheta - cameraState.theta) * ease;
         cameraState.phi += (cameraState.goalPhi - cameraState.phi) * ease;
-        cameraState.phi = THREE.MathUtils.clamp(cameraState.phi, 1.02, 1.54);
+        cameraState.theta = THREE.MathUtils.clamp(cameraState.theta, -0.86, 0.86);
+        cameraState.phi = THREE.MathUtils.clamp(cameraState.phi, 1.12, 1.53);
 
         offsetVector.setFromSphericalCoords(
           cameraState.radius,
@@ -1346,6 +1840,7 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
           cameraState.theta
         );
         camera.position.copy(cameraState.target).add(offsetVector);
+        camera.position.y = Math.min(camera.position.y, ROOM.height - 0.32);
         camera.lookAt(cameraState.target);
 
         if (Math.abs(camera.fov - orbitFov) > 0.01) {
@@ -1521,45 +2016,30 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
             className="pointer-events-none absolute left-1/2 top-1/2 z-10 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full border border-electric/60 bg-electric/30 shadow-[0_0_10px_rgba(0,242,254,0.9)]"
           />
 
-          <div className="pointer-events-none absolute bottom-44 left-4 z-20">
-            <div
-              role="group"
-              aria-label="Yurish boshqaruvi"
-              className="pointer-events-auto grid grid-cols-3 grid-rows-3 gap-1.5 rounded-2xl border border-slate-700/60 bg-ink-900/85 p-2 shadow-2xl backdrop-blur-xl"
-            >
-              <span />
-              <WalkPadButton
-                direction="forward"
-                label="Oldinga yurish"
-                icon={ChevronUp}
-                onInput={setWalkInput}
-              />
-              <span />
-              <WalkPadButton
-                direction="left"
-                label="Chapga yurish"
-                icon={ChevronLeft}
-                onInput={setWalkInput}
-              />
-              <span className="grid h-10 w-10 place-items-center font-mono text-[8px] uppercase tracking-[0.08em] text-slate-600">
-                Yur
-              </span>
-              <WalkPadButton
-                direction="right"
-                label="Oʻngga yurish"
-                icon={ChevronRight}
-                onInput={setWalkInput}
-              />
-              <span />
-              <WalkPadButton
-                direction="back"
-                label="Orqaga yurish"
-                icon={ChevronDown}
-                onInput={setWalkInput}
-              />
-              <span />
+          <div className="pointer-events-none absolute bottom-36 left-3 z-20 sm:bottom-40 sm:left-5">
+            <div className="pointer-events-auto">
+              <VirtualJoystick onChange={setWalkAxis} />
+              <p className="mt-2 text-center font-mono text-[8px] uppercase tracking-[0.16em] text-slate-500">
+                Virtual joystick
+              </p>
             </div>
           </div>
+
+          {nearDesk ? (
+            <div className="pointer-events-none absolute inset-x-0 top-32 z-30 flex justify-center px-4 sm:top-24">
+              <button
+                type="button"
+                onClick={sitAtComputer}
+                className="pointer-events-auto inline-flex animate-rise items-center gap-2 rounded-full border border-white/20 bg-gradient-to-r from-electric to-cyan-300 px-5 py-3 text-[13px] font-semibold text-ink-950 shadow-[0_0_38px_-8px_rgba(0,242,254,0.95)] transition hover:scale-[1.03] active:scale-95 sm:text-sm"
+              >
+                <Armchair size={16} strokeWidth={1.8} />
+                Kompyuterga oʻtirish
+                <kbd className="ml-1 hidden rounded border border-ink-950/20 bg-ink-950/15 px-1.5 py-0.5 font-mono text-[9px] text-ink-950/70 sm:inline">
+                  E
+                </kbd>
+              </button>
+            </div>
+          ) : null}
         </>
       ) : null}
 
@@ -1573,14 +2053,6 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
                   <Footprints size={14} />
                   Yurish rejimi
                 </span>
-                <button
-                  type="button"
-                  onClick={sitAtComputer}
-                  className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-electric to-cyan-300 px-4 py-2.5 text-[12px] font-semibold text-ink-950 shadow-[0_0_30px_-10px_rgba(0,242,254,0.9)] transition hover:scale-[1.02] active:scale-95 sm:text-[13px]"
-                >
-                  <Monitor size={15} />
-                  Kompyuterga oʻtirish
-                </button>
                 {canPointerLock ? (
                   pointerLocked ? (
                     <span className="hidden h-9 items-center gap-1.5 rounded-full border border-electric/25 bg-electric/10 px-3.5 text-[10px] font-medium text-electric sm:inline-flex">
@@ -1711,9 +2183,9 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
             <p className="text-center font-mono text-[9px] uppercase tracking-[0.16em] text-slate-500 sm:text-[10px]">
               {walkMode ? (
                 <>
-                  <span className="sm:hidden">Pastdagi tugmalar bilan yuring · ekranni sudrab qarang</span>
+                  <span className="sm:hidden">Chapdagi joystik bilan yuring · ekranni sudrab qarang</span>
                   <span className="hidden sm:inline">
-                    WASD yoki strelkalar bilan yuring · sichqoncha bilan qarang · E — oʻtirish
+                    WASD yoki strelkalar bilan yuring · sichqoncha bilan qarang · stol yonida E — oʻtirish
                   </span>
                 </>
               ) : (
@@ -1730,7 +2202,7 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
 
       {computerOpen ? (
         <ComputerScreen
-          onClose={closeComputer}
+          onStandUp={closeComputer}
           onOpenProject={onOpenProject}
           drawerOpen={drawerOpen}
         />

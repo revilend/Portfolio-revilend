@@ -3,7 +3,7 @@
 A dark, cinematic portfolio for **Revilend**, a creative developer based in Tashkent. One header switches instantly between:
 
 - **2D Sayt** — a clean, mobile-first portfolio with a hero, metrics, real project cards, tech stack, identity card and contact form.
-- **3D Xona** — a full-screen Three.js cyber-room with a modeled desk, textured monitors, server rack, floating project pins and clickable screens, plus first-person walking, a seated desk view and an in-monitor project desktop.
+- **3D Xona** — a full-screen Three.js cyber-room with a modeled desk, textured monitors, server rack, floating project pins and clickable screens, plus first-person walking with a virtual joystick, proximity-based desk interaction and a full Windows 11-style in-monitor desktop.
 
 Both modes share the same project data and the same slide-in project drawer.
 
@@ -33,7 +33,7 @@ npm run preview  # serve the production build on port 3000
 
 ### 2D Sayt
 
-- Fixed frosted header with the centered `📄 2D Sayt / 🛸 3D Xona` switcher.
+- Fixed frosted header with the centered `2D Sayt / 3D Xona` switcher.
 - Hero with availability badge, headline, subheadline, mode CTAs and a four-column metrics strip.
 - Three glassmorphic project cards — click **Batafsil maʼlumot** to open the drawer.
 - Categorized tech stack: Frontend & 3D, Backend & Database, Automation & APIs.
@@ -50,10 +50,14 @@ npm run preview  # serve the production build on port 3000
 - Wheel zoom, on-screen zoom buttons and a reset control; zoom distance is clamped per breakpoint.
 - **Avto sayr** glides through all four camera presets every 5.2 seconds and stops on manual navigation.
 - Fullscreen mode, floating light motes, pulsing pins and a pointer cursor over clickable monitors.
-- **Yurish** mode: first-person eye-level walking with `WASD` / arrow keys, `Shift` to move faster, drag to look, and an on-screen D-pad for touch layouts. Room bounds and desk/rack collision keep the camera inside the scene.
+- **Yurish** mode: first-person eye-level walking with `WASD` / arrow keys, `Shift` to move faster, drag or pointer lock to look, and a bottom-left analog virtual joystick for touch and mouse. Circular player collision against the desk, server rack and room bounds keeps the camera inside the scene.
 - **Sichqonchani qulflash** enables pointer-lock free look on desktop; `Esc` releases the pointer without leaving walk mode.
-- **Kompyuterga oʻtirish** glides the camera into the desk chair and opens **REVILEND OS** — an in-monitor desktop listing all three projects. Each project opens the shared drawer; Escape or the back button returns to the room.
-- Keyboard shortcuts: `1`–`3` project screens, `R` / `0` desk, `+` / `−` zoom, `T` auto tour, `F` fullscreen. In walk mode: `E` to sit, `Esc` to exit.
+- Near the desk a floating **Kompyuterga oʻtirish** prompt appears. It glides the camera into the chair and opens a full **Windows 11 desktop simulation**: taskbar, Start menu, live clock, desktop shortcuts, resizable windows with minimize/maximize/close, and project app windows with external links. Close their windows with the close button, minimize them to the taskbar, or open them again from the desktop.
+- **Real window management:** drag titlebars, resize from any of eight edges/corners, double-click a titlebar to maximize, and drag a window to the top/left/right screen edge to maximize or snap it to a half. Taskbar buttons focus, restore or minimize their app; right-clicking the desktop opens a context menu that creates a note, opens built-in tools or minimizes all windows.
+- **Working built-in apps:** Notepad with saved notes (`Ctrl+S`), `.txt` download and word count; a keyboard- and mouse-driven Calculator; and Settings for live wallpaper, brightness, volume, night light, Wi-Fi/Bluetooth state and system information. Settings and notes persist in `localStorage`.
+- **System tray:** quick settings (Wi-Fi, Bluetooth, night light, brightness, volume) and a real month calendar with previous/next navigation and today selection open from the taskbar. Right-clicking the desktop opens a Windows-style context menu.
+- **Oʻrindan turish** closes the Windows desktop and returns directly to walk mode beside the chair, ready for the joystick.
+- Keyboard shortcuts: `1`–`3` project screens, `R` / `0` desk, `+` / `−` zoom, `T` auto tour, `F` fullscreen. In walk mode: `E` to sit when near the desk, `Esc` to exit.
 - Floating screen-space pins are projected from 3D anchors; clicking a pin or monitor opens the shared drawer.
 - If WebGL is unavailable, the mode shows a clear fallback message.
 
@@ -69,7 +73,8 @@ src/
 │   ├── Projects.jsx         # featured project card grid
 │   ├── ProjectDrawer.jsx    # shared project drawer (2D + 3D)
 │   ├── CyberRoomView.jsx    # Three.js room, orbit/walk cameras, textures, pins
-│   ├── ComputerScreen.jsx   # in-monitor REVILEND OS project desktop
+│   ├── ComputerScreen.jsx   # Windows 11 desktop: window manager, taskbar, Start menu and apps
+│   ├── Windows11Apps.jsx    # Notepad, Calculator, Settings, quick settings, calendar, wallpaper
 │   ├── Arsenal.jsx          # categorized tech stack
 │   ├── About.jsx            # identity narrative + JSON card
 │   ├── Contact.jsx          # validated form + direct links
@@ -85,6 +90,7 @@ src/
 
 - **The 3D chunk is lazy.** The initial 2D bundle stays around 58 KB gzipped; Three.js loads on demand and is prefetched after first paint.
 - **Contact form is client-side only** — validation and the success toast are local. Wire `handleSubmit` in `src/components/Contact.jsx` to an endpoint to deliver messages.
+- **Windows 11 desktop data is local.** Notepad text and personalization/quick-setting choices use `localStorage`; they never leave the browser and are not part of the deployed repository.
 - **Project data** lives in `src/data/projects.js`; card content, drawer content, pin IDs and 3D screen associations are driven from the same IDs.
 - **Direct links** point to `t.me/revilend` and `github.com/revilend`; update those handles if they change.
 - `PREVIEW_HOST` (optional env var) is passed to Vite's `allowedHosts` for hosted previews; no machine-specific hostname is committed.
@@ -95,5 +101,5 @@ src/
 - Mode switch and auto-tour control use `aria-pressed`; pins and camera presets are real buttons with labels.
 - Project drawer supports Escape, restores focus and returns it to the trigger.
 - Room render loop pauses when the tab is hidden; device pixel ratio is capped at 2; all geometries, materials and canvas textures are disposed on unmount.
-- Walk mode has keyboard controls plus a touch D-pad; the sit button opens the project desktop without requiring pointer lock.
+- Walk mode has keyboard controls plus an analog touch joystick; the desk prompt opens the Windows desktop without requiring pointer lock. Desktop app windows have labeled close, minimize and maximize controls.
 - Scroll reveals, ambient grid motion, auto-tour timing and 3D animations are reduced under `prefers-reduced-motion`.

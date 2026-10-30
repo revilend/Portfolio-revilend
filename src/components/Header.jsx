@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import { ArrowUpRight, Github, MessageCircle } from 'lucide-react';
+import { ArrowUpRight, Box, FileText, Github, MessageCircle } from 'lucide-react';
 
 const MODES = [
-  { id: '2d', label: '📄 2D Sayt' },
-  { id: '3d', label: '🛸 3D Xona' },
+  { id: '2d', label: '2D Sayt', icon: FileText },
+  { id: '3d', label: '3D Xona', icon: Box },
 ];
 
 function ModeToggle({ mode, onChange, full = false }) {
@@ -11,11 +11,12 @@ function ModeToggle({ mode, onChange, full = false }) {
     <div
       role="group"
       aria-label="Koʻrinish rejimi"
-      className={`inline-flex items-center gap-1 rounded-full border border-slate-700/70 bg-slate-900/70 p-1 backdrop-blur-md ${
+      className={`inline-flex items-center gap-1 rounded-full border border-slate-800/80 bg-ink-950/70 p-1 backdrop-blur-xl ${
         full ? 'w-full' : ''
       }`}
     >
       {MODES.map((item) => {
+        const Icon = item.icon;
         const isActive = mode === item.id;
         return (
           <button
@@ -23,14 +24,19 @@ function ModeToggle({ mode, onChange, full = false }) {
             type="button"
             onClick={() => onChange(item.id)}
             aria-pressed={isActive}
-            className={`flex items-center justify-center gap-1.5 rounded-full px-3.5 py-1.5 text-[11px] font-medium transition duration-200 sm:text-xs ${
+            className={`flex items-center justify-center gap-2 rounded-full px-3.5 py-1.5 text-[11px] font-medium transition duration-200 sm:text-xs ${
               full ? 'flex-1' : ''
             } ${
               isActive
-                ? 'bg-gradient-to-r from-electric to-cyan-300 text-ink-950 shadow-[0_0_24px_-6px_rgba(0,242,254,0.8)]'
-                : 'text-slate-400 hover:text-white'
+                ? 'bg-slate-100 text-ink-950 shadow-[0_4px_18px_-6px_rgba(0,0,0,0.75)]'
+                : 'text-slate-400 hover:bg-slate-800/60 hover:text-white'
             }`}
           >
+            <Icon
+              size={14}
+              strokeWidth={1.8}
+              className={isActive ? 'text-ink-950' : 'text-slate-500'}
+            />
             {item.label}
           </button>
         );
@@ -92,7 +98,7 @@ export default function Header({ mode, onModeChange, onContact }) {
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Telegram profili"
-              className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-800 bg-slate-900/60 text-slate-400 transition hover:border-electric/40 hover:text-electric"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-800/90 bg-slate-900/50 text-slate-400 transition hover:border-electric/40 hover:text-electric"
             >
               <MessageCircle size={15} />
             </a>
@@ -101,17 +107,17 @@ export default function Header({ mode, onModeChange, onContact }) {
               target="_blank"
               rel="noopener noreferrer"
               aria-label="GitHub profili"
-              className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-800 bg-slate-900/60 text-slate-400 transition hover:border-electric/40 hover:text-electric"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-800/90 bg-slate-900/50 text-slate-400 transition hover:border-electric/40 hover:text-electric"
             >
               <Github size={15} />
             </a>
             <button
               type="button"
               onClick={onContact}
-              className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-slate-700/80 bg-slate-900/60 px-2.5 text-[12px] font-medium text-slate-200 transition hover:border-electric/50 hover:text-white sm:px-3.5"
+              className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-slate-100 px-2.5 text-[12px] font-medium text-ink-950 transition hover:bg-white sm:px-3.5"
             >
               <span className="hidden sm:inline">Bogʻlanish</span>
-              <ArrowUpRight size={14} className="text-electric" />
+              <ArrowUpRight size={14} />
             </button>
           </div>
         </div>

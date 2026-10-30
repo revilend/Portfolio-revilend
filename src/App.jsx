@@ -109,8 +109,10 @@ export default function App() {
             Asosiy kontentga oʻtish
           </a>
 
-          <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10">
+          <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
             <div className="absolute inset-0 bg-ink-900" />
+            <div className="absolute inset-x-0 top-0 h-[880px] opacity-[0.13] [background-image:radial-gradient(rgba(148,163,184,0.45)_0.6px,transparent_0.6px)] [background-size:24px_24px] [mask-image:linear-gradient(to_bottom,black,transparent_78%)]" />
+            <div className="absolute inset-y-0 left-1/2 hidden w-full max-w-6xl -translate-x-1/2 border-x border-white/[0.025] lg:block" />
             <div className="absolute -top-48 left-1/2 h-[560px] w-[900px] -translate-x-1/2 animate-glow-pulse rounded-full bg-electric/[0.06] blur-[140px]" />
             <div className="absolute right-[-10%] top-[35%] h-[460px] w-[460px] animate-glow-pulse rounded-full bg-plasma/[0.09] blur-[130px] [animation-delay:2.5s]" />
             <div className="absolute bottom-[-10%] left-[-5%] h-[420px] w-[420px] animate-glow-pulse rounded-full bg-cyan-500/[0.05] blur-[120px] [animation-delay:5s]" />
