@@ -3,7 +3,16 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --ink-950: #05070d;
+    --ink-900: #080c14;
+    --electric: #00f2fe;
+    --plasma: #8b5cf6;
+    --grid-line: rgba(203, 213, 225, 1);
+  }
+
   html {
+    color-scheme: dark;
     -webkit-text-size-adjust: 100%;
     scroll-behavior: smooth;
   }
@@ -30,7 +39,7 @@
   }
 
   :focus-visible {
-    outline: 2px solid rgba(0, 242, 254, 0.7);
+    outline: 2px solid rgb(0 242 254 / 0.7);
     outline-offset: 3px;
   }
 
@@ -39,12 +48,12 @@
     height: 10px;
   }
   ::-webkit-scrollbar-track {
-    background: #05070d;
+    background: var(--ink-950);
   }
   ::-webkit-scrollbar-thumb {
     background: #1e293b;
     border-radius: 9999px;
-    border: 2px solid #05070d;
+    border: 2px solid var(--ink-950);
   }
   ::-webkit-scrollbar-thumb:hover {
     background: #334155;
@@ -57,7 +66,7 @@
   }
 
   .mono-label {
-    @apply font-mono text-[11px] uppercase tracking-[0.24em] text-slate-500;
+    @apply font-mono text-2xs uppercase tracking-eyebrow text-slate-400;
   }
 
   .glass {
@@ -77,7 +86,31 @@
   }
 
   .chip {
-    @apply inline-flex items-center rounded-md border border-slate-800/90 bg-ink-950/50 px-2.5 py-1 font-mono text-[10.5px] leading-5 text-slate-400 transition-colors duration-200 hover:border-slate-700 hover:text-slate-200;
+    @apply inline-flex items-center rounded-md border border-slate-800/90 bg-ink-950/50 px-2.5 py-1 font-mono text-2xs leading-5 text-slate-400 transition-colors duration-200 hover:border-slate-700 hover:text-slate-200;
+  }
+
+  .btn-outline {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-slate-700/80 bg-slate-900/50 px-4 py-2.5 text-[12.5px] font-medium text-slate-200 transition hover:border-electric/40 hover:bg-electric/[0.08] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric/60 focus-visible:ring-offset-2 focus-visible:ring-offset-ink-900 disabled:pointer-events-none disabled:opacity-60;
+  }
+
+  .btn-sm {
+    @apply px-3.5 py-2 text-xs;
+  }
+
+  .btn-icon {
+    @apply inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-700/70 bg-slate-900/60 text-slate-400 transition hover:border-electric/40 hover:text-electric focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric/60;
+  }
+
+  .btn-icon-sm {
+    @apply h-9 w-9 rounded-lg;
+  }
+
+  .card {
+    @apply rounded-2xl border border-slate-800/80 bg-ink-950/40 transition duration-500;
+  }
+
+  .card-hover {
+    @apply hover:-translate-y-1 hover:border-slate-700 hover:shadow-card-hover;
   }
 
   .field {
@@ -86,6 +119,13 @@
 }
 
 @layer utilities {
+  .bg-grid {
+    background-image:
+      linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+    background-size: var(--grid, 32px) var(--grid, 32px);
+  }
+
   .grid-lines {
     background-image:
       linear-gradient(to right, rgba(148, 163, 184, 0.07) 1px, transparent 1px),

@@ -14,10 +14,10 @@ const CyberRoomView = lazy(() => import('./components/CyberRoomView.jsx'));
 
 function RoomLoader() {
   return (
-    <div className="fixed inset-0 z-0 flex items-center justify-center bg-[#05070d]">
+    <div className="fixed inset-0 z-0 flex items-center justify-center bg-ink-950">
       <div className="flex flex-col items-center gap-4">
         <span className="h-10 w-10 animate-spin rounded-full border-2 border-electric/20 border-t-electric" />
-        <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500">
+        <p className="font-mono text-2xs uppercase tracking-label text-slate-400">
           3D xona yuklanmoqda…
         </p>
       </div>
