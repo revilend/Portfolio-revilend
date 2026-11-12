@@ -50,17 +50,12 @@ export default function Projects({ onOpenProject }) {
             const Icon = visual.icon;
             return (
               <Reveal key={project.id} delay={index * 90} className="h-full min-w-0">
-                <article className="group relative flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border border-slate-800/80 bg-ink-950/40 transition duration-500 hover:-translate-y-1 hover:border-slate-700 hover:shadow-[0_36px_90px_-55px_rgba(0,242,254,0.9)]">
+                <article className="card card-hover group relative flex h-full min-w-0 flex-col overflow-hidden">
                   <div className="relative h-40 shrink-0 overflow-hidden border-b border-slate-800/80">
                     <div className={`absolute inset-0 bg-gradient-to-br ${visual.surface}`} />
                     <div
                       aria-hidden="true"
-                      className="absolute inset-0 opacity-[0.12]"
-                      style={{
-                        backgroundImage:
-                          'linear-gradient(to right, #cbd5e1 1px, transparent 1px), linear-gradient(to bottom, #cbd5e1 1px, transparent 1px)',
-                        backgroundSize: '28px 28px',
-                      }}
+                      className="absolute inset-0 opacity-[0.12] bg-grid [--grid:28px]"
                     />
                     <div
                       aria-hidden="true"
@@ -69,7 +64,7 @@ export default function Projects({ onOpenProject }) {
 
                     <div className="relative flex h-full flex-col justify-between p-5">
                       <div className="flex items-center justify-between gap-3">
-                        <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-slate-500">
+                        <span className="font-mono text-2xs uppercase tracking-label text-slate-400">
                           System / {project.index}
                         </span>
                         <StatusBadge status={project.status} />
@@ -77,7 +72,7 @@ export default function Projects({ onOpenProject }) {
 
                       <div className="flex items-end justify-between gap-4">
                         <div className="min-w-0">
-                          <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-slate-400">
+                          <p className="font-mono text-2xs uppercase tracking-tag text-slate-400">
                             {visual.kicker}
                           </p>
                           <h3 className="mt-1.5 break-words font-display text-[1.2rem] font-semibold leading-tight tracking-tight text-white">
@@ -94,7 +89,7 @@ export default function Projects({ onOpenProject }) {
                   </div>
 
                   <div className="flex flex-1 flex-col p-5 sm:p-6">
-                    <p className="font-mono text-[9.5px] uppercase tracking-[0.18em] text-electric/75">
+                    <p className="font-mono text-2xs uppercase tracking-label text-electric/75">
                       {project.tagline}
                     </p>
                     <p className="mt-3 text-[13.5px] leading-relaxed text-slate-400">
@@ -114,7 +109,7 @@ export default function Projects({ onOpenProject }) {
                         type="button"
                         onClick={() => onOpenProject(project)}
                         aria-haspopup="dialog"
-                        className="inline-flex items-center gap-2 rounded-lg border border-slate-700/80 bg-slate-900/50 px-4 py-2.5 text-[12.5px] font-medium text-slate-200 transition hover:border-electric/40 hover:bg-electric/[0.08] hover:text-white"
+                        className="btn-outline"
                       >
                         Batafsil maʼlumot
                         <ArrowUpRight
@@ -136,7 +131,7 @@ export default function Projects({ onOpenProject }) {
         </div>
 
         <Reveal delay={220}>
-          <p className="mt-8 font-mono text-[11px] text-slate-600">
+          <p className="mt-8 font-mono text-2xs text-slate-400">
             Koʻproq tajribalar va ochiq kodni{' '}
             <a
               href="https://github.com/revilend"

@@ -14,6 +14,7 @@ import {
   ZoomOut,
 } from 'lucide-react';
 import ComputerScreen from './ComputerScreen.jsx';
+import { THEME } from '../theme.js';
 
 const VIEWS = [
   {
@@ -448,12 +449,12 @@ function drawNeonSign(ctx, width, height) {
   ctx.textBaseline = 'middle';
 
   const gradient = ctx.createLinearGradient(width * 0.18, 0, width * 0.82, 0);
-  gradient.addColorStop(0, '#22d3ee');
+  gradient.addColorStop(0, THEME.cyan);
   gradient.addColorStop(0.5, '#e6fdff');
-  gradient.addColorStop(1, '#8b5cf6');
+  gradient.addColorStop(1, THEME.plasma);
 
   ctx.font = '800 148px "Space Grotesk", "Inter", sans-serif';
-  ctx.shadowColor = '#00f2fe';
+  ctx.shadowColor = THEME.electric;
   ctx.shadowBlur = 48;
   ctx.fillStyle = gradient;
   ctx.fillText('REVILEND.UZ', width / 2, height / 2 - 12);
@@ -753,8 +754,8 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
     }
 
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color('#05070d');
-    scene.fog = new THREE.Fog('#05070d', 14, 32);
+    scene.background = new THREE.Color(THEME.ink950);
+    scene.fog = new THREE.Fog(THEME.ink950, 14, 32);
 
     const camera = new THREE.PerspectiveCamera(window.innerWidth < 768 ? 58 : 46, 1, 0.1, 100);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
@@ -785,11 +786,11 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
     keyLight.shadow.bias = -0.0006;
     scene.add(keyLight);
 
-    const deskLight = new THREE.PointLight('#00f2fe', 4.5, 10, 2);
+    const deskLight = new THREE.PointLight(THEME.electric, 4.5, 10, 2);
     deskLight.position.set(0, 1.75, 1.3);
     scene.add(deskLight);
 
-    const rimLeft = new THREE.PointLight('#8b5cf6', 8, 16, 2);
+    const rimLeft = new THREE.PointLight(THEME.plasma, 8, 16, 2);
     rimLeft.position.set(-4.5, 3, -1.5);
     scene.add(rimLeft);
 
@@ -797,7 +798,7 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
     rimRight.position.set(4.6, 2.4, 1.4);
     scene.add(rimRight);
 
-    const signLight = new THREE.PointLight('#22d3ee', 6, 10, 2);
+    const signLight = new THREE.PointLight(THEME.cyan, 6, 10, 2);
     signLight.position.set(0, 3.3, -2.7);
     scene.add(signLight);
 
@@ -820,7 +821,7 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
     const keyboardTexture = makeTexture(1024, 420, drawKeyboard);
     const floorGlowTexture = makeTexture(256, 256, drawFloorGlow);
     const posterOneTexture = makeTexture(560, 760, (ctx, width, height) =>
-      drawWallPoster(ctx, width, height, '#22d3ee', 'SPATIAL INTERFACES', '01')
+      drawWallPoster(ctx, width, height, THEME.cyan, 'SPATIAL INTERFACES', '01')
     );
     const posterTwoTexture = makeTexture(560, 760, (ctx, width, height) =>
       drawWallPoster(ctx, width, height, '#a78bfa', 'SYSTEM ARCHITECTURE', '02')
@@ -884,7 +885,7 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
     floor.rotation.x = -Math.PI / 2;
     floor.position.set(0, 0, ROOM.centerZ);
 
-    const grid = new THREE.GridHelper(ROOM.width, 32, '#00f2fe', '#0e7490');
+    const grid = new THREE.GridHelper(ROOM.width, 32, THEME.electric, THEME.cyanDeep);
     grid.scale.z = ROOM.depth / ROOM.width;
     grid.position.set(0, 0.012, ROOM.centerZ);
     grid.material.transparent = true;
@@ -927,7 +928,7 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
     [-1, 1].forEach((side) => {
       const rugLine = new THREE.Mesh(
         new THREE.BoxGeometry(4.9, 0.012, 0.018),
-        new THREE.MeshBasicMaterial({ color: '#0e7490', toneMapped: false })
+        new THREE.MeshBasicMaterial({ color: THEME.cyanDeep, toneMapped: false })
       );
       rugLine.position.set(0, 0.028, 2.05 + side * 1.62);
       scene.add(rugLine);
@@ -1001,7 +1002,7 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
     [-1, 1].forEach((side) => {
       const cove = new THREE.Mesh(
         new THREE.BoxGeometry(0.035, 2.5, 0.05),
-        new THREE.MeshBasicMaterial({ color: side < 0 ? '#8b5cf6' : '#22d3ee', toneMapped: false })
+        new THREE.MeshBasicMaterial({ color: side < 0 ? THEME.plasma : THEME.cyan, toneMapped: false })
       );
       cove.position.set(side * (ROOM.width / 2 - 0.13), 2.7, 4.7);
       scene.add(cove);
@@ -1063,7 +1064,7 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
     );
     shelf.position.set(ROOM.width / 2 - 0.29, 2.74, 1.7);
 
-    const bookColors = ['#1d4ed8', '#0f766e', '#7c3aed', '#0e7490', '#334155', '#9f1239'];
+    const bookColors = ['#1d4ed8', '#0f766e', '#7c3aed', THEME.cyanDeep, '#334155', '#9f1239'];
     bookColors.forEach((color, index) => {
       const bookHeight = 0.25 + (index % 3) * 0.06;
       const book = new THREE.Mesh(
@@ -1196,7 +1197,7 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
 
     const pen = new THREE.Mesh(
       new THREE.CylinderGeometry(0.012, 0.012, 0.34, 8),
-      new THREE.MeshStandardMaterial({ color: '#22d3ee', metalness: 0.5, roughness: 0.3 })
+      new THREE.MeshStandardMaterial({ color: THEME.cyan, metalness: 0.5, roughness: 0.3 })
     );
     pen.position.set(2.52, 1.1, -0.1);
     pen.rotation.z = Math.PI / 2;
@@ -1219,14 +1220,14 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
 
     const frontStrip = new THREE.Mesh(
       new THREE.BoxGeometry(5.7, 0.035, 0.035),
-      new THREE.MeshBasicMaterial({ color: '#00f2fe', toneMapped: false })
+      new THREE.MeshBasicMaterial({ color: THEME.electric, toneMapped: false })
     );
     frontStrip.position.set(0, 0.92, 0.87);
     scene.add(frontStrip);
 
     const backStrip = new THREE.Mesh(
       new THREE.BoxGeometry(3.4, 0.03, 0.03),
-      new THREE.MeshBasicMaterial({ color: '#8b5cf6', toneMapped: false })
+      new THREE.MeshBasicMaterial({ color: THEME.plasma, toneMapped: false })
     );
     backStrip.position.set(0, 0.92, -0.87);
     scene.add(backStrip);
@@ -1353,7 +1354,7 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
     const ledMaterials = [];
     for (let index = 0; index < 9; index += 1) {
       const ledMaterial = new THREE.MeshBasicMaterial({
-        color: index % 3 === 0 ? '#34d399' : '#22d3ee',
+        color: index % 3 === 0 ? '#34d399' : THEME.cyan,
         transparent: true,
         opacity: 0.8,
         toneMapped: false,
@@ -1366,7 +1367,7 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
 
     const rackStrip = new THREE.Mesh(
       new THREE.BoxGeometry(0.02, 1.9, 0.02),
-      new THREE.MeshBasicMaterial({ color: '#00f2fe', toneMapped: false })
+      new THREE.MeshBasicMaterial({ color: THEME.electric, toneMapped: false })
     );
     rackStrip.position.set(0.43, 1.2, 0.1);
     rack.add(rackStrip);
@@ -1956,7 +1957,7 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
   }, []);
 
   return (
-    <div className="fixed inset-0 z-0 animate-fade-in overflow-hidden bg-[#05070d]">
+    <div className="fixed inset-0 z-0 animate-fade-in overflow-hidden bg-ink-950">
       <div
         ref={mountRef}
         className="absolute inset-0 h-full w-full cursor-grab touch-none"
@@ -1974,7 +1975,7 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
       />
 
       {webglError ? (
-        <div className="absolute inset-0 z-30 flex items-center justify-center bg-[#05070d] px-6 text-center">
+        <div className="absolute inset-0 z-30 flex items-center justify-center bg-ink-950 px-6 text-center">
           <div>
             <p className="font-display text-xl font-semibold text-white">3D xona ochilmadi</p>
             <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-slate-400">

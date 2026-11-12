@@ -61,9 +61,9 @@ export default function Arsenal() {
             return (
               <Reveal key={group.title} delay={index * 100} className="h-full min-w-0">
               <div
-                className={`group relative flex h-full flex-col overflow-hidden rounded-2xl border border-slate-800/80 bg-slate-900/40 p-6 backdrop-blur-md transition duration-500 hover:-translate-y-1 ${group.accent.hover}`}
+                className={`group relative flex h-full flex-col overflow-hidden glass rounded-2xl p-6 transition duration-500 hover:-translate-y-1 ${group.accent.hover}`}
               >
-                <span className="absolute right-5 top-5 font-mono text-[10px] tracking-[0.2em] text-slate-700">
+                <span className="absolute right-5 top-5 font-mono text-2xs tracking-label text-slate-700">
                   /{group.index}
                 </span>
 
@@ -82,7 +82,7 @@ export default function Arsenal() {
                   ))}
                 </div>
 
-                <p className="mt-5 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.16em] text-slate-600">
+                <p className="mt-5 flex items-center gap-2 font-mono text-2xs uppercase tracking-tag text-slate-400">
                   <span className={`h-1 w-1 rounded-full ${group.accent.marker}`} />
                   {String(group.items.length).padStart(2, '0')} ta vosita ishlatilmoqda
                 </p>

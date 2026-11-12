@@ -41,7 +41,7 @@ export default function ProjectDrawer({ project, onClose }) {
 
         <div className="flex items-center justify-between gap-4 border-b border-slate-800/80 px-5 py-4">
           <div className="flex items-center gap-3">
-            <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500">
+            <span className="font-mono text-2xs uppercase tracking-label text-slate-400">
               /{project.index}
             </span>
             <span className="mono-label">Loyiha tafsilotlari</span>
@@ -59,7 +59,7 @@ export default function ProjectDrawer({ project, onClose }) {
 
         <div className="flex-1 overflow-y-auto px-5 py-6 sm:px-7">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-electric">
+            <span className="font-mono text-2xs uppercase tracking-label text-electric">
               {project.tagline}
             </span>
             <span className="text-slate-700">/</span>
@@ -110,7 +110,7 @@ export default function ProjectDrawer({ project, onClose }) {
               <ExternalLink size={15} />
             </a>
           ) : (
-            <p className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.14em] text-slate-500">
+            <p className="flex items-center gap-2 font-mono text-2xs uppercase tracking-tag text-slate-400">
               <span className="h-1.5 w-1.5 rounded-full bg-plasma" />
               Yopiq loyiha · soʻrov boʻyicha namoyish
             </p>

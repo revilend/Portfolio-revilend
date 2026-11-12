@@ -2,7 +2,7 @@ export default function SectionHeading({ index, label, title, description, class
   return (
     <div className={className}>
       <div className="flex items-center gap-3">
-        <span className="inline-flex h-7 items-center rounded-full border border-slate-800/90 bg-slate-900/50 px-2.5 font-mono text-[10px] tracking-[0.12em] text-electric">
+        <span className="inline-flex h-7 items-center rounded-full border border-slate-800/90 bg-slate-900/50 px-2.5 font-mono text-2xs tracking-tag text-electric">
           {index}
         </span>
         <span className="mono-label">{label}</span>

@@ -24,7 +24,7 @@ function ModeToggle({ mode, onChange, full = false }) {
             type="button"
             onClick={() => onChange(item.id)}
             aria-pressed={isActive}
-            className={`flex items-center justify-center gap-2 rounded-full px-3.5 py-1.5 text-[11px] font-medium transition duration-200 sm:text-xs ${
+            className={`flex items-center justify-center gap-2 rounded-full px-3.5 py-1.5 text-2xs font-medium transition duration-200 sm:text-xs ${
               full ? 'flex-1' : ''
             } ${
               isActive
@@ -80,7 +80,7 @@ export default function Header({ mode, onModeChange, onContact }) {
             className="flex min-w-0 items-center gap-2.5"
             aria-label="Revilend.uz — yuqoriga qaytish"
           >
-            <span className="relative grid h-8 w-8 shrink-0 place-items-center overflow-hidden rounded-lg bg-[linear-gradient(120deg,#00f2fe,#22d3ee,#8b5cf6,#00f2fe)] bg-[length:220%_220%] font-display text-xs font-bold text-ink-950 shadow-[0_0_24px_-6px_rgba(0,242,254,0.75)] ring-1 ring-white/20 animate-gradient-x sm:h-9 sm:w-9 sm:text-sm">
+            <span className="relative grid h-8 w-8 shrink-0 place-items-center overflow-hidden rounded-lg bg-brand-flow bg-[length:220%_220%] font-display text-xs font-bold text-ink-950 shadow-[0_0_24px_-6px_rgba(0,242,254,0.75)] ring-1 ring-white/20 animate-gradient-x sm:h-9 sm:w-9 sm:text-sm">
               R
             </span>
             <span className="truncate font-display text-sm font-semibold tracking-tight text-white sm:text-[15px]">
@@ -98,7 +98,7 @@ export default function Header({ mode, onModeChange, onContact }) {
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Telegram profili"
-              className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-800/90 bg-slate-900/50 text-slate-400 transition hover:border-electric/40 hover:text-electric"
+              className="btn-icon btn-icon-sm"
             >
               <MessageCircle size={15} />
             </a>
@@ -107,7 +107,7 @@ export default function Header({ mode, onModeChange, onContact }) {
               target="_blank"
               rel="noopener noreferrer"
               aria-label="GitHub profili"
-              className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-800/90 bg-slate-900/50 text-slate-400 transition hover:border-electric/40 hover:text-electric"
+              className="btn-icon btn-icon-sm"
             >
               <Github size={15} />
             </a>

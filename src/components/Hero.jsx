@@ -28,29 +28,24 @@ function ProfilePanel() {
         className="absolute -inset-8 rounded-[2.5rem] bg-gradient-to-br from-electric/10 via-transparent to-plasma/15 blur-3xl"
       />
 
-      <div className="relative overflow-hidden rounded-[28px] border border-slate-800/80 bg-[linear-gradient(155deg,rgba(15,23,42,0.8),rgba(5,7,13,0.94))] p-6 shadow-[0_40px_100px_-55px_rgba(0,0,0,0.95)] backdrop-blur-xl">
+      <div className="relative overflow-hidden rounded-[28px] border border-slate-800/80 bg-[linear-gradient(155deg,rgba(15,23,42,0.8),rgba(5,7,13,0.94))] p-6 shadow-panel backdrop-blur-xl">
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 opacity-[0.045]"
-          style={{
-            backgroundImage:
-              'linear-gradient(to right, #cbd5e1 1px, transparent 1px), linear-gradient(to bottom, #cbd5e1 1px, transparent 1px)',
-            backgroundSize: '32px 32px',
-          }}
+          className="pointer-events-none absolute inset-0 opacity-[0.045] bg-grid [--grid:32px]"
         />
 
         <div className="relative flex items-center justify-between gap-4">
-          <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500">
+          <span className="font-mono text-2xs uppercase tracking-label text-slate-400">
             Profile / 01
           </span>
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/20 bg-emerald-400/[0.07] px-2.5 py-1 font-mono text-[9px] uppercase tracking-[0.14em] text-emerald-300">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/20 bg-emerald-400/[0.07] px-2.5 py-1 font-mono text-2xs uppercase tracking-tag text-emerald-300">
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
             Ochiq
           </span>
         </div>
 
         <div className="relative mt-7 flex items-center gap-4">
-          <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-[linear-gradient(140deg,#00f2fe,#38bdf8,#8b5cf6)] font-display text-xl font-bold text-ink-950 shadow-[0_12px_30px_-12px_rgba(0,242,254,0.8)] ring-1 ring-white/30">
+          <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-brand font-display text-xl font-bold text-ink-950 shadow-[0_12px_30px_-12px_rgba(0,242,254,0.8)] ring-1 ring-white/30">
             R
           </span>
           <div className="min-w-0">
@@ -80,7 +75,7 @@ function ProfilePanel() {
         </div>
 
         <div className="relative mt-5">
-          <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-slate-500">
+          <p className="font-mono text-2xs uppercase tracking-label text-slate-400">
             Asosiy stack
           </p>
           <div className="mt-2.5 flex flex-wrap gap-1.5">
@@ -102,7 +97,7 @@ function ProfilePanel() {
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Telegram"
-            className="grid h-10 w-10 place-items-center rounded-xl border border-slate-700/70 bg-slate-900/60 text-slate-400 transition hover:border-electric/40 hover:text-electric"
+            className="btn-icon"
           >
             <MessageCircle size={15} />
           </a>
@@ -111,7 +106,7 @@ function ProfilePanel() {
             target="_blank"
             rel="noopener noreferrer"
             aria-label="GitHub"
-            className="grid h-10 w-10 place-items-center rounded-xl border border-slate-700/70 bg-slate-900/60 text-slate-400 transition hover:border-electric/40 hover:text-electric"
+            className="btn-icon"
           >
             <Github size={15} />
           </a>
@@ -139,12 +134,12 @@ export default function Hero({ onEnter3D }) {
                 <span className="absolute inline-flex h-full w-full animate-pulse-ring rounded-full bg-emerald-400" />
                 <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
               </span>
-              <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-slate-300 sm:text-[11px]">
+              <span className="text-2xs font-medium uppercase tracking-tag text-slate-300 sm:text-2xs">
                 Loyihalar va hamkorlik uchun ochiq
               </span>
             </div>
 
-            <p className="mt-8 font-mono text-[11px] uppercase tracking-[0.2em] text-electric/80">
+            <p className="mt-8 font-mono text-2xs uppercase tracking-label text-electric/80">
               Full-stack va 3D interaktiv dasturchi
             </p>
 
@@ -169,7 +164,7 @@ export default function Hero({ onEnter3D }) {
               </a>
             </div>
 
-            <div className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-[10px] uppercase tracking-[0.14em] text-slate-500">
+            <div className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-2xs uppercase tracking-tag text-slate-400">
               <span className="flex items-center gap-1.5">
                 <MapPin size={12} className="text-electric/60" />
                 Toshkent · UZT
@@ -184,7 +179,7 @@ export default function Hero({ onEnter3D }) {
           </div>
         </div>
 
-        <div className="mt-14 animate-rise overflow-hidden rounded-2xl border border-slate-800/80 bg-slate-900/20 backdrop-blur-md [animation-delay:200ms]">
+        <div className="mt-14 animate-rise glass overflow-hidden rounded-2xl [animation-delay:200ms]">
           <div className="grid grid-cols-2 gap-px bg-slate-800/60 md:grid-cols-4">
             {METRICS.map((metric) => {
               const Icon = metric.icon;
@@ -197,7 +192,7 @@ export default function Hero({ onEnter3D }) {
                     <Icon size={16} />
                   </span>
                   <span className="min-w-0">
-                    <span className="block font-mono text-[10px] uppercase tracking-[0.14em] text-slate-500">
+                    <span className="block font-mono text-2xs uppercase tracking-tag text-slate-400">
                       {metric.label}
                     </span>
                     <span className="block truncate text-[13px] font-medium text-slate-200">

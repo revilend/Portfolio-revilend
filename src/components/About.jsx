@@ -79,7 +79,7 @@ function IdentityCard({ onNotify }) {
         aria-hidden="true"
         className="absolute -inset-4 rounded-[2rem] bg-gradient-to-br from-electric/10 via-transparent to-plasma/20 blur-2xl"
       />
-      <div className="relative min-w-0 max-w-full overflow-hidden rounded-2xl border border-slate-800/80 bg-[#060a12]/90 shadow-2xl backdrop-blur-md">
+      <div className="relative min-w-0 max-w-full overflow-hidden rounded-2xl border border-slate-800/80 bg-ink-950/90 shadow-2xl backdrop-blur-md">
         <div className="flex items-center justify-between gap-4 border-b border-slate-800/80 px-4 py-3">
           <div className="flex min-w-0 items-center gap-3">
             <span className="flex shrink-0 gap-1.5">
@@ -87,14 +87,14 @@ function IdentityCard({ onNotify }) {
               <span className="h-2 w-2 rounded-full bg-amber-300/70" />
               <span className="h-2 w-2 rounded-full bg-emerald-400/70" />
             </span>
-            <span className="truncate font-mono text-[11px] text-slate-400">
+            <span className="truncate font-mono text-2xs text-slate-400">
               developer_identity.json
             </span>
           </div>
           <button
             type="button"
             onClick={handleCopy}
-            className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-slate-800 bg-slate-900/70 px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-wider text-slate-400 transition hover:border-electric/40 hover:text-electric"
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-slate-800 bg-slate-900/70 px-2.5 py-1.5 font-mono text-2xs uppercase tracking-tag text-slate-400 transition hover:border-electric/40 hover:text-electric"
             aria-label="Dasturchi identifikatsiyasi JSON nusxasini olish"
           >
             {copied ? <Check size={12} className="text-emerald-400" /> : <Copy size={12} />}
@@ -105,7 +105,7 @@ function IdentityCard({ onNotify }) {
         <div className="flex min-w-0">
           <div
             aria-hidden="true"
-            className="shrink-0 select-none border-r border-slate-800/70 px-3 py-4 text-right font-mono text-[11px] leading-6 text-slate-700"
+            className="shrink-0 select-none border-r border-slate-800/70 px-3 py-4 text-right font-mono text-2xs leading-6 text-slate-700"
           >
             {Array.from({ length: LINE_COUNT }, (_, index) => (
               <div key={index}>{String(index + 1).padStart(2, '0')}</div>
@@ -176,7 +176,7 @@ function IdentityCard({ onNotify }) {
           </pre>
         </div>
 
-        <div className="flex items-center justify-between gap-3 border-t border-slate-800/80 bg-ink-950/60 px-4 py-2.5 font-mono text-[10px] text-slate-600">
+        <div className="flex items-center justify-between gap-3 border-t border-slate-800/80 bg-ink-950/60 px-4 py-2.5 font-mono text-2xs text-slate-400">
           <span className="truncate">// terminal · UTF-8 · LF</span>
           <span className="flex items-center gap-1.5 text-emerald-400">
             <span className="h-1 w-1 rounded-full bg-emerald-400" />

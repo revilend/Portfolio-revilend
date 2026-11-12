@@ -35,7 +35,7 @@ function Field({ id, label, error, children }) {
       </label>
       <div className="mt-2">{children}</div>
       {error ? (
-        <p id={`${id}-error`} className="mt-1.5 font-mono text-[11px] text-rose-400">
+        <p id={`${id}-error`} className="mt-1.5 font-mono text-2xs text-rose-400">
           {error}
         </p>
       ) : null}
@@ -88,7 +88,7 @@ export default function Contact({ onNotify }) {
   return (
     <section id="contact" className="relative scroll-mt-24 pb-24 pt-4 sm:pb-28">
       <div className="container-x">
-        <div className="relative overflow-hidden rounded-3xl border border-slate-800/80 bg-slate-900/30 p-6 backdrop-blur-md sm:p-10 lg:p-12">
+        <div className="relative overflow-hidden glass rounded-3xl p-6 sm:p-10 lg:p-12">
           <div
             aria-hidden="true"
             className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-electric/10 blur-[110px]"
@@ -112,20 +112,20 @@ export default function Contact({ onNotify }) {
                   href="https://t.me/revilend"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group flex items-center gap-4 rounded-xl border border-slate-800/80 bg-slate-900/40 p-4 transition hover:border-electric/30 hover:bg-slate-900/70"
+                  className="group flex items-center gap-4 glass rounded-xl p-4 transition hover:border-electric/30 hover:bg-slate-900/70"
                 >
                   <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-slate-800 bg-ink-950 text-electric">
                     <MessageCircle size={18} />
                   </span>
                   <span className="min-w-0">
-                    <span className="block font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
+                    <span className="block font-mono text-2xs uppercase tracking-label text-slate-400">
                       Telegram
                     </span>
                     <span className="block truncate text-sm text-slate-200">@revilend</span>
                   </span>
                   <ArrowUpRight
                     size={16}
-                    className="ml-auto shrink-0 text-slate-600 transition group-hover:text-electric"
+                    className="ml-auto shrink-0 text-slate-400 transition group-hover:text-electric"
                   />
                 </a>
 
@@ -133,25 +133,25 @@ export default function Contact({ onNotify }) {
                   href="https://github.com/revilend"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group flex items-center gap-4 rounded-xl border border-slate-800/80 bg-slate-900/40 p-4 transition hover:border-electric/30 hover:bg-slate-900/70"
+                  className="group flex items-center gap-4 glass rounded-xl p-4 transition hover:border-electric/30 hover:bg-slate-900/70"
                 >
                   <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-slate-800 bg-ink-950 text-electric">
                     <Github size={18} />
                   </span>
                   <span className="min-w-0">
-                    <span className="block font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
+                    <span className="block font-mono text-2xs uppercase tracking-label text-slate-400">
                       GitHub
                     </span>
                     <span className="block truncate text-sm text-slate-200">github.com/revilend</span>
                   </span>
                   <ArrowUpRight
                     size={16}
-                    className="ml-auto shrink-0 text-slate-600 transition group-hover:text-electric"
+                    className="ml-auto shrink-0 text-slate-400 transition group-hover:text-electric"
                   />
                 </a>
               </div>
 
-              <p className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 font-mono text-[10px] uppercase tracking-[0.16em] text-slate-600">
+              <p className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 font-mono text-2xs uppercase tracking-tag text-slate-400">
                 <span className="flex items-center gap-1.5">
                   <MapPin size={12} className="text-electric/60" />
                   Toshkent · GMT+5
@@ -227,7 +227,7 @@ export default function Contact({ onNotify }) {
                 )}
               </button>
 
-              <p className="mt-3 text-center font-mono text-[10px] uppercase tracking-[0.18em] text-slate-600">
+              <p className="mt-3 text-center font-mono text-2xs uppercase tracking-label text-slate-400">
                 spam yoʻq · toʻgʻridan-toʻgʻri javob
               </p>
               </form>
