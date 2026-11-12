@@ -16,6 +16,18 @@ export default {
         },
         plasma: '#8b5cf6',
       },
+      fontSize: {
+        '2xs': '0.6875rem', // 11px — minimum size for any readable text
+      },
+      letterSpacing: {
+        tag: '0.14em',
+        label: '0.2em',
+        eyebrow: '0.24em',
+      },
+      backgroundImage: {
+        brand: 'linear-gradient(140deg, #00f2fe, #38bdf8, #8b5cf6)',
+        'brand-flow': 'linear-gradient(120deg, #00f2fe, #22d3ee, #8b5cf6, #00f2fe)',
+      },
       fontFamily: {
         sans: ['Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
         display: ['"Space Grotesk"', 'Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
@@ -24,6 +36,8 @@ export default {
       boxShadow: {
         glow: '0 0 48px -12px rgba(0, 242, 254, 0.5)',
         'glow-violet': '0 0 60px -20px rgba(139, 92, 246, 0.65)',
+        'card-hover': '0 36px 90px -55px rgba(0, 242, 254, 0.9)',
+        panel: '0 40px 100px -55px rgba(0, 0, 0, 0.95)',
       },
       keyframes: {
         'gradient-x': {
