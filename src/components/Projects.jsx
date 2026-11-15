@@ -1,5 +1,7 @@
 import { ArrowUpRight, Bot, Ghost, GraduationCap } from 'lucide-react';
 import { projects } from '../data/projects.js';
+import { hasShots } from '../lib/projectShots.js';
+import ProjectShot from './ProjectShot.jsx';
 import Reveal from './Reveal.jsx';
 import SectionHeading from './SectionHeading.jsx';
 import StatusBadge from './StatusBadge.jsx';
@@ -51,31 +53,49 @@ export default function Projects({ onOpenProject }) {
             return (
               <Reveal key={project.id} delay={index * 90} className="h-full min-w-0">
                 <article className="card card-hover group relative flex h-full min-w-0 flex-col overflow-hidden">
-                  <div className="relative h-40 shrink-0 overflow-hidden border-b border-slate-800/80">
-                    <div className={`absolute inset-0 bg-gradient-to-br ${visual.surface}`} />
-                    <div
-                      aria-hidden="true"
-                      className="absolute inset-0 opacity-[0.12] bg-grid [--grid:28px]"
-                    />
-                    <div
-                      aria-hidden="true"
-                      className={`absolute -right-10 -top-14 h-44 w-44 rounded-full blur-3xl ${visual.glow}`}
-                    />
+                  <div className="flex items-center justify-between gap-3 border-b border-slate-800/80 px-5 py-3">
+                    <span className="font-mono text-2xs uppercase tracking-label text-slate-400">
+                      System / {project.index}
+                    </span>
+                    <StatusBadge status={project.status} />
+                  </div>
 
-                    <div className="relative flex h-full flex-col justify-between p-5">
-                      <div className="flex items-center justify-between gap-3">
-                        <span className="font-mono text-2xs uppercase tracking-label text-slate-400">
-                          System / {project.index}
-                        </span>
-                        <StatusBadge status={project.status} />
-                      </div>
+                  <div className="relative h-44 shrink-0 overflow-hidden border-b border-slate-800/80">
+                    {hasShots(project) ? (
+                      <>
+                        <div className="absolute inset-0">
+                          <ProjectShot
+                            project={project}
+                            sizes="(min-width: 1024px) 380px, (min-width: 768px) 46vw, 92vw"
+                            className="h-full w-full object-cover object-top transition duration-700 group-hover:scale-[1.04]"
+                          />
+                        </div>
+                        <div
+                          aria-hidden="true"
+                          className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-ink-950/95 via-ink-950/55 to-transparent"
+                        />
+                      </>
+                    ) : (
+                      <>
+                        <div className={`absolute inset-0 bg-gradient-to-br ${visual.surface}`} />
+                        <div
+                          aria-hidden="true"
+                          className="absolute inset-0 opacity-[0.12] bg-grid [--grid:28px]"
+                        />
+                        <div
+                          aria-hidden="true"
+                          className={`absolute -right-10 -top-14 h-44 w-44 rounded-full blur-3xl ${visual.glow}`}
+                        />
+                      </>
+                    )}
 
+                    <div className="relative flex h-full flex-col justify-end p-5">
                       <div className="flex items-end justify-between gap-4">
                         <div className="min-w-0">
-                          <p className="font-mono text-2xs uppercase tracking-tag text-slate-400">
+                          <p className="font-mono text-2xs uppercase tracking-tag text-slate-300 [text-shadow:0_1px_6px_rgba(5,8,15,0.95)]">
                             {visual.kicker}
                           </p>
-                          <h3 className="mt-1.5 break-words font-display text-[1.2rem] font-semibold leading-tight tracking-tight text-white">
+                          <h3 className="mt-1.5 break-words font-display text-[1.2rem] font-semibold leading-tight tracking-tight text-white [text-shadow:0_2px_10px_rgba(5,8,15,0.95)]">
                             {project.title}
                           </h3>
                         </div>

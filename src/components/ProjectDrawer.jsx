@@ -2,6 +2,8 @@ import { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { Check, ExternalLink, X } from 'lucide-react';
 import { trapTabKey } from '../lib/focusTrap.js';
+import { hasShots } from '../lib/projectShots.js';
+import ProjectShot from './ProjectShot.jsx';
 import StatusBadge from './StatusBadge.jsx';
 
 export default function ProjectDrawer({ project, onClose }) {
@@ -83,6 +85,19 @@ export default function ProjectDrawer({ project, onClose }) {
             {project.title}
           </h3>
           <p className="mt-3 text-sm leading-relaxed text-slate-400">{project.description}</p>
+
+          {hasShots(project) ? (
+            <figure className="mt-5 overflow-hidden rounded-xl border border-slate-800/80 bg-ink-950">
+              <ProjectShot
+                project={project}
+                sizes="(min-width: 640px) 400px, 92vw"
+                className="h-auto w-full object-cover"
+              />
+              <figcaption className="border-t border-slate-800/80 px-3 py-2 font-mono text-2xs uppercase tracking-label text-slate-500">
+                {project.shots.caption}
+              </figcaption>
+            </figure>
+          ) : null}
 
           <div className="mt-8">
             <p className="mono-label">Texnologiyalar</p>

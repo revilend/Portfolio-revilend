@@ -9,6 +9,12 @@ export const projects = [
       'Full-featured educational platform with attendance tracking, gradebook, and Supabase auth.',
     stack: ['Supabase', 'PostgreSQL', 'Supabase Auth', 'JavaScript', 'Realtime DB'],
     url: 'https://teachermuzaffar.uz',
+    shots: {
+      alt: 'teachermuzaffar.uz bosh sahifasi: "English Teacher — Muzaffar Amirov" sarlavhasi, tizimga kirish tugmasi va uyga vazifa, baholar hamda Telegram bot boʻlimlari',
+      caption: 'Haqiqiy skrinshot · teachermuzaffar.uz',
+      width: 1440,
+      height: 900,
+    },
     features: [
       'Student attendance tracking with daily and monthly views',
       'Digital gradebook with weighted assessment categories',
@@ -28,6 +34,12 @@ export const projects = [
       'First-person psychological horror web game built with pure Three.js & Web Audio API.',
     stack: ['Three.js', 'Web Audio API', 'Canvas 3D', 'Raycasting'],
     url: null,
+    shots: {
+      alt: 'Echoes of Room 404 oʻyining titul ekrani: "DR. ARIS — THE MAD SURGEON", Room 404, 1987 va "OPEN YOUR EYES" tugmasi',
+      caption: 'Haqiqiy skrinshot · oʻyinning ochilish ekrani',
+      width: 1440,
+      height: 829,
+    },
     features: [
       'First-person movement with pointer lock',
       'Procedural raycast collision against room geometry',
