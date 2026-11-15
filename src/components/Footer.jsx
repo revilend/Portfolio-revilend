@@ -13,7 +13,7 @@ export default function Footer() {
               Revilend<span className="text-electric">.uz</span>
             </span>
           </a>
-          <p className="mt-3 max-w-xs text-[13px] leading-relaxed text-slate-500">
+          <p className="mt-3 max-w-xs text-[13px] leading-relaxed text-slate-400">
             Toshkentdan immersiv brauzer tajribalari va ishonchli toʻliq stackli tizimlar
             yaratuvchi kreativ dasturchi.
           </p>
@@ -29,7 +29,7 @@ export default function Footer() {
             <a
               key={link.href}
               href={link.href}
-              className="text-[13px] text-slate-500 transition hover:text-slate-200"
+              className="text-[13px] text-slate-400 transition hover:text-slate-200"
             >
               {link.label}
             </a>

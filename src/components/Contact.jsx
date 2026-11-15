@@ -1,90 +1,36 @@
-import { useEffect, useRef, useState } from 'react';
-import { ArrowUpRight, Github, MapPin, MessageCircle, Send } from 'lucide-react';
+import { ArrowUpRight, Clock, Github, MapPin, MessageCircle, Send } from 'lucide-react';
 import Reveal from './Reveal.jsx';
 import SectionHeading from './SectionHeading.jsx';
 
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-const TELEGRAM_PATTERN = /^@?[a-zA-Z0-9_]{4,32}$/;
+const TELEGRAM_URL = 'https://t.me/revilend';
+const GITHUB_URL = 'https://github.com/revilend';
 
-function validate(values) {
-  const errors = {};
+const CHANNELS = [
+  {
+    id: 'telegram',
+    label: 'Telegram',
+    value: '@revilend',
+    note: 'Eng tez yoʻl — odatda bir necha soat ichida javob',
+    href: TELEGRAM_URL,
+    icon: MessageCircle,
+  },
+  {
+    id: 'github',
+    label: 'GitHub',
+    value: 'github.com/revilend',
+    note: 'Ochiq kod, tajribalar va commitlar tarixi',
+    href: GITHUB_URL,
+    icon: Github,
+  },
+];
 
-  if (values.name.trim().length < 2) {
-    errors.name = 'Kamida 2 ta belgi kiriting.';
-  }
+const BRIEF = [
+  'Nima qurmoqchisiz va u kim uchun ishlaydi',
+  'Muddat va taxminiy budjet',
+  'Havolalar: mavjud sayt, dizayn yoki namuna',
+];
 
-  const contact = values.contact.trim();
-  if (!contact) {
-    errors.contact = 'Javob berishim uchun Telegram manzili yoki email kiriting.';
-  } else if (!EMAIL_PATTERN.test(contact) && !TELEGRAM_PATTERN.test(contact)) {
-    errors.contact = 'Bu email yoki @handle ga oʻxshamaydi.';
-  }
-
-  if (values.message.trim().length < 10) {
-    errors.message = 'Biroz batafsil yozing (kamida 10 ta belgi).';
-  }
-
-  return errors;
-}
-
-function Field({ id, label, error, children }) {
-  return (
-    <div>
-      <label htmlFor={id} className="mono-label">
-        {label}
-      </label>
-      <div className="mt-2">{children}</div>
-      {error ? (
-        <p id={`${id}-error`} className="mt-1.5 font-mono text-2xs text-rose-400">
-          {error}
-        </p>
-      ) : null}
-    </div>
-  );
-}
-
-export default function Contact({ onNotify }) {
-  const [values, setValues] = useState({ name: '', contact: '', message: '' });
-  const [errors, setErrors] = useState({});
-  const [sending, setSending] = useState(false);
-  const timerRef = useRef(null);
-
-  useEffect(
-    () => () => {
-      if (timerRef.current) window.clearTimeout(timerRef.current);
-    },
-    []
-  );
-
-  const handleChange = (event) => {
-    const { name, value } = event.target;
-    setValues((current) => ({ ...current, [name]: value }));
-    setErrors((current) => {
-      if (!current[name]) return current;
-      const next = { ...current };
-      delete next[name];
-      return next;
-    });
-  };
-
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    const nextErrors = validate(values);
-    setErrors(nextErrors);
-
-    if (Object.keys(nextErrors).length > 0) return;
-
-    setSending(true);
-    timerRef.current = window.setTimeout(() => {
-      setSending(false);
-      setValues({ name: '', contact: '', message: '' });
-      onNotify?.('Xabar yuborildi — 24 soat ichida javob beraman.');
-    }, 800);
-  };
-
-  const inputClass = (field) =>
-    `field ${errors[field] ? 'border-rose-500/60 focus:border-rose-500/60 focus:ring-rose-500/20' : ''}`;
-
+export default function Contact() {
   return (
     <section id="contact" className="relative scroll-mt-24 pb-24 pt-4 sm:pb-28">
       <div className="container-x">
@@ -108,47 +54,35 @@ export default function Contact({ onNotify }) {
               />
 
               <div className="mt-8 space-y-3">
-                <a
-                  href="https://t.me/revilend"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group flex items-center gap-4 glass rounded-xl p-4 transition hover:border-electric/30 hover:bg-slate-900/70"
-                >
-                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-slate-800 bg-ink-950 text-electric">
-                    <MessageCircle size={18} />
-                  </span>
-                  <span className="min-w-0">
-                    <span className="block font-mono text-2xs uppercase tracking-label text-slate-400">
-                      Telegram
-                    </span>
-                    <span className="block truncate text-sm text-slate-200">@revilend</span>
-                  </span>
-                  <ArrowUpRight
-                    size={16}
-                    className="ml-auto shrink-0 text-slate-400 transition group-hover:text-electric"
-                  />
-                </a>
-
-                <a
-                  href="https://github.com/revilend"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group flex items-center gap-4 glass rounded-xl p-4 transition hover:border-electric/30 hover:bg-slate-900/70"
-                >
-                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-slate-800 bg-ink-950 text-electric">
-                    <Github size={18} />
-                  </span>
-                  <span className="min-w-0">
-                    <span className="block font-mono text-2xs uppercase tracking-label text-slate-400">
-                      GitHub
-                    </span>
-                    <span className="block truncate text-sm text-slate-200">github.com/revilend</span>
-                  </span>
-                  <ArrowUpRight
-                    size={16}
-                    className="ml-auto shrink-0 text-slate-400 transition group-hover:text-electric"
-                  />
-                </a>
+                {CHANNELS.map((channel) => {
+                  const Icon = channel.icon;
+                  return (
+                    <a
+                      key={channel.id}
+                      href={channel.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group flex items-center gap-4 glass rounded-xl p-4 transition hover:border-electric/30 hover:bg-slate-900/70"
+                    >
+                      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-slate-800 bg-ink-950 text-electric">
+                        <Icon size={18} />
+                      </span>
+                      <span className="min-w-0">
+                        <span className="block font-mono text-2xs uppercase tracking-label text-slate-400">
+                          {channel.label}
+                        </span>
+                        <span className="block truncate text-sm text-slate-200">{channel.value}</span>
+                        <span className="mt-0.5 block truncate text-[12px] text-slate-400">
+                          {channel.note}
+                        </span>
+                      </span>
+                      <ArrowUpRight
+                        size={16}
+                        className="ml-auto shrink-0 text-slate-400 transition group-hover:text-electric"
+                      />
+                    </a>
+                  );
+                })}
               </div>
 
               <p className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 font-mono text-2xs uppercase tracking-tag text-slate-400">
@@ -161,76 +95,50 @@ export default function Contact({ onNotify }) {
                   24 soat ichida javob
                 </span>
               </p>
-            </Reveal>            <Reveal delay={120} className="min-w-0">
-              <form
-                onSubmit={handleSubmit}
-                noValidate
-                className="min-w-0 rounded-2xl border border-slate-800/80 bg-ink-950/50 p-5 backdrop-blur sm:p-6"
-              >
-              <div className="space-y-5">
-                <Field id="name" label="Ism" error={errors.name}>
-                  <input
-                    id="name"
-                    name="name"
-                    type="text"
-                    autoComplete="name"
-                    value={values.name}
-                    onChange={handleChange}
-                    placeholder="Sizga qanday murojaat qilay?"
-                    className={inputClass('name')}
-                    aria-invalid={Boolean(errors.name)}
-                    aria-describedby={errors.name ? 'name-error' : undefined}
-                  />
-                </Field>
+            </Reveal>
 
-                <Field id="contact" label="Telegram / Email" error={errors.contact}>
-                  <input
-                    id="contact"
-                    name="contact"
-                    type="text"
-                    autoComplete="email"
-                    value={values.contact}
-                    onChange={handleChange}
-                    placeholder="@handle yoki siz@domen.com"
-                    className={inputClass('contact')}
-                    aria-invalid={Boolean(errors.contact)}
-                    aria-describedby={errors.contact ? 'contact-error' : undefined}
-                  />
-                </Field>
+            <Reveal delay={120} className="min-w-0">
+              <div className="flex h-full min-w-0 flex-col rounded-2xl border border-slate-800/80 bg-ink-950/50 p-5 backdrop-blur sm:p-6">
+                <p className="mono-label">Bevosita xabar</p>
 
-                <Field id="message" label="Xabar" error={errors.message}>
-                  <textarea
-                    id="message"
-                    name="message"
-                    rows={4}
-                    value={values.message}
-                    onChange={handleChange}
-                    placeholder="Taxminiy gʻoya, muddat yoki havola — har qanday maʼlumot yordam beradi."
-                    className={`${inputClass('message')} resize-none`}
-                    aria-invalid={Boolean(errors.message)}
-                    aria-describedby={errors.message ? 'message-error' : undefined}
-                  />
-                </Field>
+                <h3 className="mt-3 font-display text-xl font-semibold tracking-tight text-white sm:text-[22px]">
+                  Xabarni Telegram orqali yuboring.
+                </h3>
+                <p className="mt-3 text-[13.5px] leading-relaxed text-slate-400">
+                  Bu saytda forma yoʻq: xabar hech qayerda toʻplanmaydi va yoʻqolmaydi. Telegram
+                  chatini ochib, gʻoyangizni toʻgʻridan-toʻgʻri yozing — javobni oʻsha yerda olasiz.
+                </p>
+
+                <a
+                  href={TELEGRAM_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-primary mt-6 w-full"
+                >
+                  <Send size={16} />
+                  @revilend ga yozish
+                </a>
+
+                <div className="mt-6 border-t border-slate-800/80 pt-5">
+                  <p className="mono-label">Xabarda nima boʻlsa foydali</p>
+                  <ul className="mt-3 space-y-2.5">
+                    {BRIEF.map((item) => (
+                      <li
+                        key={item}
+                        className="flex items-start gap-2.5 text-[13px] leading-relaxed text-slate-300"
+                      >
+                        <span className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-electric shadow-[0_0_10px_rgba(0,242,254,0.9)]" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <p className="mt-auto flex items-center gap-2 pt-6 font-mono text-2xs uppercase tracking-label text-slate-400">
+                  <Clock size={12} className="text-electric/60" />
+                  spam yoʻq · toʻgʻridan-toʻgʻri javob
+                </p>
               </div>
-
-              <button type="submit" disabled={sending} className="btn-primary mt-6 w-full">
-                {sending ? (
-                  <>
-                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-ink-950/30 border-t-ink-950" />
-                    Yuborilmoqda…
-                  </>
-                ) : (
-                  <>
-                    Xabar yuborish
-                    <Send size={16} />
-                  </>
-                )}
-              </button>
-
-              <p className="mt-3 text-center font-mono text-2xs uppercase tracking-label text-slate-400">
-                spam yoʻq · toʻgʻridan-toʻgʻri javob
-              </p>
-              </form>
             </Reveal>
           </div>
         </div>

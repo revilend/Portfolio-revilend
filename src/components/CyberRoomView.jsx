@@ -14,6 +14,7 @@ import {
   ZoomOut,
 } from 'lucide-react';
 import ComputerScreen from './ComputerScreen.jsx';
+import { projects } from '../data/projects.js';
 import { THEME } from '../theme.js';
 
 const VIEWS = [
@@ -55,11 +56,17 @@ const VIEWS = [
   },
 ];
 
-const PINS = [
-  { id: 'teachermuzaffar', label: 'teachermuzaffar.uz', anchor: [-0.35, 2.72, -0.4] },
-  { id: 'echoes-of-room-404', label: 'Echoes 404', anchor: [1.55, 2.8, -0.35] },
-  { id: 'telegram-automation', label: 'Telegram Bot', anchor: [-1.95, 1.95, 0.2] },
-];
+// Anchors live here because they are 3D-only; ids come from the shared project
+// data so a renamed or removed project can never leave a dead pin behind.
+const PIN_META = {
+  teachermuzaffar: { label: 'teachermuzaffar.uz', anchor: [-0.35, 2.72, -0.4] },
+  'echoes-of-room-404': { label: 'Echoes 404', anchor: [1.55, 2.8, -0.35] },
+  'telegram-automation': { label: 'Telegram Bot', anchor: [-1.95, 1.95, 0.2] },
+};
+
+const PINS = projects
+  .filter((project) => PIN_META[project.id])
+  .map((project) => ({ id: project.id, ...PIN_META[project.id] }));
 
 const SEAT_VIEW = {
   key: 'seat',
@@ -146,10 +153,10 @@ function VirtualJoystick({ onChange }) {
       <span aria-hidden="true" className="absolute inset-3 rounded-full border border-slate-600/50" />
       <span aria-hidden="true" className="absolute left-1/2 top-1/2 h-px w-[72%] -translate-x-1/2 -translate-y-1/2 bg-slate-500/20" />
       <span aria-hidden="true" className="absolute left-1/2 top-1/2 h-[72%] w-px -translate-x-1/2 -translate-y-1/2 bg-slate-500/20" />
-      <span aria-hidden="true" className="absolute left-1/2 top-1.5 -translate-x-1/2 font-mono text-[8px] uppercase tracking-[0.16em] text-slate-500">
+      <span aria-hidden="true" className="absolute left-1/2 top-1.5 -translate-x-1/2 font-mono text-[11px] uppercase tracking-[0.16em] text-slate-400">
         Old
       </span>
-      <span aria-hidden="true" className="absolute bottom-1.5 left-1/2 -translate-x-1/2 font-mono text-[8px] uppercase tracking-[0.16em] text-slate-500">
+      <span aria-hidden="true" className="absolute bottom-1.5 left-1/2 -translate-x-1/2 font-mono text-[11px] uppercase tracking-[0.16em] text-slate-400">
         Orqa
       </span>
       <span
@@ -732,7 +739,8 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
       cameraApiRef.current?.focus(view.key);
     };
 
-    step();
+    // Wait one full interval before moving, otherwise enabling the tour yanks
+    // the camera off the view the visitor was looking at.
     const timer = window.setInterval(step, 5200);
     return () => window.clearInterval(timer);
   }, [autoTour]);
@@ -1479,6 +1487,7 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
     };
 
     const zoom = (factor) => {
+      setAutoTour(false);
       cameraState.goalRadius = clampRadius(cameraState.goalRadius * factor);
     };
 
@@ -2000,7 +2009,7 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
               onOpenProject?.(pin.id);
             }}
             aria-label={`${pin.label} loyihasini ochish`}
-            className="pointer-events-auto absolute left-0 top-0 whitespace-nowrap rounded-full border border-electric/30 bg-ink-900/85 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.1em] text-slate-200 shadow-[0_14px_40px_rgba(0,0,0,0.55)] backdrop-blur-md transition-colors hover:border-electric/60 hover:text-white"
+            className="pointer-events-auto absolute left-0 top-0 whitespace-nowrap rounded-full border border-electric/30 bg-ink-900/85 px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.1em] text-slate-200 shadow-[0_14px_40px_rgba(0,0,0,0.55)] backdrop-blur-md transition-colors hover:border-electric/60 hover:text-white"
             style={{ opacity: 0, willChange: 'transform' }}
           >
             <span className="mr-1.5 inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-electric align-middle shadow-[0_0_8px_rgba(0,242,254,0.9)] motion-reduce:animate-none" />
@@ -2020,7 +2029,7 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
           <div className="pointer-events-none absolute bottom-36 left-3 z-20 sm:bottom-40 sm:left-5">
             <div className="pointer-events-auto">
               <VirtualJoystick onChange={setWalkAxis} />
-              <p className="mt-2 text-center font-mono text-[8px] uppercase tracking-[0.16em] text-slate-500">
+              <p className="mt-2 text-center font-mono text-[11px] uppercase tracking-[0.16em] text-slate-400">
                 Virtual joystick
               </p>
             </div>
@@ -2035,7 +2044,7 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
               >
                 <Armchair size={16} strokeWidth={1.8} />
                 Kompyuterga oʻtirish
-                <kbd className="ml-1 hidden rounded border border-ink-950/20 bg-ink-950/15 px-1.5 py-0.5 font-mono text-[9px] text-ink-950/70 sm:inline">
+                <kbd className="ml-1 hidden rounded border border-ink-950/20 bg-ink-950/15 px-1.5 py-0.5 font-mono text-[11px] text-ink-950/70 sm:inline">
                   E
                 </kbd>
               </button>
@@ -2050,13 +2059,13 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
           <div className="mx-auto flex max-w-4xl flex-col items-center gap-3">
             {walkMode ? (
               <div className="pointer-events-auto flex w-full flex-wrap items-center justify-center gap-2">
-                <span className="inline-flex h-9 items-center gap-2 rounded-full border border-electric/25 bg-electric/10 px-3.5 font-mono text-[10px] uppercase tracking-[0.14em] text-electric">
+                <span className="inline-flex h-9 items-center gap-2 rounded-full border border-electric/25 bg-electric/10 px-3.5 font-mono text-[11px] uppercase tracking-[0.14em] text-electric">
                   <Footprints size={14} />
                   Yurish rejimi
                 </span>
                 {canPointerLock ? (
                   pointerLocked ? (
-                    <span className="hidden h-9 items-center gap-1.5 rounded-full border border-electric/25 bg-electric/10 px-3.5 text-[10px] font-medium text-electric sm:inline-flex">
+                    <span className="hidden h-9 items-center gap-1.5 rounded-full border border-electric/25 bg-electric/10 px-3.5 text-[11px] font-medium text-electric sm:inline-flex">
                       <MousePointer2 size={14} />
                       Esc — qulfdan chiqish
                     </span>
@@ -2093,7 +2102,7 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
                       type="button"
                       onClick={() => focusView(view.key)}
                       aria-pressed={activeView === view.key}
-                      className={`whitespace-nowrap rounded-full px-3 py-1.5 text-[10px] font-medium transition sm:px-3.5 sm:text-[11px] ${
+                      className={`whitespace-nowrap rounded-full px-3 py-1.5 text-[11px] font-medium transition sm:px-3.5 ${
                         activeView === view.key
                           ? 'bg-electric text-ink-950'
                           : 'text-slate-400 hover:bg-slate-800/80 hover:text-white'
@@ -2113,7 +2122,7 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
                     type="button"
                     onClick={toggleWalk}
                     title="Birinchi shaxsda yurish"
-                    className="flex h-8 items-center gap-1.5 rounded-full px-2.5 text-[10px] font-medium text-slate-400 transition hover:bg-slate-800/80 hover:text-white active:scale-95"
+                    className="flex h-8 items-center gap-1.5 rounded-full px-2.5 text-[11px] font-medium text-slate-400 transition hover:bg-slate-800/80 hover:text-white active:scale-95"
                   >
                     <Footprints size={14} />
                     Yurish
@@ -2156,7 +2165,7 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
                     onClick={() => setAutoTour((value) => !value)}
                     aria-pressed={autoTour}
                     title="Avtomatik kamera sayri (T)"
-                    className={`flex h-8 items-center gap-1.5 rounded-full px-2.5 text-[10px] font-medium transition active:scale-95 ${
+                    className={`flex h-8 items-center gap-1.5 rounded-full px-2.5 text-[11px] font-medium transition active:scale-95 ${
                       autoTour
                         ? 'bg-electric text-ink-950'
                         : 'text-slate-400 hover:bg-slate-800/80 hover:text-white'
@@ -2181,7 +2190,7 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
               </div>
             )}
 
-            <p className="text-center font-mono text-[9px] uppercase tracking-[0.16em] text-slate-500 sm:text-[10px]">
+            <p className="text-center font-mono text-[11px] uppercase tracking-[0.16em] text-slate-400">
               {walkMode ? (
                 <>
                   <span className="sm:hidden">Chapdagi joystik bilan yuring · ekranni sudrab qarang</span>

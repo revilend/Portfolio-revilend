@@ -1,16 +1,22 @@
 import { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { Check, ExternalLink, X } from 'lucide-react';
+import { trapTabKey } from '../lib/focusTrap.js';
 import StatusBadge from './StatusBadge.jsx';
 
 export default function ProjectDrawer({ project, onClose }) {
   const closeButtonRef = useRef(null);
+  const panelRef = useRef(null);
 
   useEffect(() => {
     if (!project) return undefined;
     const previousFocus = document.activeElement;
     const handleKey = (event) => {
-      if (event.key === 'Escape') onClose();
+      if (event.key === 'Escape') {
+        onClose();
+        return;
+      }
+      trapTabKey(event, panelRef.current);
     };
     document.addEventListener('keydown', handleKey);
     closeButtonRef.current?.focus();
@@ -32,6 +38,7 @@ export default function ProjectDrawer({ project, onClose }) {
       />
 
       <aside
+        ref={panelRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="project-drawer-title"

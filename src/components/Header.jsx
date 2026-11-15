@@ -35,7 +35,7 @@ function ModeToggle({ mode, onChange, full = false }) {
             <Icon
               size={14}
               strokeWidth={1.8}
-              className={isActive ? 'text-ink-950' : 'text-slate-500'}
+              className={isActive ? 'text-ink-950' : 'text-slate-400'}
             />
             {item.label}
           </button>

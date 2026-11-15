@@ -18,8 +18,10 @@ const IDENTITY = {
   available: true,
 };
 
+// The terminal and the clipboard read from the same string, so adding a field
+// to IDENTITY updates the card and the gutter without a second edit.
 const IDENTITY_JSON = JSON.stringify(IDENTITY, null, 2);
-const LINE_COUNT = 19;
+const IDENTITY_LINES = IDENTITY_JSON.split('\n');
 
 const PRINCIPLES = [
   {
@@ -36,6 +38,44 @@ const PRINCIPLES = [
   },
 ];
 
+const TOKEN_PATTERN = /("(?:[^"\\]|\\.)*")|(-?\d+(?:\.\d+)?)|(\btrue\b|\bfalse\b|\bnull\b)|([{}[\],:])/g;
+
+const PUNCTUATION = 'text-slate-400';
+const KEY = 'text-cyan-300';
+const STRING = 'text-emerald-300';
+const LITERAL = 'text-violet-300';
+
+function tokenizeLine(line) {
+  const tokens = [];
+  let last = 0;
+  TOKEN_PATTERN.lastIndex = 0;
+
+  let match = TOKEN_PATTERN.exec(line);
+  while (match) {
+    if (match.index > last) {
+      tokens.push({ text: line.slice(last, match.index), className: PUNCTUATION });
+    }
+
+    if (match[1]) {
+      const isKey = /^\s*:/.test(line.slice(TOKEN_PATTERN.lastIndex));
+      tokens.push({ text: match[1], className: isKey ? KEY : STRING });
+    } else if (match[2] || match[3]) {
+      tokens.push({ text: match[0], className: LITERAL });
+    } else {
+      tokens.push({ text: match[0], className: PUNCTUATION });
+    }
+
+    last = TOKEN_PATTERN.lastIndex;
+    match = TOKEN_PATTERN.exec(line);
+  }
+
+  if (last < line.length) {
+    tokens.push({ text: line.slice(last), className: PUNCTUATION });
+  }
+
+  return tokens;
+}
+
 function copyFallback(text) {
   const textarea = document.createElement('textarea');
   textarea.value = text;
@@ -44,34 +84,45 @@ function copyFallback(text) {
   textarea.style.opacity = '0';
   document.body.appendChild(textarea);
   textarea.select();
+
+  let copied = false;
   try {
-    document.execCommand('copy');
+    copied = document.execCommand('copy');
   } catch {
-    /* clipboard is best-effort */
+    copied = false;
   }
+
   document.body.removeChild(textarea);
+  return copied;
 }
 
 function IdentityCard({ onNotify }) {
-  const [copied, setCopied] = useState(false);
+  const [copyState, setCopyState] = useState('idle');
 
   const handleCopy = async () => {
+    let copied = false;
+
     try {
       if (navigator.clipboard?.writeText) {
         await navigator.clipboard.writeText(IDENTITY_JSON);
+        copied = true;
       } else {
-        copyFallback(IDENTITY_JSON);
+        copied = copyFallback(IDENTITY_JSON);
       }
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 2000);
-      onNotify?.('developer_identity.json buferga nusxalandi.');
     } catch {
-      copyFallback(IDENTITY_JSON);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 2000);
+      copied = copyFallback(IDENTITY_JSON);
+    }
+
+    setCopyState(copied ? 'copied' : 'failed');
+    window.setTimeout(() => setCopyState('idle'), 2200);
+
+    if (copied) {
       onNotify?.('developer_identity.json buferga nusxalandi.');
     }
   };
+
+  const label =
+    copyState === 'copied' ? 'nusxalandi' : copyState === 'failed' ? 'qayta urinish' : 'nusxalash';
 
   return (
     <div className="relative min-w-0 max-w-full">
@@ -97,8 +148,12 @@ function IdentityCard({ onNotify }) {
             className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-slate-800 bg-slate-900/70 px-2.5 py-1.5 font-mono text-2xs uppercase tracking-tag text-slate-400 transition hover:border-electric/40 hover:text-electric"
             aria-label="Dasturchi identifikatsiyasi JSON nusxasini olish"
           >
-            {copied ? <Check size={12} className="text-emerald-400" /> : <Copy size={12} />}
-            {copied ? 'nusxalandi' : 'nusxalash'}
+            {copyState === 'copied' ? (
+              <Check size={12} className="text-emerald-400" />
+            ) : (
+              <Copy size={12} />
+            )}
+            {label}
           </button>
         </div>
 
@@ -107,81 +162,40 @@ function IdentityCard({ onNotify }) {
             aria-hidden="true"
             className="shrink-0 select-none border-r border-slate-800/70 px-3 py-4 text-right font-mono text-2xs leading-6 text-slate-700"
           >
-            {Array.from({ length: LINE_COUNT }, (_, index) => (
+            {IDENTITY_LINES.map((_, index) => (
               <div key={index}>{String(index + 1).padStart(2, '0')}</div>
             ))}
           </div>
 
           <pre className="min-w-0 flex-1 overflow-x-auto py-4 pl-4 pr-5 font-mono text-[11.5px] leading-6 text-slate-300">
-            <span className="text-slate-500">{'{'}</span>
-            {'\n  '}
-            <span className="text-cyan-300">&quot;handle&quot;</span>
-            <span className="text-slate-500">: </span>
-            <span className="text-emerald-300">&quot;Revilend&quot;</span>
-            <span className="text-slate-500">,</span>
-            {'\n  '}
-            <span className="text-cyan-300">&quot;role&quot;</span>
-            <span className="text-slate-500">: </span>
-            <span className="text-emerald-300">&quot;Kreativ dasturchi&quot;</span>
-            <span className="text-slate-500">,</span>
-            {'\n  '}
-            <span className="text-cyan-300">&quot;location&quot;</span>
-            <span className="text-slate-500">: </span>
-            <span className="text-emerald-300">&quot;Toshkent, Oʻzbekiston&quot;</span>
-            <span className="text-slate-500">,</span>
-            {'\n  '}
-            <span className="text-cyan-300">&quot;focus&quot;</span>
-            <span className="text-slate-500">: [</span>
-            {'\n    '}
-            <span className="text-emerald-300">&quot;3D veb-tajribalar&quot;</span>
-            <span className="text-slate-500">,</span>
-            {'\n    '}
-            <span className="text-emerald-300">&quot;Toʻliq stackli tizimlar&quot;</span>
-            <span className="text-slate-500">,</span>
-            {'\n    '}
-            <span className="text-emerald-300">&quot;Real vaqtli arxitektura&quot;</span>
-            <span className="text-slate-500">,</span>
-            {'\n    '}
-            <span className="text-emerald-300">&quot;Bulutli avtomatizatsiya&quot;</span>
-            {'\n  '}
-            <span className="text-slate-500">],</span>
-            {'\n  '}
-            <span className="text-cyan-300">&quot;stack&quot;</span>
-            <span className="text-slate-500">: [</span>
-            {'\n    '}
-            <span className="text-emerald-300">&quot;Three.js&quot;</span>
-            <span className="text-slate-500">,</span>
-            {'\n    '}
-            <span className="text-emerald-300">&quot;React&quot;</span>
-            <span className="text-slate-500">,</span>
-            {'\n    '}
-            <span className="text-emerald-300">&quot;Supabase&quot;</span>
-            <span className="text-slate-500">,</span>
-            {'\n    '}
-            <span className="text-emerald-300">&quot;Node.js&quot;</span>
-            {'\n  '}
-            <span className="text-slate-500">],</span>
-            {'\n  '}
-            <span className="text-cyan-300">&quot;mindset&quot;</span>
-            <span className="text-slate-500">: </span>
-            <span className="text-emerald-300">&quot;Tizim qur, detallarni sayqal.&quot;</span>
-            <span className="text-slate-500">,</span>
-            {'\n  '}
-            <span className="text-cyan-300">&quot;available&quot;</span>
-            <span className="text-slate-500">: </span>
-            <span className="text-violet-300">true</span>
-            {'\n'}
-            <span className="text-slate-500">{'}'}</span>
-            <span className="ml-1 inline-block h-3.5 w-[7px] translate-y-0.5 animate-blink bg-electric/80" />
+            {IDENTITY_LINES.map((line, index) => (
+              <div key={index}>
+                {tokenizeLine(line).map((token, tokenIndex) => (
+                  <span key={tokenIndex} className={token.className}>
+                    {token.text}
+                  </span>
+                ))}
+                {index === IDENTITY_LINES.length - 1 ? (
+                  <span className="ml-1 inline-block h-3.5 w-[7px] translate-y-0.5 animate-blink bg-electric/80" />
+                ) : null}
+              </div>
+            ))}
           </pre>
         </div>
 
         <div className="flex items-center justify-between gap-3 border-t border-slate-800/80 bg-ink-950/60 px-4 py-2.5 font-mono text-2xs text-slate-400">
-          <span className="truncate">// terminal · UTF-8 · LF</span>
-          <span className="flex items-center gap-1.5 text-emerald-400">
-            <span className="h-1 w-1 rounded-full bg-emerald-400" />
-            json toʻgʻri
-          </span>
+          <span className="truncate">{'// terminal · UTF-8 · LF'}</span>
+          {copyState === 'failed' ? (
+            <span className="flex shrink-0 items-center gap-1.5 text-rose-300">
+              <span className="h-1 w-1 rounded-full bg-rose-400" />
+              nusxalash imkonsiz
+            </span>
+          ) : (
+            <span className="flex shrink-0 items-center gap-1.5 text-emerald-400">
+              <span className="h-1 w-1 rounded-full bg-emerald-400" />
+              json toʻgʻri
+            </span>
+          )}
         </div>
       </div>
     </div>
@@ -223,7 +237,7 @@ export default function About({ onNotify }) {
                     <p className="font-display text-sm font-semibold text-slate-200">
                       {principle.title}
                     </p>
-                    <p className="mt-0.5 text-[13px] leading-relaxed text-slate-500">
+                    <p className="mt-0.5 text-[13px] leading-relaxed text-slate-400">
                       {principle.detail}
                     </p>
                   </div>

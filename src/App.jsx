@@ -62,8 +62,13 @@ export default function App() {
     document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
   }, [mode, changeMode]);
 
-  // Warm the 3D chunk after first paint so the mode switch feels instant.
+  // Warm the 3D chunk after first paint, but skip it on metered or slow
+  // connections: it is ~150 kB gzipped and most visitors never open the room.
   useEffect(() => {
+    const connection = navigator.connection;
+    if (connection?.saveData) return undefined;
+    if (connection?.effectiveType && /(^|-)2g$/.test(connection.effectiveType)) return undefined;
+
     const timer = window.setTimeout(() => {
       import('./components/CyberRoomView.jsx').catch(() => {});
     }, 2500);
@@ -123,7 +128,7 @@ export default function App() {
             <Projects onOpenProject={openProject} />
             <Arsenal />
             <About onNotify={notify} />
-            <Contact onNotify={notify} />
+            <Contact />
           </main>
 
           <Footer />

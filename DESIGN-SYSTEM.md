@@ -33,8 +33,8 @@ Three.js/canvas ranglari: faqat `THEME` (`src/theme.js`) orqali.
 | `bg-grid` + `[--grid:Npx]` | to'r fon | — |
 
 ## Qoidalar
-1. Hex yozmang: token yoki `THEME` ishlating.
-2. 11px dan kichik matn yo'q (`text-2xs` minimum).
+1. Hex yozmang: token yoki `THEME` ishlating. Istisno — `CyberRoomView.jsx` dagi canvas/tekstura chizuvchi funksiyalar (`draw*Screen`, `drawNeonSign`, `drawWallPoster`, `drawFloorGlow`): ular Tailwind klasslarini ishlata olmaydi, shuning uchun gradient stoplari lokal hex bo'lishi mumkin. Bunday qiymat ikki joyda takrorlansa, `THEME` ga ko'chiriladi.
+2. 11px dan kichik matn yo'q (`text-2xs` minimum). `ComputerScreen.jsx` va `Windows11Apps.jsx` uchungina istisno (mock UI zichligi), `CyberRoomView.jsx` uchun emas.
 3. Ikkilamchi matn `slate-400` dan to'q bo'lmasin (AA kontrast).
 4. Yangi tugma/karta kerak bo'lsa avval yuqoridagi klasslarni kengaytiring.
 5. Barcha harakat `prefers-reduced-motion` ni hurmat qiladi.

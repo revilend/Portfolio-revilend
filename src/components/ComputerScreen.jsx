@@ -31,6 +31,7 @@ import {
   X,
 } from 'lucide-react';
 import { projects } from '../data/projects.js';
+import { trapTabKey } from '../lib/focusTrap.js';
 import {
   CalendarFlyout,
   CalculatorApp,
@@ -61,22 +62,27 @@ const PROJECT_ACCENTS = {
   },
 };
 
-const PROJECT_LINKS = {
+// Labels and icons are presentation only; the destination comes from
+// projects[].url so a link lives in exactly one place. Projects without a live
+// URL fall back to the profile that hosts them.
+const PROJECT_LINK_META = {
   teachermuzaffar: {
-    href: 'https://teachermuzaffar.uz',
     label: 'Jonli saytni ochish',
     icon: ExternalLink,
   },
   'echoes-of-room-404': {
-    href: 'https://github.com/revilend',
     label: "GitHub'da ochish",
     icon: Github,
   },
   'telegram-automation': {
-    href: 'https://t.me/revilend',
     label: "Telegram'da ochish",
     icon: MessageCircle,
   },
+};
+
+const PROJECT_FALLBACK_URLS = {
+  'echoes-of-room-404': 'https://github.com/revilend',
+  'telegram-automation': 'https://t.me/revilend',
 };
 
 const APPS = {
@@ -492,7 +498,9 @@ function WindowFrame({
 
 function ProjectApp({ project, onOpenProject }) {
   const meta = PROJECT_ACCENTS[project.id];
-  const link = PROJECT_LINKS[project.id];
+  const linkMeta = PROJECT_LINK_META[project.id];
+  const href = project.url ?? PROJECT_FALLBACK_URLS[project.id] ?? null;
+  const link = linkMeta && href ? { ...linkMeta, href } : null;
   const LinkIcon = link?.icon ?? ExternalLink;
 
   return (
@@ -1163,6 +1171,7 @@ export default function ComputerScreen({ onStandUp, onOpenProject, drawerOpen = 
   const [settings, setSettings] = useState(loadWindowsSettings);
   const [tray, setTray] = useState(null);
   const [contextMenu, setContextMenu] = useState(null);
+  const rootRef = useRef(null);
   const zCounterRef = useRef(10);
   const windowSeqRef = useRef(0);
 
@@ -1204,7 +1213,14 @@ export default function ComputerScreen({ onStandUp, onOpenProject, drawerOpen = 
 
   useEffect(() => {
     const handleKey = (event) => {
-      if (event.key !== 'Escape' || drawerOpen) return;
+      if (drawerOpen) return;
+
+      if (event.key === 'Tab') {
+        trapTabKey(event, rootRef.current);
+        return;
+      }
+
+      if (event.key !== 'Escape') return;
       if (startOpen) {
         setStartOpen(false);
         return;
@@ -1434,6 +1450,7 @@ export default function ComputerScreen({ onStandUp, onOpenProject, drawerOpen = 
 
   return (
     <div
+      ref={rootRef}
       className="fixed inset-0 z-[85] select-none overflow-hidden bg-[#04101d] text-slate-100 [&_button]:cursor-pointer"
       role="dialog"
       aria-modal="true"

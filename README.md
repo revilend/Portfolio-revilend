@@ -37,7 +37,7 @@ npm run preview  # serve the production build on port 3000
 - Hero with availability badge, headline, subheadline, mode CTAs and a four-column metrics strip.
 - Three glassmorphic project cards — click **Batafsil maʼlumot** to open the drawer.
 - Categorized tech stack: Frontend & 3D, Backend & Database, Automation & APIs.
-- Terminal identity card and a validated contact form with success toast.
+- Terminal identity card whose JSON is generated from the same object it copies, plus a direct-contact panel that hands the visitor to Telegram (there is no form and no data collection).
 - Sections and cards reveal on scroll with a short stagger; the hero glows and the background grid drift slowly. All motion respects `prefers-reduced-motion`.
 
 ### 3D Xona
@@ -67,6 +67,7 @@ npm run preview  # serve the production build on port 3000
 src/
 ├── App.jsx                  # mode state, lazy 3D loading, scroll lock, toast
 ├── data/projects.js         # shared project case studies
+├── lib/focusTrap.js         # shared Tab focus containment for the modals
 ├── components/
 │   ├── Header.jsx           # frosted navbar + segmented mode switcher
 │   ├── Hero.jsx             # 2D hero + metrics
@@ -77,7 +78,7 @@ src/
 │   ├── Windows11Apps.jsx    # Notepad, Calculator, Settings, quick settings, calendar, wallpaper
 │   ├── Arsenal.jsx          # categorized tech stack
 │   ├── About.jsx            # identity narrative + JSON card
-│   ├── Contact.jsx          # validated form + direct links
+│   ├── Contact.jsx          # direct-contact channels (Telegram, GitHub)
 │   ├── Toast.jsx            # success notification
 │   ├── Footer.jsx
 │   ├── Reveal.jsx           # IntersectionObserver scroll reveal
@@ -88,8 +89,8 @@ src/
 
 ## Notes
 
-- **The 3D chunk is lazy.** The initial 2D bundle stays around 58 KB gzipped; Three.js loads on demand and is prefetched after first paint.
-- **Contact form is client-side only** — validation and the success toast are local. Wire `handleSubmit` in `src/components/Contact.jsx` to an endpoint to deliver messages.
+- **The 3D chunk is lazy.** The initial 2D bundle is about 60 KB gzipped and the interactive room is a separate chunk (~155 KB gzipped, with Three.js split into its own vendor chunk). The room is fetched on demand and prefetched after first paint — but skipped entirely when `navigator.connection.saveData` is set or the connection reports 2G.
+- **Contact is deliberately form-free.** A static build cannot deliver mail, so an earlier fake-submitting form (which showed "Xabar yuborildi" without sending anything) was replaced by a Telegram handoff. Messages go straight to `t.me/revilend`; nothing is collected or stored. To add a real endpoint later, introduce a server or form service and only render a success state after the request resolves.
 - **Windows 11 desktop data is local.** Notepad text and personalization/quick-setting choices use `localStorage`; they never leave the browser and are not part of the deployed repository.
 - **Project data** lives in `src/data/projects.js`; card content, drawer content, pin IDs and 3D screen associations are driven from the same IDs.
 - **Direct links** point to `t.me/revilend` and `github.com/revilend`; update those handles if they change.
@@ -99,7 +100,7 @@ src/
 ## Accessibility & performance
 
 - Mode switch and auto-tour control use `aria-pressed`; pins and camera presets are real buttons with labels.
-- Project drawer supports Escape, restores focus and returns it to the trigger.
+- Project drawer and the Windows desktop support Escape, restore focus to the trigger, and contain `Tab` inside the dialog so `aria-modal` is truthful.
 - Room render loop pauses when the tab is hidden; device pixel ratio is capped at 2; all geometries, materials and canvas textures are disposed on unmount.
 - Walk mode has keyboard controls plus an analog touch joystick; the desk prompt opens the Windows desktop without requiring pointer lock. Desktop app windows have labeled close, minimize and maximize controls.
 - Scroll reveals, ambient grid motion, auto-tour timing and 3D animations are reduced under `prefers-reduced-motion`.

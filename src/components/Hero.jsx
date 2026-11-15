@@ -57,19 +57,19 @@ function ProfilePanel() {
         <div className="relative mt-6 space-y-3.5 border-y border-slate-800/80 py-5">
           <div className="flex items-center gap-2.5 text-[12px]">
             <MapPin size={14} className="shrink-0 text-electric" />
-            <span className="text-slate-500">Joylashuv</span>
+            <span className="text-slate-400">Joylashuv</span>
             <span className="ml-auto text-slate-300">Toshkent, UZ</span>
           </div>
           <div className="flex items-center gap-2.5 text-[12px]">
             <Code2 size={14} className="shrink-0 text-plasma" />
-            <span className="text-slate-500">Fokus</span>
+            <span className="text-slate-400">Fokus</span>
             <span className="ml-auto text-slate-300">3D · Full-stack</span>
           </div>
           <div className="flex items-center gap-2.5 text-[12px]">
             <span className="relative flex h-3.5 w-3.5 shrink-0 items-center justify-center">
               <span className="absolute h-1.5 w-1.5 rounded-full bg-emerald-400" />
             </span>
-            <span className="text-slate-500">Holat</span>
+            <span className="text-slate-400">Holat</span>
             <span className="ml-auto text-slate-300">Yangi loyihalarga ochiq</span>
           </div>
         </div>
