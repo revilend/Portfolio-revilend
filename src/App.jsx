@@ -131,7 +131,7 @@ export default function App() {
             <Projects onOpenProject={openProject} />
             <Arsenal />
             <About onNotify={notify} />
-            <Contact />
+            <Contact onNotify={notify} />
           </main>
 
           <Footer />

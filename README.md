@@ -29,6 +29,9 @@ npm run build    # production bundle in dist/
 npm run preview  # serve the production build on port 3000
 ```
 
+Optional: `cp .env.example .env.local` and set `VITE_CONTACT_ENDPOINT` to switch the
+contact section from the Telegram handoff to a real form (see Notes).
+
 Quality gates (all must pass before a change lands):
 
 ```bash
@@ -98,7 +101,8 @@ src/
 ## Notes
 
 - **The 3D chunk is lazy.** The initial 2D bundle is about 60 KB gzipped and the interactive room is a separate chunk (~155 KB gzipped, with Three.js split into its own vendor chunk). The room is fetched on demand and prefetched after first paint — but skipped entirely when `navigator.connection.saveData` is set or the connection reports 2G.
-- **Contact is deliberately form-free.** A static build cannot deliver mail, so an earlier fake-submitting form (which showed "Xabar yuborildi" without sending anything) was replaced by a Telegram handoff. Messages go straight to `t.me/revilend`; nothing is collected or stored. To add a real endpoint later, introduce a server or form service and only render a success state after the request resolves.
+- **The contact section has two modes, and neither ever fakes success.** Without configuration a static build has nowhere to deliver a message, so it shows a Telegram handoff to `t.me/revilend` and collects nothing. Set `VITE_CONTACT_ENDPOINT` (copy `.env.example` to `.env.local`) to the hosted bot's `POST /api/contact` route and a validated form appears instead. The form clears and reports success **only** after the endpoint answers 2xx with `{ "ok": true }`; a failed request shows an error with the Telegram fallback, and the visitor's text is kept so it is not lost. The original implementation showed "Xabar yuborildi" while sending nothing — that is what this design prevents.
+- **`main.py` is the bot behind that endpoint** (aiogram + aiohttp, `requirements.txt`). It serves `GET /` as a health check and `POST /api/contact` with `{ name, contact, message }`, forwarding the payload to `ADMIN_ID` in Telegram. Two things must be set on the host or messages will be acknowledged but never delivered: `BOT_TOKEN` and `ADMIN_ID`. Its CORS header only allows `https://revilend.uz`, so adjust it if the site moves to another origin.
 - **Windows 11 desktop data is local.** Notepad text and personalization/quick-setting choices use `localStorage`; they never leave the browser and are not part of the deployed repository.
 - **Project data** lives in `src/data/projects.js`; card content, drawer content, pin IDs, project URLs and 3D screen associations are all driven from it, so a renamed id cannot leave a dead pin or link behind.
 - **`public/og.png`** is the 1200×630 share card behind `og:image` and `twitter:image`. Regenerate it from the hero if the headline or palette changes.
