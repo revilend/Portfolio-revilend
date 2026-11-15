@@ -44,7 +44,10 @@ export default function ProjectDrawer({ project, onClose }) {
         aria-labelledby="project-drawer-title"
         className="absolute inset-y-0 right-0 flex w-full max-w-md animate-drawer-in flex-col border-l border-slate-800/80 bg-ink-900/95 shadow-2xl backdrop-blur-xl"
       >
-        <div className="h-1 w-full bg-gradient-to-r from-electric via-cyan-300 to-plasma" aria-hidden="true" />
+        <div
+          className="h-1 w-full bg-gradient-to-r from-electric via-cyan-300 to-plasma"
+          aria-hidden="true"
+        />
 
         <div className="flex items-center justify-between gap-4 border-b border-slate-800/80 px-5 py-4">
           <div className="flex items-center gap-3">

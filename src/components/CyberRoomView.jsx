@@ -150,13 +150,28 @@ function VirtualJoystick({ onChange }) {
       onContextMenu={(event) => event.preventDefault()}
       className="relative h-28 w-28 touch-none select-none rounded-full border border-electric/25 bg-[radial-gradient(circle_at_50%_40%,rgba(0,242,254,0.13),rgba(6,12,20,0.92)_62%)] shadow-[0_18px_50px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.1)] backdrop-blur-xl sm:h-32 sm:w-32"
     >
-      <span aria-hidden="true" className="absolute inset-3 rounded-full border border-slate-600/50" />
-      <span aria-hidden="true" className="absolute left-1/2 top-1/2 h-px w-[72%] -translate-x-1/2 -translate-y-1/2 bg-slate-500/20" />
-      <span aria-hidden="true" className="absolute left-1/2 top-1/2 h-[72%] w-px -translate-x-1/2 -translate-y-1/2 bg-slate-500/20" />
-      <span aria-hidden="true" className="absolute left-1/2 top-1.5 -translate-x-1/2 font-mono text-[11px] uppercase tracking-[0.16em] text-slate-400">
+      <span
+        aria-hidden="true"
+        className="absolute inset-3 rounded-full border border-slate-600/50"
+      />
+      <span
+        aria-hidden="true"
+        className="absolute left-1/2 top-1/2 h-px w-[72%] -translate-x-1/2 -translate-y-1/2 bg-slate-500/20"
+      />
+      <span
+        aria-hidden="true"
+        className="absolute left-1/2 top-1/2 h-[72%] w-px -translate-x-1/2 -translate-y-1/2 bg-slate-500/20"
+      />
+      <span
+        aria-hidden="true"
+        className="absolute left-1/2 top-1.5 -translate-x-1/2 font-mono text-[11px] uppercase tracking-[0.16em] text-slate-400"
+      >
         Old
       </span>
-      <span aria-hidden="true" className="absolute bottom-1.5 left-1/2 -translate-x-1/2 font-mono text-[11px] uppercase tracking-[0.16em] text-slate-400">
+      <span
+        aria-hidden="true"
+        className="absolute bottom-1.5 left-1/2 -translate-x-1/2 font-mono text-[11px] uppercase tracking-[0.16em] text-slate-400"
+      >
         Orqa
       </span>
       <span
@@ -168,7 +183,9 @@ function VirtualJoystick({ onChange }) {
           <span className="h-2 w-2 rounded-full bg-electric shadow-[0_0_10px_rgba(0,242,254,0.95)]" />
         </span>
       </span>
-      <span className="sr-only">Yurish uchun joystick. Klaviaturada WASD yoki strelkalar ham ishlaydi.</span>
+      <span className="sr-only">
+        Yurish uchun joystick. Klaviaturada WASD yoki strelkalar ham ishlaydi.
+      </span>
     </div>
   );
 }
@@ -591,7 +608,14 @@ function drawKeyboard(ctx, width, height) {
 }
 
 function drawFloorGlow(ctx, width, height) {
-  const gradient = ctx.createRadialGradient(width / 2, height / 2, 0, width / 2, height / 2, width / 2);
+  const gradient = ctx.createRadialGradient(
+    width / 2,
+    height / 2,
+    0,
+    width / 2,
+    height / 2,
+    width / 2
+  );
   gradient.addColorStop(0, 'rgba(0,242,254,0.6)');
   gradient.addColorStop(0.45, 'rgba(0,160,210,0.18)');
   gradient.addColorStop(1, 'rgba(0,0,0,0)');
@@ -987,10 +1011,7 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
     for (let index = 0; index < 14; index += 1) {
       const z = -2.85 + index * 0.43;
       [-1, 1].forEach((side) => {
-        const slat = new THREE.Mesh(
-          new THREE.BoxGeometry(0.03, 3.4, 0.13),
-          trimMaterial
-        );
+        const slat = new THREE.Mesh(new THREE.BoxGeometry(0.03, 3.4, 0.13), trimMaterial);
         slat.position.set(side * (ROOM.width / 2 - 0.1), 2.35, z);
         slat.receiveShadow = true;
         scene.add(slat);
@@ -1010,7 +1031,10 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
     [-1, 1].forEach((side) => {
       const cove = new THREE.Mesh(
         new THREE.BoxGeometry(0.035, 2.5, 0.05),
-        new THREE.MeshBasicMaterial({ color: side < 0 ? THEME.plasma : THEME.cyan, toneMapped: false })
+        new THREE.MeshBasicMaterial({
+          color: side < 0 ? THEME.plasma : THEME.cyan,
+          toneMapped: false,
+        })
       );
       cove.position.set(side * (ROOM.width / 2 - 0.13), 2.7, 4.7);
       scene.add(cove);
@@ -1049,10 +1073,7 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
       { texture: posterOneTexture, x: -4.65 },
       { texture: posterTwoTexture, x: 4.65 },
     ].forEach(({ texture, x }) => {
-      const posterFrame = new THREE.Mesh(
-        new THREE.BoxGeometry(1.56, 2.06, 0.06),
-        frameMaterial
-      );
+      const posterFrame = new THREE.Mesh(new THREE.BoxGeometry(1.56, 2.06, 0.06), frameMaterial);
       posterFrame.position.set(x, 3.0, ROOM.backZ + 0.13);
       posterFrame.castShadow = true;
       scene.add(posterFrame);
@@ -1079,11 +1100,7 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
         new THREE.BoxGeometry(0.16, bookHeight, 0.09),
         new THREE.MeshStandardMaterial({ color, metalness: 0.1, roughness: 0.72 })
       );
-      book.position.set(
-        ROOM.width / 2 - 0.34,
-        2.77 + bookHeight / 2,
-        0.72 + index * 0.3
-      );
+      book.position.set(ROOM.width / 2 - 0.34, 2.77 + bookHeight / 2, 0.72 + index * 0.3);
       book.castShadow = true;
       scene.add(book);
     });
@@ -1104,10 +1121,7 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
       [0.84, 1.4, 0.1, 2.9],
       [0, 2.84, 1.78, 0.1],
     ].forEach(([x, y, width, height]) => {
-      const framePart = new THREE.Mesh(
-        new THREE.BoxGeometry(width, height, 0.12),
-        trimMaterial
-      );
+      const framePart = new THREE.Mesh(new THREE.BoxGeometry(width, height, 0.12), trimMaterial);
       framePart.position.set(x, y, 0.01);
       doorGroup.add(framePart);
     });
@@ -1161,11 +1175,7 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
         })
       );
       leaf.scale.set(1.35, 0.28, 0.62);
-      leaf.position.set(
-        Math.cos(angle) * 0.33,
-        0.55 + stemHeight,
-        Math.sin(angle) * 0.33
-      );
+      leaf.position.set(Math.cos(angle) * 0.33, 0.55 + stemHeight, Math.sin(angle) * 0.33);
       leaf.rotation.z = Math.cos(angle) * 0.6;
       leaf.castShadow = true;
       plant.add(leaf);
@@ -1265,7 +1275,10 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
       clickTargets.push(screen, frame);
 
       const poleHeight = Math.max(0.14, y - height / 2 - 1.07);
-      const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.05, poleHeight, 16), frameMaterial);
+      const pole = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.035, 0.05, poleHeight, 16),
+        frameMaterial
+      );
       pole.position.set(0, -(height / 2 + poleHeight / 2), 0);
       pole.castShadow = true;
       group.add(pole);
@@ -1461,8 +1474,7 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
       );
     };
 
-    const isNearDeskPosition = (x, z) =>
-      Math.abs(x) < 2.85 && z > 1.14 && z < 2.42;
+    const isNearDeskPosition = (x, z) => Math.abs(x) < 2.85 && z > 1.14 && z < 2.42;
 
     const updateNearDesk = () => {
       if (!walkState.active) return;
@@ -1537,11 +1549,7 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
       const spherical = new THREE.Spherical().setFromVector3(offset);
       cameraState.radius = cameraState.goalRadius = spherical.radius;
       cameraState.theta = cameraState.goalTheta = spherical.theta;
-      cameraState.phi = cameraState.goalPhi = THREE.MathUtils.clamp(
-        spherical.phi,
-        1.12,
-        1.53
-      );
+      cameraState.phi = cameraState.goalPhi = THREE.MathUtils.clamp(spherical.phi, 1.12, 1.53);
     };
 
     const releasePointerLock = () => {
@@ -1663,11 +1671,7 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
         -0.86,
         0.86
       );
-      cameraState.goalPhi = THREE.MathUtils.clamp(
-        cameraState.goalPhi - deltaY * 0.004,
-        1.12,
-        1.53
-      );
+      cameraState.goalPhi = THREE.MathUtils.clamp(cameraState.goalPhi - deltaY * 0.004, 1.12, 1.53);
     };
 
     const handlePointerEnd = (event) => {
@@ -1791,8 +1795,7 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
           const beforeZ = walkState.position.z;
 
           const nextX = THREE.MathUtils.clamp(
-            beforeX +
-              (directionForward * -sin + directionStrafe * cos) * speed,
+            beforeX + (directionForward * -sin + directionStrafe * cos) * speed,
             WALK_BOUNDS.minX,
             WALK_BOUNDS.maxX
           );
@@ -1801,8 +1804,7 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
           }
 
           const nextZ = THREE.MathUtils.clamp(
-            beforeZ +
-              (directionForward * -cos + directionStrafe * -sin) * speed,
+            beforeZ + (directionForward * -cos + directionStrafe * -sin) * speed,
             WALK_BOUNDS.minZ,
             WALK_BOUNDS.maxZ
           );
@@ -1820,8 +1822,7 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
         }
 
         const targetEye = WALK_EYE + (moved ? Math.sin(walkState.bob) * 0.018 : 0);
-        walkState.position.y +=
-          (targetEye - walkState.position.y) * (1 - Math.exp(-8 * delta));
+        walkState.position.y += (targetEye - walkState.position.y) * (1 - Math.exp(-8 * delta));
 
         const cosPitch = Math.cos(walkState.pitch);
         camera.position.copy(walkState.position);
@@ -1844,11 +1845,7 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
         cameraState.theta = THREE.MathUtils.clamp(cameraState.theta, -0.86, 0.86);
         cameraState.phi = THREE.MathUtils.clamp(cameraState.phi, 1.12, 1.53);
 
-        offsetVector.setFromSphericalCoords(
-          cameraState.radius,
-          cameraState.phi,
-          cameraState.theta
-        );
+        offsetVector.setFromSphericalCoords(cameraState.radius, cameraState.phi, cameraState.theta);
         camera.position.copy(cameraState.target).add(offsetVector);
         camera.position.y = Math.min(camera.position.y, ROOM.height - 0.32);
         camera.lookAt(cameraState.target);
@@ -1997,25 +1994,25 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
 
       {walkMode || computerOpen ? null : (
         <div className="pointer-events-none absolute inset-0 z-10">
-        {PINS.map((pin) => (
-          <button
-            key={pin.id}
-            ref={(node) => {
-              pinRefs.current[pin.id] = node;
-            }}
-            type="button"
-            onClick={() => {
-              setAutoTour(false);
-              onOpenProject?.(pin.id);
-            }}
-            aria-label={`${pin.label} loyihasini ochish`}
-            className="pointer-events-auto absolute left-0 top-0 whitespace-nowrap rounded-full border border-electric/30 bg-ink-900/85 px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.1em] text-slate-200 shadow-[0_14px_40px_rgba(0,0,0,0.55)] backdrop-blur-md transition-colors hover:border-electric/60 hover:text-white"
-            style={{ opacity: 0, willChange: 'transform' }}
-          >
-            <span className="mr-1.5 inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-electric align-middle shadow-[0_0_8px_rgba(0,242,254,0.9)] motion-reduce:animate-none" />
-            {pin.label}
-          </button>
-        ))}
+          {PINS.map((pin) => (
+            <button
+              key={pin.id}
+              ref={(node) => {
+                pinRefs.current[pin.id] = node;
+              }}
+              type="button"
+              onClick={() => {
+                setAutoTour(false);
+                onOpenProject?.(pin.id);
+              }}
+              aria-label={`${pin.label} loyihasini ochish`}
+              className="pointer-events-auto absolute left-0 top-0 whitespace-nowrap rounded-full border border-electric/30 bg-ink-900/85 px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.1em] text-slate-200 shadow-[0_14px_40px_rgba(0,0,0,0.55)] backdrop-blur-md transition-colors hover:border-electric/60 hover:text-white"
+              style={{ opacity: 0, willChange: 'transform' }}
+            >
+              <span className="mr-1.5 inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-electric align-middle shadow-[0_0_8px_rgba(0,242,254,0.9)] motion-reduce:animate-none" />
+              {pin.label}
+            </button>
+          ))}
         </div>
       )}
 
@@ -2054,160 +2051,165 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
       ) : null}
 
       {computerOpen ? null : (
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20">
-        <div className="bg-gradient-to-t from-ink-950 via-ink-950/70 to-transparent px-3 pb-4 pt-24 sm:px-6 sm:pb-6">
-          <div className="mx-auto flex max-w-4xl flex-col items-center gap-3">
-            {walkMode ? (
-              <div className="pointer-events-auto flex w-full flex-wrap items-center justify-center gap-2">
-                <span className="inline-flex h-9 items-center gap-2 rounded-full border border-electric/25 bg-electric/10 px-3.5 font-mono text-[11px] uppercase tracking-[0.14em] text-electric">
-                  <Footprints size={14} />
-                  Yurish rejimi
-                </span>
-                {canPointerLock ? (
-                  pointerLocked ? (
-                    <span className="hidden h-9 items-center gap-1.5 rounded-full border border-electric/25 bg-electric/10 px-3.5 text-[11px] font-medium text-electric sm:inline-flex">
-                      <MousePointer2 size={14} />
-                      Esc — qulfdan chiqish
-                    </span>
-                  ) : (
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20">
+          <div className="bg-gradient-to-t from-ink-950 via-ink-950/70 to-transparent px-3 pb-4 pt-24 sm:px-6 sm:pb-6">
+            <div className="mx-auto flex max-w-4xl flex-col items-center gap-3">
+              {walkMode ? (
+                <div className="pointer-events-auto flex w-full flex-wrap items-center justify-center gap-2">
+                  <span className="inline-flex h-9 items-center gap-2 rounded-full border border-electric/25 bg-electric/10 px-3.5 font-mono text-[11px] uppercase tracking-[0.14em] text-electric">
+                    <Footprints size={14} />
+                    Yurish rejimi
+                  </span>
+                  {canPointerLock ? (
+                    pointerLocked ? (
+                      <span className="hidden h-9 items-center gap-1.5 rounded-full border border-electric/25 bg-electric/10 px-3.5 text-[11px] font-medium text-electric sm:inline-flex">
+                        <MousePointer2 size={14} />
+                        Esc — qulfdan chiqish
+                      </span>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => cameraApiRef.current?.lockPointer()}
+                        className="hidden h-9 items-center gap-1.5 rounded-full border border-slate-700/70 bg-ink-900/85 px-3.5 text-[11px] font-medium text-slate-300 backdrop-blur-xl transition hover:border-slate-600 hover:text-white sm:inline-flex"
+                      >
+                        <MousePointer2 size={14} />
+                        Sichqonchani qulflash
+                      </button>
+                    )
+                  ) : null}
+                  <button
+                    type="button"
+                    onClick={exitWalk}
+                    className="inline-flex h-9 items-center gap-1.5 rounded-full border border-slate-700/70 bg-ink-900/85 px-3.5 text-[11px] font-medium text-slate-300 backdrop-blur-xl transition hover:border-slate-600 hover:text-white"
+                  >
+                    <X size={14} />
+                    Chiqish
+                  </button>
+                </div>
+              ) : (
+                <div className="pointer-events-auto flex w-full flex-wrap items-center justify-center gap-2">
+                  <div
+                    role="group"
+                    aria-label="3D kamera manzillari"
+                    className="no-scrollbar flex max-w-full items-center gap-1 overflow-x-auto rounded-full border border-slate-700/60 bg-ink-900/85 p-1.5 shadow-2xl backdrop-blur-xl"
+                  >
+                    {VIEWS.map((view) => (
+                      <button
+                        key={view.key}
+                        type="button"
+                        onClick={() => focusView(view.key)}
+                        aria-pressed={activeView === view.key}
+                        className={`whitespace-nowrap rounded-full px-3 py-1.5 text-[11px] font-medium transition sm:px-3.5 ${
+                          activeView === view.key
+                            ? 'bg-electric text-ink-950'
+                            : 'text-slate-400 hover:bg-slate-800/80 hover:text-white'
+                        }`}
+                      >
+                        {view.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div
+                    role="group"
+                    aria-label="3D boshqaruvlari"
+                    className="flex items-center gap-0.5 rounded-full border border-slate-700/60 bg-ink-900/85 p-1.5 shadow-2xl backdrop-blur-xl"
+                  >
                     <button
                       type="button"
-                      onClick={() => cameraApiRef.current?.lockPointer()}
-                      className="hidden h-9 items-center gap-1.5 rounded-full border border-slate-700/70 bg-ink-900/85 px-3.5 text-[11px] font-medium text-slate-300 backdrop-blur-xl transition hover:border-slate-600 hover:text-white sm:inline-flex"
+                      onClick={toggleWalk}
+                      title="Birinchi shaxsda yurish"
+                      className="flex h-8 items-center gap-1.5 rounded-full px-2.5 text-[11px] font-medium text-slate-400 transition hover:bg-slate-800/80 hover:text-white active:scale-95"
                     >
-                      <MousePointer2 size={14} />
-                      Sichqonchani qulflash
+                      <Footprints size={14} />
+                      Yurish
                     </button>
-                  )
-                ) : null}
-                <button
-                  type="button"
-                  onClick={exitWalk}
-                  className="inline-flex h-9 items-center gap-1.5 rounded-full border border-slate-700/70 bg-ink-900/85 px-3.5 text-[11px] font-medium text-slate-300 backdrop-blur-xl transition hover:border-slate-600 hover:text-white"
-                >
-                  <X size={14} />
-                  Chiqish
-                </button>
-              </div>
-            ) : (
-              <div className="pointer-events-auto flex w-full flex-wrap items-center justify-center gap-2">
-                <div
-                  role="group"
-                  aria-label="3D kamera manzillari"
-                  className="no-scrollbar flex max-w-full items-center gap-1 overflow-x-auto rounded-full border border-slate-700/60 bg-ink-900/85 p-1.5 shadow-2xl backdrop-blur-xl"
-                >
-                  {VIEWS.map((view) => (
+
+                    <span className="mx-1 h-5 w-px bg-slate-700/70" aria-hidden="true" />
+
                     <button
-                      key={view.key}
                       type="button"
-                      onClick={() => focusView(view.key)}
-                      aria-pressed={activeView === view.key}
-                      className={`whitespace-nowrap rounded-full px-3 py-1.5 text-[11px] font-medium transition sm:px-3.5 ${
-                        activeView === view.key
+                      onClick={() => cameraApiRef.current?.zoom(1.12)}
+                      title="Kichiklashtirish (−)"
+                      aria-label="3D kamerani kichiklashtirish"
+                      className="grid h-8 w-8 place-items-center rounded-full text-slate-400 transition hover:bg-slate-800/80 hover:text-white active:scale-95"
+                    >
+                      <ZoomOut size={15} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => cameraApiRef.current?.zoom(0.88)}
+                      title="Kattalashtirish (+)"
+                      aria-label="3D kamerani kattalashtirish"
+                      className="grid h-8 w-8 place-items-center rounded-full text-slate-400 transition hover:bg-slate-800/80 hover:text-white active:scale-95"
+                    >
+                      <ZoomIn size={15} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => focusView('desk')}
+                      title="Kamerani qayta tiklash (R)"
+                      aria-label="Kamerani qayta tiklash"
+                      className="grid h-8 w-8 place-items-center rounded-full text-slate-400 transition hover:bg-slate-800/80 hover:text-white active:scale-95"
+                    >
+                      <RotateCcw size={14} />
+                    </button>
+
+                    <span className="mx-1 h-5 w-px bg-slate-700/70" aria-hidden="true" />
+
+                    <button
+                      type="button"
+                      onClick={() => setAutoTour((value) => !value)}
+                      aria-pressed={autoTour}
+                      title="Avtomatik kamera sayri (T)"
+                      className={`flex h-8 items-center gap-1.5 rounded-full px-2.5 text-[11px] font-medium transition active:scale-95 ${
+                        autoTour
                           ? 'bg-electric text-ink-950'
                           : 'text-slate-400 hover:bg-slate-800/80 hover:text-white'
                       }`}
                     >
-                      {view.label}
+                      {autoTour ? <Pause size={13} /> : <Play size={13} />}
+                      <span className="hidden sm:inline">Avto sayr</span>
                     </button>
-                  ))}
+
+                    {canFullscreen ? (
+                      <button
+                        type="button"
+                        onClick={toggleFullscreen}
+                        title={isFullscreen ? 'Toʻliq ekrandan chiqish (F)' : 'Toʻliq ekran (F)'}
+                        aria-label={
+                          isFullscreen ? 'Toʻliq ekrandan chiqish' : 'Toʻliq ekranga oʻtish'
+                        }
+                        className="grid h-8 w-8 place-items-center rounded-full text-slate-400 transition hover:bg-slate-800/80 hover:text-white active:scale-95"
+                      >
+                        {isFullscreen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
+                      </button>
+                    ) : null}
+                  </div>
                 </div>
-
-                <div
-                  role="group"
-                  aria-label="3D boshqaruvlari"
-                  className="flex items-center gap-0.5 rounded-full border border-slate-700/60 bg-ink-900/85 p-1.5 shadow-2xl backdrop-blur-xl"
-                >
-                  <button
-                    type="button"
-                    onClick={toggleWalk}
-                    title="Birinchi shaxsda yurish"
-                    className="flex h-8 items-center gap-1.5 rounded-full px-2.5 text-[11px] font-medium text-slate-400 transition hover:bg-slate-800/80 hover:text-white active:scale-95"
-                  >
-                    <Footprints size={14} />
-                    Yurish
-                  </button>
-
-                  <span className="mx-1 h-5 w-px bg-slate-700/70" aria-hidden="true" />
-
-                  <button
-                    type="button"
-                    onClick={() => cameraApiRef.current?.zoom(1.12)}
-                    title="Kichiklashtirish (−)"
-                    aria-label="3D kamerani kichiklashtirish"
-                    className="grid h-8 w-8 place-items-center rounded-full text-slate-400 transition hover:bg-slate-800/80 hover:text-white active:scale-95"
-                  >
-                    <ZoomOut size={15} />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => cameraApiRef.current?.zoom(0.88)}
-                    title="Kattalashtirish (+)"
-                    aria-label="3D kamerani kattalashtirish"
-                    className="grid h-8 w-8 place-items-center rounded-full text-slate-400 transition hover:bg-slate-800/80 hover:text-white active:scale-95"
-                  >
-                    <ZoomIn size={15} />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => focusView('desk')}
-                    title="Kamerani qayta tiklash (R)"
-                    aria-label="Kamerani qayta tiklash"
-                    className="grid h-8 w-8 place-items-center rounded-full text-slate-400 transition hover:bg-slate-800/80 hover:text-white active:scale-95"
-                  >
-                    <RotateCcw size={14} />
-                  </button>
-
-                  <span className="mx-1 h-5 w-px bg-slate-700/70" aria-hidden="true" />
-
-                  <button
-                    type="button"
-                    onClick={() => setAutoTour((value) => !value)}
-                    aria-pressed={autoTour}
-                    title="Avtomatik kamera sayri (T)"
-                    className={`flex h-8 items-center gap-1.5 rounded-full px-2.5 text-[11px] font-medium transition active:scale-95 ${
-                      autoTour
-                        ? 'bg-electric text-ink-950'
-                        : 'text-slate-400 hover:bg-slate-800/80 hover:text-white'
-                    }`}
-                  >
-                    {autoTour ? <Pause size={13} /> : <Play size={13} />}
-                    <span className="hidden sm:inline">Avto sayr</span>
-                  </button>
-
-                  {canFullscreen ? (
-                    <button
-                      type="button"
-                      onClick={toggleFullscreen}
-                      title={isFullscreen ? 'Toʻliq ekrandan chiqish (F)' : 'Toʻliq ekran (F)'}
-                      aria-label={isFullscreen ? 'Toʻliq ekrandan chiqish' : 'Toʻliq ekranga oʻtish'}
-                      className="grid h-8 w-8 place-items-center rounded-full text-slate-400 transition hover:bg-slate-800/80 hover:text-white active:scale-95"
-                    >
-                      {isFullscreen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
-                    </button>
-                  ) : null}
-                </div>
-              </div>
-            )}
-
-            <p className="text-center font-mono text-[11px] uppercase tracking-[0.16em] text-slate-400">
-              {walkMode ? (
-                <>
-                  <span className="sm:hidden">Chapdagi joystik bilan yuring · ekranni sudrab qarang</span>
-                  <span className="hidden sm:inline">
-                    WASD yoki strelkalar bilan yuring · sichqoncha bilan qarang · stol yonida E — oʻtirish
-                  </span>
-                </>
-              ) : (
-                <>
-                  Sudrab aylantiring · gʻildirak bilan zoom
-                  <span className="hidden sm:inline"> · 1–3, R, +/−</span>
-                </>
               )}
-            </p>
+
+              <p className="text-center font-mono text-[11px] uppercase tracking-[0.16em] text-slate-400">
+                {walkMode ? (
+                  <>
+                    <span className="sm:hidden">
+                      Chapdagi joystik bilan yuring · ekranni sudrab qarang
+                    </span>
+                    <span className="hidden sm:inline">
+                      WASD yoki strelkalar bilan yuring · sichqoncha bilan qarang · stol yonida E —
+                      oʻtirish
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    Sudrab aylantiring · gʻildirak bilan zoom
+                    <span className="hidden sm:inline"> · 1–3, R, +/−</span>
+                  </>
+                )}
+              </p>
+            </div>
           </div>
         </div>
-      </div>
       )}
 
       {computerOpen ? (

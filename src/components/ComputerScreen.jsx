@@ -162,11 +162,7 @@ const TASKBAR_IDS = [
   'this-pc',
 ];
 
-const PROJECT_IDS = new Set([
-  'teachermuzaffar',
-  'echoes-of-room-404',
-  'telegram-automation',
-]);
+const PROJECT_IDS = new Set(['teachermuzaffar', 'echoes-of-room-404', 'telegram-automation']);
 
 const WINDOW_SIZES = {
   teachermuzaffar: { width: 760, height: 548 },
@@ -308,11 +304,7 @@ function ResizeHandle({ direction, win, onFocus, onResize }) {
       nextX = resize.x + resize.w - nextW;
     }
     if (direction.includes('s')) {
-      nextH = clamp(
-        resize.h + dy,
-        MIN_HEIGHT,
-        window.innerHeight - TASKBAR_HEIGHT - resize.y
-      );
+      nextH = clamp(resize.h + dy, MIN_HEIGHT, window.innerHeight - TASKBAR_HEIGHT - resize.y);
     }
     if (direction.includes('n')) {
       nextH = clamp(resize.h - dy, MIN_HEIGHT, resize.y + resize.h);
@@ -539,7 +531,9 @@ function ProjectApp({ project, onOpenProject }) {
         <div className="grid gap-3 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,0.65fr)]">
           <section className="min-w-0 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
             <h3 className="text-[13px] font-semibold text-slate-900">Loyiha haqida</h3>
-            <p className="mt-2 text-[12.5px] leading-relaxed text-slate-600">{project.description}</p>
+            <p className="mt-2 text-[12.5px] leading-relaxed text-slate-600">
+              {project.description}
+            </p>
 
             <div className="mt-4 flex flex-wrap gap-1.5">
               {project.stack.map((item) => (
@@ -600,7 +594,10 @@ function ProjectApp({ project, onOpenProject }) {
           <h3 className="text-[13px] font-semibold text-slate-900">Asosiy imkoniyatlar</h3>
           <ul className="mt-3 grid gap-2 sm:grid-cols-2">
             {project.features.map((feature) => (
-              <li key={feature} className="flex min-w-0 items-start gap-2 text-[12px] text-slate-600">
+              <li
+                key={feature}
+                className="flex min-w-0 items-start gap-2 text-[12px] text-slate-600"
+              >
                 <Check size={13} className="mt-0.5 shrink-0" style={{ color: meta.accent }} />
                 <span>{feature}</span>
               </li>
@@ -622,11 +619,11 @@ const TERMINAL_INTRO = [
 
 const TERMINAL_ALIASES = {
   teacher: 'teachermuzaffar',
-  'teachermuzaffar': 'teachermuzaffar',
+  teachermuzaffar: 'teachermuzaffar',
   'teachermuzaffar.uz': 'teachermuzaffar',
   echoes: 'echoes-of-room-404',
   'echoes-of-room-404': 'echoes-of-room-404',
-  '404': 'echoes-of-room-404',
+  404: 'echoes-of-room-404',
   telegram: 'telegram-automation',
   bot: 'telegram-automation',
   'telegram-automation': 'telegram-automation',
@@ -777,7 +774,10 @@ function TerminalApp({ onOpenApp, onClose }) {
             </button>
           ))}
         </div>
-        <form onSubmit={submit} className="flex items-center gap-2 font-mono text-[11px] sm:text-[12px]">
+        <form
+          onSubmit={submit}
+          className="flex items-center gap-2 font-mono text-[11px] sm:text-[12px]"
+        >
           <label htmlFor="windows-terminal-input" className="shrink-0 text-emerald-400">
             C:\Users\Revilend&gt;
           </label>
@@ -807,7 +807,10 @@ function ThisPCApp({ onOpenApp }) {
           Bu kompyuter
         </div>
         {['Tez kirish', 'Ish stoli', 'Hujjatlar', 'Yuklamalar', 'Rasmlar'].map((item) => (
-          <span key={item} className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-[11px] text-slate-500">
+          <span
+            key={item}
+            className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-[11px] text-slate-500"
+          >
             {item === 'Rasmlar' ? <FileText size={13} /> : <Folder size={13} />}
             {item}
           </span>
@@ -1293,15 +1296,10 @@ export default function ComputerScreen({ onStandUp, onOpenProject, drawerOpen = 
     setWindows((previous) => {
       const target = previous.find((win) => win.id === id);
       if (!target) return previous;
-      const topZ = Math.max(
-        0,
-        ...previous.filter((win) => !win.minimized).map((win) => win.z)
-      );
+      const topZ = Math.max(0, ...previous.filter((win) => !win.minimized).map((win) => win.z));
       if (!target.minimized && target.z === topZ) return previous;
       const nextZ = ++zCounterRef.current;
-      return previous.map((win) =>
-        win.id === id ? { ...win, minimized: false, z: nextZ } : win
-      );
+      return previous.map((win) => (win.id === id ? { ...win, minimized: false, z: nextZ } : win));
     });
   }, []);
 
@@ -1380,9 +1378,7 @@ export default function ComputerScreen({ onStandUp, onOpenProject, drawerOpen = 
   const toggleMaximize = useCallback((id) => {
     setWindows((previous) =>
       previous.map((win) =>
-        win.id === id
-          ? { ...win, maximized: !win.maximized, snap: null, minimized: false }
-          : win
+        win.id === id ? { ...win, maximized: !win.maximized, snap: null, minimized: false } : win
       )
     );
   }, []);
@@ -1395,10 +1391,7 @@ export default function ComputerScreen({ onStandUp, onOpenProject, drawerOpen = 
       return;
     }
 
-    const topZ = Math.max(
-      0,
-      ...windows.filter((win) => !win.minimized).map((win) => win.z)
-    );
+    const topZ = Math.max(0, ...windows.filter((win) => !win.minimized).map((win) => win.z));
     if (!existing.minimized && existing.z === topZ) {
       minimizeWindow(existing.id);
     } else {
@@ -1413,9 +1406,7 @@ export default function ComputerScreen({ onStandUp, onOpenProject, drawerOpen = 
       return <ProjectApp project={project} onOpenProject={onOpenProject} />;
     }
     if (win.appId === 'terminal') {
-      return (
-        <TerminalApp onOpenApp={openApp} onClose={() => closeWindow(win.id)} />
-      );
+      return <TerminalApp onOpenApp={openApp} onClose={() => closeWindow(win.id)} />;
     }
     if (win.appId === 'notepad') {
       return <NotepadApp />;
@@ -1424,9 +1415,7 @@ export default function ComputerScreen({ onStandUp, onOpenProject, drawerOpen = 
       return <CalculatorApp />;
     }
     if (win.appId === 'settings') {
-      return (
-        <SettingsApp settings={settings} onChange={updateSettings} viewport={viewport} />
-      );
+      return <SettingsApp settings={settings} onChange={updateSettings} viewport={viewport} />;
     }
     if (win.appId === 'this-pc') {
       return <ThisPCApp onOpenApp={openApp} />;
@@ -1535,16 +1524,10 @@ export default function ComputerScreen({ onStandUp, onOpenProject, drawerOpen = 
       ) : null}
 
       {startOpen ? (
-        <StartMenu
-          query={startQuery}
-          onQueryChange={setStartQuery}
-          onOpenApp={openApp}
-        />
+        <StartMenu query={startQuery} onQueryChange={setStartQuery} onOpenApp={openApp} />
       ) : null}
 
-      {tray === 'quick' ? (
-        <QuickSettings settings={settings} onChange={updateSettings} />
-      ) : null}
+      {tray === 'quick' ? <QuickSettings settings={settings} onChange={updateSettings} /> : null}
 
       {tray === 'calendar' ? <CalendarFlyout now={now} /> : null}
 

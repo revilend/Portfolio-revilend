@@ -5,7 +5,11 @@ export default function Footer() {
     <footer className="relative border-t border-slate-800/80 bg-ink-950/60">
       <div className="container-x flex flex-col gap-8 py-10 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <a href="#top" className="flex items-center gap-2.5" aria-label="Revilend.uz — yuqoriga qaytish">
+          <a
+            href="#top"
+            className="flex items-center gap-2.5"
+            aria-label="Revilend.uz — yuqoriga qaytish"
+          >
             <span className="grid h-8 w-8 place-items-center rounded-lg bg-brand font-display text-xs font-bold text-ink-950 ring-1 ring-white/20">
               R
             </span>
@@ -14,8 +18,8 @@ export default function Footer() {
             </span>
           </a>
           <p className="mt-3 max-w-xs text-[13px] leading-relaxed text-slate-400">
-            Toshkentdan immersiv brauzer tajribalari va ishonchli toʻliq stackli tizimlar
-            yaratuvchi kreativ dasturchi.
+            Toshkentdan immersiv brauzer tajribalari va ishonchli toʻliq stackli tizimlar yaratuvchi
+            kreativ dasturchi.
           </p>
         </div>
 
@@ -55,11 +59,7 @@ export default function Footer() {
           >
             <Github size={16} />
           </a>
-          <a
-            href="#top"
-            aria-label="Yuqoriga qaytish"
-            className="btn-icon btn-icon-sm"
-          >
+          <a href="#top" aria-label="Yuqoriga qaytish" className="btn-icon btn-icon-sm">
             <ArrowUp size={16} />
           </a>
         </div>

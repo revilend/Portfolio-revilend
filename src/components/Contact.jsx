@@ -71,7 +71,9 @@ export default function Contact() {
                         <span className="block font-mono text-2xs uppercase tracking-label text-slate-400">
                           {channel.label}
                         </span>
-                        <span className="block truncate text-sm text-slate-200">{channel.value}</span>
+                        <span className="block truncate text-sm text-slate-200">
+                          {channel.value}
+                        </span>
                         <span className="mt-0.5 block truncate text-[12px] text-slate-400">
                           {channel.note}
                         </span>

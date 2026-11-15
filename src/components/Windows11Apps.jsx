@@ -511,7 +511,10 @@ export function NotepadApp() {
   };
 
   const newNote = () => {
-    if (text.trim() && !window.confirm('Joriy matn saqlanmagan boʻlishi mumkin. Yangi fayl ochilsinmi?')) {
+    if (
+      text.trim() &&
+      !window.confirm('Joriy matn saqlanmagan boʻlishi mumkin. Yangi fayl ochilsinmi?')
+    ) {
       return;
     }
     setText('');
@@ -565,7 +568,9 @@ export function NotepadApp() {
 
       <div className="flex shrink-0 items-center gap-2 border-b border-slate-100 px-3 py-1.5 text-[9.5px] text-slate-400">
         <span className="flex items-center gap-1.5">
-          <span className={`h-1.5 w-1.5 rounded-full ${dirty ? 'bg-amber-400' : 'bg-emerald-400'}`} />
+          <span
+            className={`h-1.5 w-1.5 rounded-full ${dirty ? 'bg-amber-400' : 'bg-emerald-400'}`}
+          />
           revilend-notes.txt
         </span>
         <span className="ml-auto truncate">{status}</span>
@@ -850,7 +855,9 @@ function SettingsRow({ title, description, children }) {
     <div className="flex items-start justify-between gap-4 border-b border-slate-100 py-3 last:border-b-0">
       <div className="min-w-0">
         <p className="text-[11.5px] font-medium text-slate-800">{title}</p>
-        {description ? <p className="mt-0.5 text-[10px] leading-relaxed text-slate-400">{description}</p> : null}
+        {description ? (
+          <p className="mt-0.5 text-[10px] leading-relaxed text-slate-400">{description}</p>
+        ) : null}
       </div>
       <div className="shrink-0">{children}</div>
     </div>
@@ -901,7 +908,9 @@ export function SettingsApp({ settings, onChange, viewport }) {
               type="button"
               onClick={() => setSection(item.id)}
               className={`shrink-0 rounded-full px-2.5 py-1 text-[9.5px] ${
-                section === item.id ? 'bg-white font-medium text-sky-700 shadow-sm' : 'text-slate-500'
+                section === item.id
+                  ? 'bg-white font-medium text-sky-700 shadow-sm'
+                  : 'text-slate-500'
               }`}
             >
               {item.label}
@@ -953,7 +962,9 @@ export function SettingsApp({ settings, onChange, viewport }) {
                             {wallpaper.description}
                           </span>
                         </span>
-                        {active ? <Check size={13} className="mt-0.5 shrink-0 text-sky-600" /> : null}
+                        {active ? (
+                          <Check size={13} className="mt-0.5 shrink-0 text-sky-600" />
+                        ) : null}
                       </span>
                     </button>
                   );
@@ -1047,7 +1058,10 @@ export function SettingsApp({ settings, onChange, viewport }) {
                 <SettingsRow title="Renderer" description="React 18 · Vite · Tailwind CSS">
                   <span className="font-mono text-[9px] text-slate-400">WebGL</span>
                 </SettingsRow>
-                <SettingsRow title="Ekran" description={`${viewport.width} × ${viewport.height} px`}>
+                <SettingsRow
+                  title="Ekran"
+                  description={`${viewport.width} × ${viewport.height} px`}
+                >
                   <Monitor size={15} className="text-slate-400" />
                 </SettingsRow>
                 <SettingsRow title="Vaqt mintaqasi" description="Asia/Tashkent · UTC+5">

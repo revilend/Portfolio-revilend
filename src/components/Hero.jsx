@@ -75,9 +75,7 @@ function ProfilePanel() {
         </div>
 
         <div className="relative mt-5">
-          <p className="font-mono text-2xs uppercase tracking-label text-slate-400">
-            Asosiy stack
-          </p>
+          <p className="font-mono text-2xs uppercase tracking-label text-slate-400">Asosiy stack</p>
           <div className="mt-2.5 flex flex-wrap gap-1.5">
             {STACK.map((item) => (
               <span key={item} className="chip">
@@ -144,8 +142,8 @@ export default function Hero({ onEnter3D }) {
             </p>
 
             <h1 className="mt-4 max-w-[15ch] font-display text-[2.1rem] font-semibold leading-[1.1] tracking-[-0.04em] text-white sm:text-5xl lg:text-[3.65rem] lg:leading-[1.04]">
-              Gʻoyalarni{' '}
-              <span className="text-gradient">interaktiv va jonli</span> tizimlarga aylantiraman.
+              Gʻoyalarni <span className="text-gradient">interaktiv va jonli</span> tizimlarga
+              aylantiraman.
             </h1>
 
             <p className="mt-6 max-w-xl text-[15px] leading-relaxed text-slate-400 sm:text-base">

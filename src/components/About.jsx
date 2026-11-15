@@ -26,7 +26,8 @@ const IDENTITY_LINES = IDENTITY_JSON.split('\n');
 const PRINCIPLES = [
   {
     title: 'Unumdorlik ham xususiyat',
-    detail: 'Sahna haqiqiy qurilmalarda kadr tezligini saqlab turmaguncha tugallangan hisoblanmaydi.',
+    detail:
+      'Sahna haqiqiy qurilmalarda kadr tezligini saqlab turmaguncha tugallangan hisoblanmaydi.',
   },
   {
     title: 'Avval tizim, keyin ekran',
@@ -38,7 +39,8 @@ const PRINCIPLES = [
   },
 ];
 
-const TOKEN_PATTERN = /("(?:[^"\\]|\\.)*")|(-?\d+(?:\.\d+)?)|(\btrue\b|\bfalse\b|\bnull\b)|([{}[\],:])/g;
+const TOKEN_PATTERN =
+  /("(?:[^"\\]|\\.)*")|(-?\d+(?:\.\d+)?)|(\btrue\b|\bfalse\b|\bnull\b)|([{}[\],:])/g;
 
 const PUNCTUATION = 'text-slate-400';
 const KEY = 'text-cyan-300';
@@ -218,9 +220,9 @@ export default function About({ onNotify }) {
             <div className="mt-6 space-y-4 text-[14.5px] leading-relaxed text-slate-400">
               <p>
                 Men Revilend — Toshkentda yashovchi kreativ dasturchiman. Ishlarim real vaqtda
-                ishlaydigan Three.js sahnalarini mahsulotni ishonchli qiladigan muhim qismlar
-                bilan uygʻunlashtiradi: Postgres sxemalari, qatorlar darajasidagi xavfsizlik,
-                navbatga asoslangan vazifalar va barqaror bulutli joylashtirishlar.
+                ishlaydigan Three.js sahnalarini mahsulotni ishonchli qiladigan muhim qismlar bilan
+                uygʻunlashtiradi: Postgres sxemalari, qatorlar darajasidagi xavfsizlik, navbatga
+                asoslangan vazifalar va barqaror bulutli joylashtirishlar.
               </p>
               <p>
                 Chiqargan ishlarimning aksariyati brauzerda ishlaydi: har kuni ochiladigan maktab

@@ -7,11 +7,17 @@ const GROUPS = [
     title: 'Frontend & 3D',
     description: 'Tez chizadigan va qoʻlda ushlagandek tuyuladigan interfeyslar.',
     icon: Code2,
-    items: ['JavaScript (ES6+)', 'Three.js', 'Canvas API', 'Tailwind CSS', 'Web Audio API', 'HTML5 / CSS3'],
+    items: [
+      'JavaScript (ES6+)',
+      'Three.js',
+      'Canvas API',
+      'Tailwind CSS',
+      'Web Audio API',
+      'HTML5 / CSS3',
+    ],
     accent: {
       icon: 'border-electric/25 bg-electric/10 text-electric',
-      hover:
-        'hover:border-electric/30 hover:shadow-[0_36px_90px_-55px_rgba(0,242,254,0.9)]',
+      hover: 'hover:border-electric/30 hover:shadow-[0_36px_90px_-55px_rgba(0,242,254,0.9)]',
       marker: 'bg-electric',
     },
     index: '01',
@@ -60,33 +66,39 @@ export default function Arsenal() {
             const Icon = group.icon;
             return (
               <Reveal key={group.title} delay={index * 100} className="h-full min-w-0">
-              <div
-                className={`group relative flex h-full flex-col overflow-hidden glass rounded-2xl p-6 transition duration-500 hover:-translate-y-1 ${group.accent.hover}`}
-              >
-                <span className="absolute right-5 top-5 font-mono text-2xs tracking-label text-slate-700">
-                  /{group.index}
-                </span>
+                <div
+                  className={`group relative flex h-full flex-col overflow-hidden glass rounded-2xl p-6 transition duration-500 hover:-translate-y-1 ${group.accent.hover}`}
+                >
+                  <span className="absolute right-5 top-5 font-mono text-2xs tracking-label text-slate-700">
+                    /{group.index}
+                  </span>
 
-                <div className={`grid h-11 w-11 place-items-center rounded-xl border ${group.accent.icon}`}>
-                  <Icon size={20} />
+                  <div
+                    className={`grid h-11 w-11 place-items-center rounded-xl border ${group.accent.icon}`}
+                  >
+                    <Icon size={20} />
+                  </div>
+
+                  <h3 className="mt-5 font-display text-lg font-semibold text-white">
+                    {group.title}
+                  </h3>
+                  <p className="mt-2 text-[13px] leading-relaxed text-slate-400">
+                    {group.description}
+                  </p>
+
+                  <div className="mt-5 flex flex-1 flex-wrap content-start gap-1.5 border-t border-slate-800/80 pt-5">
+                    {group.items.map((item) => (
+                      <span key={item} className="chip">
+                        {item}
+                      </span>
+                    ))}
+                  </div>
+
+                  <p className="mt-5 flex items-center gap-2 font-mono text-2xs uppercase tracking-tag text-slate-400">
+                    <span className={`h-1 w-1 rounded-full ${group.accent.marker}`} />
+                    {String(group.items.length).padStart(2, '0')} ta vosita ishlatilmoqda
+                  </p>
                 </div>
-
-                <h3 className="mt-5 font-display text-lg font-semibold text-white">{group.title}</h3>
-                <p className="mt-2 text-[13px] leading-relaxed text-slate-400">{group.description}</p>
-
-                <div className="mt-5 flex flex-1 flex-wrap content-start gap-1.5 border-t border-slate-800/80 pt-5">
-                  {group.items.map((item) => (
-                    <span key={item} className="chip">
-                      {item}
-                    </span>
-                  ))}
-                </div>
-
-                <p className="mt-5 flex items-center gap-2 font-mono text-2xs uppercase tracking-tag text-slate-400">
-                  <span className={`h-1 w-1 rounded-full ${group.accent.marker}`} />
-                  {String(group.items.length).padStart(2, '0')} ta vosita ishlatilmoqda
-                </p>
-              </div>
               </Reveal>
             );
           })}

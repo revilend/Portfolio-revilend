@@ -114,7 +114,10 @@ export default function App() {
             Asosiy kontentga oʻtish
           </a>
 
-          <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none fixed inset-0 -z-10 overflow-hidden"
+          >
             <div className="absolute inset-0 bg-ink-900" />
             <div className="absolute inset-x-0 top-0 h-[880px] opacity-[0.13] [background-image:radial-gradient(rgba(148,163,184,0.45)_0.6px,transparent_0.6px)] [background-size:24px_24px] [mask-image:linear-gradient(to_bottom,black,transparent_78%)]" />
             <div className="absolute inset-y-0 left-1/2 hidden w-full max-w-6xl -translate-x-1/2 border-x border-white/[0.025] lg:block" />
@@ -141,7 +144,9 @@ export default function App() {
 
       <ProjectDrawer project={activeProject} onClose={closeProject} />
 
-      {toast ? <Toast key={toast.id} message={toast.message} onClose={() => setToast(null)} /> : null}
+      {toast ? (
+        <Toast key={toast.id} message={toast.message} onClose={() => setToast(null)} />
+      ) : null}
     </div>
   );
 }

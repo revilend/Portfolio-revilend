@@ -43,8 +43,7 @@ export const projects = [
     title: 'Telegram Auto-Bots',
     tagline: 'Automation & Cloud',
     status: { label: 'Production', tone: 'cyan' },
-    description:
-      'High-speed content delivery and AI-integrated (Gemini API) bot pipelines.',
+    description: 'High-speed content delivery and AI-integrated (Gemini API) bot pipelines.',
     stack: ['Node.js', 'Telegram Bot API', 'Gemini API', 'Webhooks', 'Render'],
     url: null,
     features: [
