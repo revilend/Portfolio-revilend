@@ -11,6 +11,7 @@ import ProjectDrawer from './components/ProjectDrawer.jsx';
 import { projects } from './data/projects.js';
 import { projectPath, readProjectId } from './lib/projectUrl.js';
 import { initTelegramWebApp, setTelegramBackButton } from './lib/telegram.js';
+import { installErrorReporting, pingVisit } from './lib/telemetry.js';
 
 const CyberRoomView = lazy(() => import('./components/CyberRoomView.jsx'));
 
@@ -102,6 +103,14 @@ export default function App() {
   // is a no-op. Tinting the client chrome keeps the dark page seamless.
   useEffect(() => {
     initTelegramWebApp();
+  }, []);
+
+  // A broken page on a visitor's phone is otherwise invisible: forward crashes
+  // and WebGL context loss to the bot, and count the visit for the summary.
+  useEffect(() => {
+    const stopReporting = installErrorReporting();
+    pingVisit();
+    return stopReporting;
   }, []);
 
   // Inside Telegram the native back button should close the drawer instead of

@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import ComputerScreen from './ComputerScreen.jsx';
 import { projects } from '../data/projects.js';
+import { attachWebglDiagnostics } from '../lib/telemetry.js';
 import { THEME } from '../theme.js';
 
 const VIEWS = [
@@ -801,6 +802,9 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
     renderer.domElement.setAttribute('aria-hidden', 'true');
     mount.appendChild(renderer.domElement);
     const canvas = renderer.domElement;
+    // Losing the GPU context leaves a black screen with no trace: report it, and
+    // ask the browser to restore instead of giving up on the room.
+    const stopWebglDiagnostics = attachWebglDiagnostics(canvas);
 
     // Lighting is intentionally generous so the room reads clearly, never pitch black.
     scene.add(new THREE.AmbientLight('#9fc6ff', 2.8));
@@ -1957,6 +1961,7 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
         });
       });
 
+      stopWebglDiagnostics();
       renderer.dispose();
       if (canvas.parentNode === mount) mount.removeChild(canvas);
     };
