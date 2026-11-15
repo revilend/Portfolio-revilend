@@ -9,6 +9,8 @@ import Footer from './components/Footer.jsx';
 import Toast from './components/Toast.jsx';
 import ProjectDrawer from './components/ProjectDrawer.jsx';
 import { projects } from './data/projects.js';
+import { projectPath, readProjectId } from './lib/projectUrl.js';
+import { initTelegramWebApp, setTelegramBackButton } from './lib/telegram.js';
 
 const CyberRoomView = lazy(() => import('./components/CyberRoomView.jsx'));
 
@@ -25,9 +27,20 @@ function RoomLoader() {
   );
 }
 
+// A deep link such as /loyiha/teachermuzaffar/ opens that project's drawer, so
+// a shared link lands on the thing that was shared.
+function projectFromLocation() {
+  if (typeof window === 'undefined') return null;
+
+  const id = readProjectId(window.location);
+  if (!id) return null;
+
+  return projects.find((project) => project.id === id) ?? null;
+}
+
 export default function App() {
   const [mode, setMode] = useState('2d');
-  const [activeProject, setActiveProject] = useState(null);
+  const [activeProject, setActiveProject] = useState(projectFromLocation);
   const [toast, setToast] = useState(null);
   const [pendingContact, setPendingContact] = useState(false);
 
@@ -35,23 +48,46 @@ export default function App() {
     setToast({ message, id: Date.now() });
   }, []);
 
+  const clearProjectUrl = useCallback(() => {
+    if (readProjectId(window.location)) window.history.replaceState({}, '', '/');
+  }, []);
+
   const openProject = useCallback((project) => {
     setActiveProject(project);
+
+    if (readProjectId(window.location) !== project.id) {
+      window.history.pushState({ projectId: project.id }, '', projectPath(project.id));
+    }
   }, []);
 
-  const openProjectById = useCallback((id) => {
-    const project = projects.find((item) => item.id === id);
-    if (project) setActiveProject(project);
-  }, []);
+  const openProjectById = useCallback(
+    (id) => {
+      const project = projects.find((item) => item.id === id);
+      if (project) openProject(project);
+    },
+    [openProject]
+  );
 
   const closeProject = useCallback(() => {
-    setActiveProject(null);
-  }, []);
+    // When the project came from an in-page click we pushed a history entry, so
+    // closing is a real back navigation. A deep link has no entry to pop.
+    if (window.history.state?.projectId) {
+      window.history.back();
+      return;
+    }
 
-  const changeMode = useCallback((nextMode) => {
     setActiveProject(null);
-    setMode(nextMode);
-  }, []);
+    clearProjectUrl();
+  }, [clearProjectUrl]);
+
+  const changeMode = useCallback(
+    (nextMode) => {
+      setActiveProject(null);
+      clearProjectUrl();
+      setMode(nextMode);
+    },
+    [clearProjectUrl]
+  );
 
   const handleContact = useCallback(() => {
     if (mode === '3d') {
@@ -61,6 +97,27 @@ export default function App() {
     }
     document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
   }, [mode, changeMode]);
+
+  // Telegram injects its WebApp SDK inside the Mini App; everywhere else this
+  // is a no-op. Tinting the client chrome keeps the dark page seamless.
+  useEffect(() => {
+    initTelegramWebApp();
+  }, []);
+
+  // Inside Telegram the native back button should close the drawer instead of
+  // leaving the Mini App.
+  useEffect(() => {
+    if (!activeProject) return setTelegramBackButton(false);
+
+    return setTelegramBackButton(true, () => closeProject());
+  }, [activeProject, closeProject]);
+
+  // Browser back/forward keeps the drawer in sync with the URL.
+  useEffect(() => {
+    const handlePopState = () => setActiveProject(projectFromLocation());
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   // Warm the 3D chunk after first paint, but skip it on metered or slow
   // connections: it is ~150 kB gzipped and most visitors never open the room.

@@ -1,12 +1,14 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import { projectPages } from './build/projectPages.js';
 
 // PREVIEW_HOST is only provided by the hosted preview environment, so no
 // machine-specific hostnames ever end up in the repository.
 const previewHost = process.env.PREVIEW_HOST;
+const site = process.env.SITE_ORIGIN || 'https://revilend.uz';
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), projectPages({ site })],
   build: {
     rollupOptions: {
       output: {
