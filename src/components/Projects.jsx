@@ -9,7 +9,7 @@ import StatusBadge from './StatusBadge.jsx';
 const VISUALS = {
   teachermuzaffar: {
     icon: GraduationCap,
-    kicker: 'Education / Realtime',
+    kicker: 'Taʼlim / Real vaqt',
     surface: 'from-cyan-500/[0.18] via-sky-500/[0.06] to-transparent',
     glow: 'bg-cyan-400/20',
     iconClass: 'border-cyan-400/25 bg-cyan-400/10 text-cyan-200',
@@ -17,7 +17,7 @@ const VISUALS = {
   },
   'echoes-of-room-404': {
     icon: Ghost,
-    kicker: '3D / Experimental',
+    kicker: '3D / Eksperimental',
     surface: 'from-violet-500/[0.20] via-fuchsia-500/[0.06] to-transparent',
     glow: 'bg-violet-400/20',
     iconClass: 'border-violet-400/25 bg-violet-400/10 text-violet-200',
@@ -25,7 +25,7 @@ const VISUALS = {
   },
   'telegram-automation': {
     icon: Bot,
-    kicker: 'Automation / Cloud',
+    kicker: 'Avtomatlashtirish / Bulut',
     surface: 'from-emerald-500/[0.18] via-teal-500/[0.06] to-transparent',
     glow: 'bg-emerald-400/20',
     iconClass: 'border-emerald-400/25 bg-emerald-400/10 text-emerald-200',

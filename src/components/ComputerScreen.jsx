@@ -4,7 +4,6 @@ import {
   BatteryFull,
   Bot,
   Calculator,
-  Check,
   ChevronRight,
   ExternalLink,
   FileText,
@@ -583,26 +582,33 @@ function ProjectApp({ project, onOpenProject }) {
                 <dd className="font-medium text-slate-700">{project.stack.length} texnologiya</dd>
               </div>
               <div className="flex items-center justify-between gap-2">
-                <dt className="text-slate-400">Imkoniyatlar</dt>
-                <dd className="font-medium text-slate-700">{project.features.length} ta</dd>
+                <dt className="text-slate-400">Qarorlar</dt>
+                <dd className="font-medium text-slate-700">{project.decisions.length} ta</dd>
               </div>
             </dl>
           </aside>
         </div>
 
         <section className="mt-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-          <h3 className="text-[13px] font-semibold text-slate-900">Asosiy imkoniyatlar</h3>
-          <ul className="mt-3 grid gap-2 sm:grid-cols-2">
-            {project.features.map((feature) => (
-              <li
-                key={feature}
-                className="flex min-w-0 items-start gap-2 text-[12px] text-slate-600"
+          <h3 className="text-[13px] font-semibold text-slate-900">Muammo</h3>
+          <p className="mt-1.5 text-[12px] leading-relaxed text-slate-600">{project.problem}</p>
+
+          <h3 className="mt-4 text-[13px] font-semibold text-slate-900">Natija raqamlarda</h3>
+          <dl className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
+            {project.results.map((result) => (
+              <div
+                key={result.label}
+                className="min-w-0 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-2"
               >
-                <Check size={13} className="mt-0.5 shrink-0" style={{ color: meta.accent }} />
-                <span>{feature}</span>
-              </li>
+                <dt className="font-display text-base font-semibold leading-tight text-slate-900">
+                  {result.value}
+                </dt>
+                <dd className="mt-0.5 font-mono text-[9px] uppercase leading-tight tracking-[0.12em] text-slate-500">
+                  {result.label}
+                </dd>
+              </div>
             ))}
-          </ul>
+          </dl>
         </section>
       </div>
     </div>

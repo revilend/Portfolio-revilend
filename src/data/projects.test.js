@@ -36,10 +36,42 @@ describe('projects data', () => {
   it('provides the copy the cards and drawer render', () => {
     for (const project of projects) {
       expect(project.stack.length).toBeGreaterThan(0);
-      expect(project.features.length).toBeGreaterThan(0);
       expect(project.description.length).toBeGreaterThan(0);
       expect(project.title.length).toBeGreaterThan(0);
       expect(project.tagline.length).toBeGreaterThan(0);
+    }
+  });
+
+  it('carries a complete case study: problem, decisions, results', () => {
+    for (const project of projects) {
+      expect(project.problem.length).toBeGreaterThan(80);
+      expect(project.constraints.length).toBeGreaterThan(1);
+      expect(project.decisions.length).toBeGreaterThan(2);
+      expect(project.results.length).toBeGreaterThan(2);
+    }
+  });
+
+  it('explains why each architectural decision was made', () => {
+    for (const project of projects) {
+      for (const decision of project.decisions) {
+        expect(decision.choice.length).toBeGreaterThan(3);
+        expect(decision.why.length).toBeGreaterThan(40);
+      }
+    }
+  });
+
+  it('reports results as a value with a unit or label', () => {
+    for (const project of projects) {
+      for (const result of project.results) {
+        expect(result.value).toMatch(/^[\d.,]+\s?\p{L}*$/u);
+        expect(result.label.length).toBeGreaterThan(3);
+      }
+    }
+  });
+
+  it('keeps the old feature list out of the data', () => {
+    for (const project of projects) {
+      expect(project).not.toHaveProperty('features');
     }
   });
 });

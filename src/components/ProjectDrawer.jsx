@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { Check, ExternalLink, X } from 'lucide-react';
+import { ExternalLink, X } from 'lucide-react';
 import { trapTabKey } from '../lib/focusTrap.js';
 import { hasShots } from '../lib/projectShots.js';
 import ProjectShot from './ProjectShot.jsx';
@@ -111,15 +111,53 @@ export default function ProjectDrawer({ project, onClose }) {
           </div>
 
           <div className="mt-8">
-            <p className="mono-label">Asosiy imkoniyatlar</p>
-            <ul className="mt-3 space-y-2.5">
-              {project.features.map((feature) => (
-                <li key={feature} className="flex items-start gap-2.5 text-[13.5px] text-slate-300">
-                  <Check size={14} className="mt-0.5 shrink-0 text-electric" />
-                  <span>{feature}</span>
+            <p className="mono-label">Muammo va cheklovlar</p>
+            <p className="mt-3 text-[13.5px] leading-relaxed text-slate-300">{project.problem}</p>
+            <ul className="mt-3 flex flex-wrap gap-1.5">
+              {project.constraints.map((constraint) => (
+                <li key={constraint} className="chip">
+                  {constraint}
                 </li>
               ))}
             </ul>
+          </div>
+
+          <div className="mt-8">
+            <p className="mono-label">Arxitektura qarorlari</p>
+            <ol className="mt-3 space-y-4">
+              {project.decisions.map((decision, position) => (
+                <li key={decision.choice} className="border-l border-slate-800 pl-3.5">
+                  <p className="flex items-baseline gap-2 text-[13.5px] font-medium text-white">
+                    <span className="font-mono text-2xs tracking-label text-electric/70">
+                      {String(position + 1).padStart(2, '0')}
+                    </span>
+                    {decision.choice}
+                  </p>
+                  <p className="mt-1 text-[12.5px] leading-relaxed text-slate-400">
+                    {decision.why}
+                  </p>
+                </li>
+              ))}
+            </ol>
+          </div>
+
+          <div className="mt-8">
+            <p className="mono-label">Natija raqamlarda</p>
+            <dl className="mt-3 grid grid-cols-2 gap-2.5">
+              {project.results.map((result) => (
+                <div
+                  key={result.label}
+                  className="rounded-xl border border-slate-800/80 bg-ink-950/60 px-3 py-2.5"
+                >
+                  <dt className="font-display text-lg font-semibold tracking-tight text-white">
+                    {result.value}
+                  </dt>
+                  <dd className="mt-0.5 font-mono text-2xs uppercase leading-snug tracking-tag text-slate-400">
+                    {result.label}
+                  </dd>
+                </div>
+              ))}
+            </dl>
           </div>
         </div>
 
