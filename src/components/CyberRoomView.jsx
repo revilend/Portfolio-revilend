@@ -38,7 +38,7 @@ const VIEWS = [
     phi: 1.46,
   },
   {
-    key: 'echoes-of-room-404',
+    key: 'horror-game',
     label: '2. 3D Oʻyin',
     target: [1.55, 1.92, -0.5],
     radius: 2.05,
@@ -47,8 +47,8 @@ const VIEWS = [
     phi: 1.44,
   },
   {
-    key: 'telegram-automation',
-    label: '3. Telegram Bot',
+    key: 'revilend-games',
+    label: '3. Revilend Games',
     target: [-1.95, 1.45, 0.05],
     radius: 1.9,
     mobileRadius: 2.8,
@@ -61,8 +61,8 @@ const VIEWS = [
 // data so a renamed or removed project can never leave a dead pin behind.
 const PIN_META = {
   teachermuzaffar: { label: 'teachermuzaffar.uz', anchor: [-0.35, 2.72, -0.4] },
-  'echoes-of-room-404': { label: 'Echoes 404', anchor: [1.55, 2.8, -0.35] },
-  'telegram-automation': { label: 'Telegram Bot', anchor: [-1.95, 1.95, 0.2] },
+  'horror-game': { label: 'Horror Game', anchor: [1.55, 2.8, -0.35] },
+  'revilend-games': { label: 'Revilend Games', anchor: [-1.95, 1.95, 0.2] },
 };
 
 const PINS = projects
@@ -340,7 +340,7 @@ function drawEchoesScreen(ctx, width, height) {
   ctx.shadowBlur = 30;
   ctx.fillStyle = '#f5f3ff';
   ctx.font = '700 86px "Space Grotesk", sans-serif';
-  ctx.fillText('ECHOES', width / 2, 292);
+  ctx.fillText('HORROR', width / 2, 292);
   ctx.font = '600 58px "Space Grotesk", sans-serif';
   ctx.fillText('OF ROOM', width / 2, 370);
   ctx.font = '800 168px "Space Grotesk", sans-serif';
@@ -421,7 +421,7 @@ function drawTelegramScreen(ctx, width, height) {
   ctx.fillText('Telegram', 58, 255);
   ctx.font = '700 88px "Space Grotesk", sans-serif';
   ctx.fillStyle = '#7df9ff';
-  ctx.fillText('Auto-Bots', 58, 355);
+  ctx.fillText('Games', 58, 355);
   ctx.restore();
 
   ctx.fillStyle = '#5b7183';
@@ -730,8 +730,8 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
         return;
       }
       if (key === '1') focusView('teachermuzaffar');
-      else if (key === '2') focusView('echoes-of-room-404');
-      else if (key === '3') focusView('telegram-automation');
+      else if (key === '2') focusView('horror-game');
+      else if (key === '3') focusView('revilend-games');
       else if (key === '0' || key === 'r') focusView('desk');
       else if (key === '+' || key === '=') cameraApiRef.current?.zoom(0.88);
       else if (key === '-' || key === '_') cameraApiRef.current?.zoom(1.14);
@@ -1315,7 +1315,7 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
       y: 1.95,
       z: -0.58,
       rotationY: -0.2,
-      projectId: 'echoes-of-room-404',
+      projectId: 'horror-game',
     });
 
     const laptop = new THREE.Group();
@@ -1342,7 +1342,7 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
     const lid = new THREE.Mesh(new THREE.BoxGeometry(1.18, 0.74, 0.04), frameMaterial);
     lid.position.y = 0.37;
     lid.castShadow = true;
-    lid.userData.projectId = 'telegram-automation';
+    lid.userData.projectId = 'revilend-games';
     lidPivot.add(lid);
 
     const laptopScreen = new THREE.Mesh(
@@ -1350,7 +1350,7 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
       new THREE.MeshBasicMaterial({ map: telegramTexture, toneMapped: false })
     );
     laptopScreen.position.set(0, 0.37, 0.023);
-    laptopScreen.userData.projectId = 'telegram-automation';
+    laptopScreen.userData.projectId = 'revilend-games';
     lidPivot.add(laptopScreen);
 
     clickTargets.push(laptopScreen, lid);

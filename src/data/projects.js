@@ -1,22 +1,82 @@
 /**
- * Har bir loyiha — keys tuzilmasida:
- *   problem      muammo va cheklovlar
- *   constraints  cheklovlar roʻyxati (chip)
- *   decisions    arxitektura qarorlari va nega aynan shunday
- *   results      raqamlardagi natija (value + label)
- *
- * Raqamlar loyihalarning oʻz kodidan va jonli nusxalaridan olingan, taxmin emas.
+ * Faqat tugallangan loyihalar. Har bir yozuv:
+ *   category   'bot' | 'web' | 'game' — filtr pill'lari uchun
+ *   featured   bento setkasida ikki ustunni egallaydi
+ *   repo       GitHub manzili (har bir loyihada majburiy)
+ *   url        jonli nusxa, boʻlmasa null
+ *   shots      haqiqiy skrinshot (faqat tekshirilgan loyihalarda)
+ *   problem / constraints / decisions / results — keys, faqat tasdiqlangan
+ *              loyihalarda; modal ularni bor boʻlsa koʻrsatadi.
  */
+export const PROJECT_CATEGORIES = [
+  { id: 'all', label: 'Barchasi' },
+  { id: 'bot', label: 'Telegram Botlar' },
+  { id: 'web', label: 'Veb va Taʼlim' },
+  { id: 'game', label: 'Oʻyinlar' },
+];
+
 export const projects = [
   {
-    id: 'teachermuzaffar',
+    id: 'revilend-games',
     index: '01',
+    title: 'Revilend Games',
+    tagline: 'Telegram bot',
+    category: 'bot',
+    featured: true,
+    status: { label: 'Ishlab chiqarishda', tone: 'cyan' },
+    description:
+      '5 ta oʻyinni (Bunker, Mafiya, Josus, Alias, Portlovchi Bomba) birlashtirgan Telegram bot va Mini App ekotizimi.',
+    stack: ['Python', 'Telegram Mini App', 'Supabase', 'Render'],
+    repo: 'https://github.com/revilend/Telegram_oyin',
+    url: 'https://t.me/revilend_gamesbot',
+  },
+  {
+    id: 'stars-savdo',
+    index: '02',
+    title: 'Stars Savdo',
+    tagline: 'Telegram bot',
+    category: 'bot',
+    status: { label: 'Ishlab chiqarishda', tone: 'cyan' },
+    description: 'Telegram Stars sotib olish va sotishni avtomatlashtiruvchi savdo boti.',
+    stack: ['Python', 'Telegram Bot API'],
+    repo: 'https://github.com/revilend/Starssavdo',
+    url: null,
+  },
+  {
+    id: 'mlbb-savdo',
+    index: '03',
+    title: 'MLBB Savdo',
+    tagline: 'Telegram bot',
+    category: 'bot',
+    status: { label: 'Ishlab chiqarishda', tone: 'cyan' },
+    description: 'Mobile Legends oʻyini uchun avtomatlashtirilgan raqamli doʻkon va toʻlov boti.',
+    stack: ['Python', 'Telegram Bot API'],
+    repo: 'https://github.com/revilend/Mlbb-savdo',
+    url: null,
+  },
+  {
+    id: 'pulsarcoin-bot',
+    index: '04',
+    title: 'PulsarCoin Bot',
+    tagline: 'Telegram bot',
+    category: 'bot',
+    status: { label: 'Ishlab chiqarishda', tone: 'cyan' },
+    description: 'Interaktiv ichki tangalar va mukofotlar tizimiga ega Telegram bot.',
+    stack: ['Python', 'Telegram Bot API'],
+    repo: 'https://github.com/revilend/Pulsarcoinbot',
+    url: null,
+  },
+  {
+    id: 'teachermuzaffar',
+    index: '05',
     title: 'teachermuzaffar.uz',
     tagline: 'Veb portal',
+    category: 'web',
+    featured: true,
     status: { label: 'Onlayn', tone: 'green' },
-    description:
-      'Uyga vazifa, baholar va davomatni bitta joyda yuritadigan, Telegram Mini App sifatida ham ochiladigan oʻquv platformasi.',
-    stack: ['Supabase', 'PostgreSQL', 'Supabase Auth', 'JavaScript', 'Realtime DB'],
+    description: 'Ustoz uchun yaratilgan zamonaviy taʼlim va realtime veb-portal.',
+    stack: ['JavaScript', 'Supabase', 'PostgreSQL', 'Realtime'],
+    repo: 'https://github.com/revilend/teachermuzaffaruz',
     url: 'https://teachermuzaffar.uz',
     shots: {
       alt: 'teachermuzaffar.uz bosh sahifasi: "English Teacher — Muzaffar Amirov" sarlavhasi, tizimga kirish tugmasi va uyga vazifa, baholar hamda Telegram bot boʻlimlari',
@@ -49,10 +109,6 @@ export const projects = [
         choice: 'Speaking topshirigʻi Telegram bot orqali',
         why: 'Ovozli yoki video javobni saytga yuklashdan koʻra Telegramʼda yuborish osonroq; bot faylni qabul qiladi va natija jurnalga tushadi.',
       },
-      {
-        choice: 'jsdom smoke va Python bot-check testlari',
-        why: 'Build tizimi yoʻqligi sababli DOM oqimlari jsdomʼda, bot oqimi esa alohida Python skriptida tekshiriladi — deploydan oldingi yagona toʻsiq shu.',
-      },
     ],
     results: [
       { value: '0', label: 'framework / build qadami' },
@@ -62,17 +118,54 @@ export const projects = [
     ],
   },
   {
-    id: 'echoes-of-room-404',
-    index: '02',
-    title: 'Echoes of Room 404',
-    tagline: '3D veb oʻyin',
-    status: { label: 'Prototip', tone: 'amber' },
-    description:
-      'St. Jude kasalxonasining 404-xonasida kechadigan, brauzerda oflayn oʻynaladigan birinchi shaxs qoʻrqinchli oʻyin.',
-    stack: ['Three.js', 'Web Audio API', 'TypeScript', 'Vite'],
+    id: 'konushma',
+    index: '06',
+    title: 'Konuşma',
+    tagline: 'Veb ilova',
+    category: 'web',
+    status: { label: 'Onlayn', tone: 'green' },
+    description: 'Turk tilida gaplashish va suhbat amaliyoti uchun interaktiv veb-ilova.',
+    stack: ['JavaScript', 'Web'],
+    repo: 'https://github.com/revilend/Konushma',
+    url: 'https://konushma.vercel.app',
+  },
+  {
+    id: 'dinleme-turkce',
+    index: '07',
+    title: 'Dinleme Türkçe',
+    tagline: 'Veb ilova',
+    category: 'web',
+    status: { label: 'Onlayn', tone: 'green' },
+    description: 'Turk tilini tinglab tushunish (dinleme) koʻnikmasini rivojlantiruvchi ilova.',
+    stack: ['Python', 'Audio'],
+    repo: 'https://github.com/revilend/Dinleme-T-rk-e-',
+    url: null,
+  },
+  {
+    id: 'english-learning',
+    index: '08',
+    title: 'English Learning',
+    tagline: 'Veb ilova',
+    category: 'web',
+    status: { label: 'Onlayn', tone: 'green' },
+    description: 'Ingliz tili soʻz boyligi va grammatikasini oʻrganish uchun veb-ilova.',
+    stack: ['JavaScript', 'Web'],
+    repo: 'https://github.com/revilend/English-learning',
+    url: null,
+  },
+  {
+    id: 'horror-game',
+    index: '09',
+    title: 'Horror Game',
+    tagline: 'Veb oʻyin',
+    category: 'game',
+    status: { label: 'Onlayn', tone: 'green' },
+    description: 'Brauzerda ishlaydigan atmosferik qoʻrqinchli (horror) veb-oʻyin.',
+    stack: ['TypeScript', 'Canvas / WebGL'],
+    repo: 'https://github.com/revilend/Horror-game',
     url: null,
     shots: {
-      alt: 'Echoes of Room 404 oʻyinning titul ekrani: "DR. ARIS — THE MAD SURGEON", Room 404, 1987 va "OPEN YOUR EYES" tugmasi',
+      alt: 'Horror Game ochilish ekrani: "DR. ARIS — THE MAD SURGEON", Room 404, 1987 va "OPEN YOUR EYES" tugmasi',
       caption: 'Haqiqiy skrinshot · oʻyinning ochilish ekrani',
       width: 1440,
       height: 829,
@@ -97,62 +190,47 @@ export const projects = [
         choice: 'Web Audio API bilan pozitsion ovoz',
         why: 'Ovoz manbai xonadagi joyiga bogʻlanadi (qadamlar, monitor shovqini), tashqi audio kutubxonasiz — qoʻshimcha hajm va litsenziya tashvishisiz.',
       },
-      {
-        choice: 'standalone/ nusxasi va ildiz index.html yoʻnaltirishi',
-        why: 'GitHub Pages “Deploy from a branch” rejimida qolishi mumkin: u holda repo ildizidagi build qilinmagan index.html eʼlon qilinadi. Shuning uchun build natijasi standalone/ ga koʻchiriladi, ildiz fayl esa visitorʼni oʻsha yerga yoʻnaltiradi — repo sozlamalariga tegmasdan.',
-      },
     ],
     results: [
       { value: '1', label: 'runtime kutubxona (three)' },
       { value: '0', label: 'server soʻrovi — oflayn' },
       { value: '26 MB', label: 'audio va tekstura aktivlari' },
-      { value: '1', label: 'qoʻlda yozilgan kolliziya qatlami' },
     ],
   },
   {
-    id: 'telegram-automation',
-    index: '03',
-    title: 'Telegram Auto-Bots',
-    tagline: 'Avtomatlashtirish',
-    status: { label: 'Ishlamoqda', tone: 'cyan' },
-    description:
-      'Sayt formasi va Telegram botini bitta jarayonda birlashtirgan avtomatlashtirish: xabar yoʻqolmaydi, ochiq endpoint esa flooddan himoyalangan.',
-    stack: ['Python', 'aiogram', 'aiohttp', 'Telegram Bot API', 'Render'],
+    id: 'parkour',
+    index: '10',
+    title: 'Parkour',
+    tagline: 'Veb oʻyin',
+    category: 'game',
+    status: { label: 'Onlayn', tone: 'green' },
+    description: 'Dinamik va tezkor harakatlarga asoslangan brauzer parkur oʻyini.',
+    stack: ['TypeScript', 'Web'],
+    repo: 'https://github.com/revilend/Parkour',
     url: null,
-    problem:
-      'Saytdagi bogʻlanish formasi xabarni toʻgʻridan-toʻgʻri Telegramga yetkazishi kerak edi, lekin bu endpoint autentifikatsiyasiz va dunyoning istalgan IPʼsidan keladi. Bot tokeni esa faqat serverda turishi shart, alohida backend va alohida bot jarayoni esa byudjetga sigʻmasdi.',
-    constraints: [
-      'Ochiq, authsiz HTTP endpoint',
-      'Bitta kichik jarayon',
-      'Token kliyentga chiqmasin',
-    ],
-    decisions: [
-      {
-        choice: 'aiohttp va aiogram — bitta processda',
-        why: 'HTTP qatlam va bot polling bitta asyncio loopʼda ishlaydi: alohida servis, navbat yoki proksi kerak emas. / yoʻli health-check boʻlib, hostingning tiriklik tekshiruviga javob beradi.',
-      },
-      {
-        choice: 'Fail-closed: token yoki ADMIN_ID yoʻq boʻlsa 503',
-        why: 'Yetkazib boʻlmaydigan xabarni “qabul qildim” deb qaytarish — jimgina yoʻqotish. Shuning uchun konfiguratsiya toʻliq boʻlmasa endpoint ochiq xato qaytaradi va log sababni yozadi.',
-      },
-      {
-        choice: 'IP boʻyicha 5 soʻrov / 10 daqiqa, 2048 IP chegarasi',
-        why: 'Oyna floodni toʻxtatish uchun yetarli, xotira esa cheklangan: eng eski IPʼlar tashlab yuboriladi, shuning uchun lugʻat cheksiz oʻsmaydi.',
-      },
-      {
-        choice: 'Maydon chegaralari 80/120/3500 va HTML escape',
-        why: 'Telegram xabar limitidan oshmaslik uchun, hamda parse_mode HTML ichida foydalanuvchi matni teglarni buzmasligi uchun har bir qiymat escape qilinadi.',
-      },
-      {
-        choice: '17 ta pytest — tarmoqsiz',
-        why: 'Handler oqimi mock bot bilan sinaladi: 405, 400, 422, 429, 502, 503 javoblari va muvaffaqiyatli yetkazish — deploy va haqiqiy token boʻlmasa ham.',
-      },
-    ],
-    results: [
-      { value: '5', label: 'soʻrov / 10 daqiqa / IP' },
-      { value: '3.5k', label: 'belgi — xabar chegarasi' },
-      { value: '3', label: 'handler: start, buyurtma, matn' },
-      { value: '17', label: 'pytest testi' },
-    ],
+  },
+  {
+    id: 'xronos-game',
+    index: '11',
+    title: 'Xronos Game',
+    tagline: 'Veb oʻyin',
+    category: 'game',
+    status: { label: 'Onlayn', tone: 'green' },
+    description: 'Interaktiv veb-oʻyin loyihasi.',
+    stack: ['Web', 'JavaScript'],
+    repo: 'https://github.com/revilend/Xronos-game',
+    url: null,
+  },
+  {
+    id: 'dino-trex',
+    index: '12',
+    title: 'Dino T-Rex',
+    tagline: 'Veb oʻyin',
+    category: 'game',
+    status: { label: 'Onlayn', tone: 'green' },
+    description: 'Klassik cheksiz yugurish (endless runner) brauzer oʻyini.',
+    stack: ['HTML5', 'CSS3', 'JavaScript'],
+    repo: 'https://github.com/revilend/Dino-trex',
+    url: null,
   },
 ];

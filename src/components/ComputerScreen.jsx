@@ -49,12 +49,12 @@ const PROJECT_ACCENTS = {
     accent: '#0e7490',
     soft: '#e0f2fe',
   },
-  'echoes-of-room-404': {
+  'horror-game': {
     gradient: 'linear-gradient(135deg, #160a2c 0%, #4c1d95 56%, #831843 100%)',
     accent: '#7c3aed',
     soft: '#f3e8ff',
   },
-  'telegram-automation': {
+  'revilend-games': {
     gradient: 'linear-gradient(135deg, #04231f 0%, #047857 58%, #0f766e 100%)',
     accent: '#059669',
     soft: '#d1fae5',
@@ -69,19 +69,19 @@ const PROJECT_LINK_META = {
     label: 'Jonli saytni ochish',
     icon: ExternalLink,
   },
-  'echoes-of-room-404': {
+  'horror-game': {
     label: "GitHub'da ochish",
     icon: Github,
   },
-  'telegram-automation': {
+  'revilend-games': {
     label: "Telegram'da ochish",
     icon: MessageCircle,
   },
 };
 
 const PROJECT_FALLBACK_URLS = {
-  'echoes-of-room-404': 'https://github.com/revilend',
-  'telegram-automation': 'https://t.me/revilend',
+  'horror-game': 'https://github.com/revilend/Horror-game',
+  'revilend-games': 'https://t.me/revilend_gamesbot',
 };
 
 const APPS = {
@@ -91,14 +91,14 @@ const APPS = {
     icon: GraduationCap,
     gradient: 'linear-gradient(135deg, #0ea5e9, #1d4ed8)',
   },
-  'echoes-of-room-404': {
-    label: 'Echoes of Room 404',
+  'horror-game': {
+    label: 'Horror Game',
     short: '3D oʻyin',
     icon: Ghost,
     gradient: 'linear-gradient(135deg, #8b5cf6, #be185d)',
   },
-  'telegram-automation': {
-    label: 'Telegram Auto-Bots',
+  'revilend-games': {
+    label: 'Revilend Games',
     short: 'Telegram bot',
     icon: Bot,
     gradient: 'linear-gradient(135deg, #10b981, #047857)',
@@ -143,8 +143,8 @@ const APPS = {
 
 const APP_IDS = [
   'teachermuzaffar',
-  'echoes-of-room-404',
-  'telegram-automation',
+  'horror-game',
+  'revilend-games',
   'terminal',
   'notepad',
   'calculator',
@@ -153,20 +153,14 @@ const APP_IDS = [
   'recycle-bin',
 ];
 
-const TASKBAR_IDS = [
-  'teachermuzaffar',
-  'echoes-of-room-404',
-  'telegram-automation',
-  'terminal',
-  'this-pc',
-];
+const TASKBAR_IDS = ['teachermuzaffar', 'horror-game', 'revilend-games', 'terminal', 'this-pc'];
 
-const PROJECT_IDS = new Set(['teachermuzaffar', 'echoes-of-room-404', 'telegram-automation']);
+const PROJECT_IDS = new Set(['teachermuzaffar', 'horror-game', 'revilend-games']);
 
 const WINDOW_SIZES = {
   teachermuzaffar: { width: 760, height: 548 },
-  'echoes-of-room-404': { width: 720, height: 536 },
-  'telegram-automation': { width: 720, height: 514 },
+  'horror-game': { width: 720, height: 536 },
+  'revilend-games': { width: 720, height: 514 },
   terminal: { width: 720, height: 456 },
   notepad: { width: 720, height: 500 },
   calculator: { width: 372, height: 552 },
@@ -581,21 +575,29 @@ function ProjectApp({ project, onOpenProject }) {
                 <dt className="text-slate-400">Stack</dt>
                 <dd className="font-medium text-slate-700">{project.stack.length} texnologiya</dd>
               </div>
-              <div className="flex items-center justify-between gap-2">
-                <dt className="text-slate-400">Qarorlar</dt>
-                <dd className="font-medium text-slate-700">{project.decisions.length} ta</dd>
-              </div>
+              {project.decisions?.length ? (
+                <div className="flex items-center justify-between gap-2">
+                  <dt className="text-slate-400">Qarorlar</dt>
+                  <dd className="font-medium text-slate-700">{project.decisions.length} ta</dd>
+                </div>
+              ) : null}
             </dl>
           </aside>
         </div>
 
         <section className="mt-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-          <h3 className="text-[13px] font-semibold text-slate-900">Muammo</h3>
-          <p className="mt-1.5 text-[12px] leading-relaxed text-slate-600">{project.problem}</p>
+          {project.problem ? (
+            <>
+              <h3 className="text-[13px] font-semibold text-slate-900">Muammo</h3>
+              <p className="mt-1.5 text-[12px] leading-relaxed text-slate-600">{project.problem}</p>
+            </>
+          ) : null}
 
-          <h3 className="mt-4 text-[13px] font-semibold text-slate-900">Natija raqamlarda</h3>
+          {project.results?.length ? (
+            <h3 className="mt-4 text-[13px] font-semibold text-slate-900">Natija raqamlarda</h3>
+          ) : null}
           <dl className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
-            {project.results.map((result) => (
+            {(project.results ?? []).map((result) => (
               <div
                 key={result.label}
                 className="min-w-0 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-2"
@@ -627,12 +629,12 @@ const TERMINAL_ALIASES = {
   teacher: 'teachermuzaffar',
   teachermuzaffar: 'teachermuzaffar',
   'teachermuzaffar.uz': 'teachermuzaffar',
-  echoes: 'echoes-of-room-404',
-  'echoes-of-room-404': 'echoes-of-room-404',
-  404: 'echoes-of-room-404',
-  telegram: 'telegram-automation',
-  bot: 'telegram-automation',
-  'telegram-automation': 'telegram-automation',
+  echoes: 'horror-game',
+  'horror-game': 'horror-game',
+  404: 'horror-game',
+  telegram: 'revilend-games',
+  bot: 'revilend-games',
+  'revilend-games': 'revilend-games',
   terminal: 'terminal',
   'this-pc': 'this-pc',
   thispc: 'this-pc',

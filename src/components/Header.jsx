@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ArrowUpRight, Box, FileText, Github, MessageCircle } from 'lucide-react';
+import { ArrowUpRight, Box, FileText, Github, MessageCircle, Search } from 'lucide-react';
 
 const MODES = [
   { id: '2d', label: '2D Sayt', icon: FileText },
@@ -45,7 +45,7 @@ function ModeToggle({ mode, onChange, full = false }) {
   );
 }
 
-export default function Header({ mode, onModeChange, onContact }) {
+export default function Header({ mode, onModeChange, onContact, onOpenPalette }) {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -93,6 +93,17 @@ export default function Header({ mode, onModeChange, onContact }) {
           </div>
 
           <div className="flex items-center justify-end gap-1.5 sm:gap-2">
+            <button
+              type="button"
+              onClick={onOpenPalette}
+              aria-label="Buyruqlar panelini ochish (Ctrl+K)"
+              className="hidden h-9 items-center gap-2 rounded-lg border border-slate-800/80 bg-ink-950/60 pl-2.5 pr-1.5 text-[11px] font-medium text-slate-400 transition hover:border-slate-700 hover:text-white sm:inline-flex"
+            >
+              <Search size={13} />
+              <kbd className="rounded border border-slate-700/80 bg-slate-900 px-1 font-mono text-[10px] text-slate-400">
+                ⌘K
+              </kbd>
+            </button>
             <a
               href="https://t.me/revilend"
               target="_blank"

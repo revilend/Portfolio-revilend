@@ -30,7 +30,12 @@ export function renderProjectHtml(
   { site = 'https://revilend.uz', cardsDirectory = 'og', cardExtension = 'jpg' } = {}
 ) {
   const url = projectUrl(project.id, site);
-  const image = `${site.replace(/\/+$/, '')}/${cardsDirectory}/${project.id}.${cardExtension}`;
+  const origin = site.replace(/\/+$/, '');
+  // Only a project with a real capture advertises its own card; everyone else
+  // uses the site-wide card instead of pointing at a file that does not exist.
+  const image = project.shots?.alt
+    ? `${origin}/${cardsDirectory}/${project.id}.${cardExtension}`
+    : `${origin}/og.png`;
   const title = `${project.title} — Revilend.uz`;
   const description = project.description;
 

@@ -457,9 +457,9 @@ Ctrl + S — saqlash
 Ctrl + A — barchasini tanlash
 
 Loyihalar:
-01  teachermuzaffar.uz
-02  Echoes of Room 404
-03  Telegram Auto-Bots
+01  Revilend Games
+02  teachermuzaffar.uz
+03  Horror Game
 `;
 
 function loadNote() {

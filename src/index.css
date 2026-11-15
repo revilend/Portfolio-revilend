@@ -116,6 +116,36 @@
   .field {
     @apply w-full rounded-xl border border-slate-800 bg-ink-950/50 px-4 py-3 text-sm text-slate-100 placeholder:text-slate-600 outline-none transition focus:border-electric/50 focus:bg-ink-950/80 focus:ring-2 focus:ring-electric/15;
   }
+
+  /* Cursor spotlight: the position lives in --spot-x/--spot-y, written by
+     SpotlightCard on mousemove, so CSS does the painting and React never
+     re-renders while the pointer moves. */
+  .spotlight {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .spotlight::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.35s ease;
+    background: radial-gradient(
+      420px circle at var(--spot-x, 50%) var(--spot-y, 0%),
+      rgba(0, 242, 254, 0.13),
+      rgba(139, 92, 246, 0.09) 42%,
+      transparent 72%
+    );
+  }
+
+  .spotlight:hover::before,
+  .spotlight:focus-within::before {
+    opacity: 1;
+  }
 }
 
 @layer utilities {

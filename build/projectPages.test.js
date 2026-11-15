@@ -21,7 +21,8 @@ const SHELL = `<!doctype html>
 </html>`;
 
 describe('renderProjectHtml', () => {
-  const project = projects[0];
+  const project = projects.find((item) => item.shots);
+  const withoutShot = projects.find((item) => !item.shots);
 
   it('replaces the generic metadata with the project metadata', () => {
     const html = renderProjectHtml(SHELL, project);
@@ -32,6 +33,14 @@ describe('renderProjectHtml', () => {
     expect(html).toContain(`href="https://revilend.uz/loyiha/${project.id}/"`);
     expect(html).not.toContain('https://revilend.uz/og.png');
     expect(html).not.toContain('Umumiy tavsif');
+  });
+
+  it('falls back to the site-wide card when a project has no capture', () => {
+    const html = renderProjectHtml(SHELL, withoutShot);
+
+    expect(html).toContain('<title>' + withoutShot.title + ' — Revilend.uz</title>');
+    expect(html).toContain(`content="https://revilend.uz/loyiha/${withoutShot.id}/"`);
+    expect(html).toContain('content="https://revilend.uz/og.png"');
   });
 
   it('keeps the app shell so the deep link still boots the SPA', () => {

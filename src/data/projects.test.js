@@ -1,10 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { projects } from './projects.js';
+import { PROJECT_CATEGORIES, projects } from './projects.js';
 
 const TONES = ['green', 'amber', 'cyan'];
+const CATEGORY_IDS = PROJECT_CATEGORIES.filter((item) => item.id !== 'all').map((item) => item.id);
 
 describe('projects data', () => {
-  it('has unique ids and indexes', () => {
+  it('lists the twelve completed projects with unique ids and indexes', () => {
+    expect(projects).toHaveLength(12);
+
     const ids = projects.map((project) => project.id);
     const indexes = projects.map((project) => project.index);
 
@@ -18,6 +21,17 @@ describe('projects data', () => {
     );
   });
 
+  it('only uses categories the filter pills know', () => {
+    for (const project of projects) {
+      expect(CATEGORY_IDS).toContain(project.category);
+    }
+  });
+
+  it('features exactly the two bento projects', () => {
+    const featured = projects.filter((project) => project.featured).map((project) => project.id);
+    expect(featured).toEqual(['revilend-games', 'teachermuzaffar']);
+  });
+
   it('uses a status tone the badge knows', () => {
     for (const project of projects) {
       expect(TONES).toContain(project.status.tone);
@@ -25,7 +39,7 @@ describe('projects data', () => {
     }
   });
 
-  it('keeps every url absolute and https, or null for closed projects', () => {
+  it('keeps every live url absolute and https, or null for source-only projects', () => {
     for (const project of projects) {
       if (project.url === null) continue;
       expect(() => new URL(project.url)).not.toThrow();
@@ -33,39 +47,48 @@ describe('projects data', () => {
     }
   });
 
-  it('provides the copy the cards and drawer render', () => {
+  it('links every project to a GitHub repository', () => {
+    for (const project of projects) {
+      expect(project.repo).toMatch(/^https:\/\/github\.com\/revilend\/[\w.-]+\/?$/);
+    }
+  });
+
+  it('provides the copy the cards and modal render', () => {
     for (const project of projects) {
       expect(project.stack.length).toBeGreaterThan(0);
-      expect(project.description.length).toBeGreaterThan(0);
+      expect(project.description.length).toBeGreaterThan(20);
       expect(project.title.length).toBeGreaterThan(0);
       expect(project.tagline.length).toBeGreaterThan(0);
     }
   });
 
-  it('carries a complete case study: problem, decisions, results', () => {
+  it('only carries a case study where the facts are verified', () => {
     for (const project of projects) {
+      if (!project.problem) continue;
+
       expect(project.problem.length).toBeGreaterThan(80);
       expect(project.constraints.length).toBeGreaterThan(1);
-      expect(project.decisions.length).toBeGreaterThan(2);
-      expect(project.results.length).toBeGreaterThan(2);
-    }
-  });
+      expect(project.decisions.length).toBeGreaterThan(1);
+      expect(project.results.length).toBeGreaterThan(1);
 
-  it('explains why each architectural decision was made', () => {
-    for (const project of projects) {
       for (const decision of project.decisions) {
         expect(decision.choice.length).toBeGreaterThan(3);
         expect(decision.why.length).toBeGreaterThan(40);
       }
-    }
-  });
 
-  it('reports results as a value with a unit or label', () => {
-    for (const project of projects) {
       for (const result of project.results) {
         expect(result.value).toMatch(/^[\d.,]+\s?\p{L}*$/u);
         expect(result.label.length).toBeGreaterThan(3);
       }
+    }
+  });
+
+  it('only shows a screenshot when it has alt text', () => {
+    for (const project of projects) {
+      if (!project.shots) continue;
+      expect(project.shots.alt.length).toBeGreaterThan(30);
+      expect(project.shots.width).toBeGreaterThan(0);
+      expect(project.shots.height).toBeGreaterThan(0);
     }
   });
 

@@ -9,6 +9,7 @@ const GROUPS = [
     icon: Code2,
     items: [
       'JavaScript (ES6+)',
+      'TypeScript',
       'Three.js',
       'Canvas API',
       'Tailwind CSS',
@@ -26,7 +27,7 @@ const GROUPS = [
     title: 'Backend & Database',
     description: 'Maʼlumot modellari va ruxsatlar birinchi pikseldan oldin oʻylanadi.',
     icon: Database,
-    items: ['Node.js', 'Supabase', 'PostgreSQL', 'REST APIs', 'Row Level Security'],
+    items: ['Python', 'Node.js', 'Supabase', 'PostgreSQL', 'REST APIs', 'Row Level Security'],
     accent: {
       icon: 'border-plasma/25 bg-plasma/10 text-plasma',
       hover: 'hover:border-plasma/30 hover:shadow-[0_36px_90px_-55px_rgba(139,92,246,0.9)]',

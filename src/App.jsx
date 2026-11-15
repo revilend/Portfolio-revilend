@@ -8,6 +8,7 @@ import Contact from './components/Contact.jsx';
 import Footer from './components/Footer.jsx';
 import Toast from './components/Toast.jsx';
 import ProjectDrawer from './components/ProjectDrawer.jsx';
+import CommandPalette from './components/CommandPalette.jsx';
 import { projects } from './data/projects.js';
 import { projectPath, readProjectId } from './lib/projectUrl.js';
 import { initTelegramWebApp, setTelegramBackButton } from './lib/telegram.js';
@@ -44,6 +45,7 @@ export default function App() {
   const [activeProject, setActiveProject] = useState(projectFromLocation);
   const [toast, setToast] = useState(null);
   const [pendingContact, setPendingContact] = useState(false);
+  const [paletteOpen, setPaletteOpen] = useState(false);
 
   const notify = useCallback((message) => {
     setToast({ message, id: Date.now() });
@@ -98,6 +100,35 @@ export default function App() {
     }
     document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
   }, [mode, changeMode]);
+
+  // Ctrl/Cmd+K opens the palette from anywhere, including the 3D room.
+  useEffect(() => {
+    const handleShortcut = (event) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault();
+        setPaletteOpen((open) => !open);
+      }
+    };
+    window.addEventListener('keydown', handleShortcut);
+    return () => window.removeEventListener('keydown', handleShortcut);
+  }, []);
+
+  // A palette destination always lands on the 2D page: the 3D room has no
+  // scrollable sections to jump to.
+  const navigateToSection = useCallback(
+    (id) => {
+      setPaletteOpen(false);
+      const scroll = () => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+
+      if (mode === '3d') {
+        changeMode('2d');
+        window.setTimeout(scroll, 140);
+        return;
+      }
+      scroll();
+    },
+    [mode, changeMode]
+  );
 
   // Telegram injects its WebApp SDK inside the Mini App; everywhere else this
   // is a no-op. Tinting the client chrome keeps the dark page seamless.
@@ -169,7 +200,12 @@ export default function App() {
 
   return (
     <div className="relative min-h-screen overflow-x-hidden">
-      <Header mode={mode} onModeChange={changeMode} onContact={handleContact} />
+      <Header
+        mode={mode}
+        onModeChange={changeMode}
+        onContact={handleContact}
+        onOpenPalette={() => setPaletteOpen(true)}
+      />
 
       {mode === '2d' ? (
         <div key="2d" className="animate-fade-in">
@@ -209,6 +245,14 @@ export default function App() {
       )}
 
       <ProjectDrawer project={activeProject} onClose={closeProject} />
+
+      <CommandPalette
+        open={paletteOpen}
+        mode={mode}
+        onClose={() => setPaletteOpen(false)}
+        onNavigate={navigateToSection}
+        onModeChange={changeMode}
+      />
 
       {toast ? (
         <Toast key={toast.id} message={toast.message} onClose={() => setToast(null)} />

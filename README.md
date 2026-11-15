@@ -2,10 +2,10 @@
 
 A dark, cinematic portfolio for **Revilend**, a creative developer based in Tashkent. One header switches instantly between:
 
-- **2D Sayt** — a clean, mobile-first portfolio with a hero, metrics, real project cards, tech stack, identity card and contact form.
+- **2D Sayt** — a clean, mobile-first portfolio with a hero, metrics, twelve completed projects in a filterable bento grid, a tech stack, an identity card and a contact panel.
 - **3D Xona** — a full-screen Three.js cyber-room with a modeled desk, textured monitors, server rack, floating project pins and clickable screens, plus first-person walking with a virtual joystick, proximity-based desk interaction and a full Windows 11-style in-monitor desktop.
 
-Both modes share the same project data and the same slide-in project drawer.
+Both modes share the same project data and the same glassmorphic project modal.
 
 ## Stack
 
@@ -54,7 +54,11 @@ python3 -m venv .venv
 
 - Fixed frosted header with the centered `2D Sayt / 3D Xona` switcher.
 - Hero with availability badge, headline, subheadline, mode CTAs and a four-column metrics strip.
-- Three glassmorphic project cards — click **Batafsil maʼlumot** to open the drawer.
+- Twelve completed projects in a three-column bento grid: **Revilend Games** and **teachermuzaffar.uz** are featured and span two columns on desktop.
+- Category pills — **Barchasi**, **Telegram Botlar**, **Veb va Taʼlim**, **Oʻyinlar** — filter the grid and carry live counts.
+- Every project, skill and contact card tracks the cursor with a cyan/violet spotlight: two CSS variables are written straight to the node on `mousemove`, so hovering never triggers a React render.
+- **Batafsil maʼlumot** opens a glassmorphic modal with the summary, tech badges, status, a **GitHub'da koʻrish** link and the live link where one exists.
+- `Ctrl`/`Cmd` + `K`, or the `⌘K` button in the header, opens a command palette for jumping to a section, toggling the 3D room and opening the Telegram/GitHub profiles.
 - Categorized tech stack: Frontend & 3D, Backend & Database, Automation & APIs.
 - Terminal identity card whose JSON is generated from the same object it copies, plus a direct-contact panel that hands the visitor to Telegram (there is no form and no data collection).
 - Sections and cards reveal on scroll with a short stagger; the hero glows and the background grid drift slowly. All motion respects `prefers-reduced-motion`.
@@ -62,10 +66,10 @@ python3 -m venv .venv
 ### 3D Xona
 
 - Full-screen room with an illuminated floor, cyan grid, animated server LEDs and a neon **REVILEND.UZ** wall sign.
-- Ultrawide monitor showing `teachermuzaffar.uz`, a vertical monitor for `Echoes of Room 404`, and a laptop running `Telegram Auto-Bots`.
+- Ultrawide monitor showing `teachermuzaffar.uz`, a vertical monitor for `Horror Game`, and a laptop running `Revilend Games`.
 - Lighting: ambient 2.8, directional 3.2, cyan desk point light 4.5, purple rim lights, ACES tone mapping at exposure 1.35.
 - Camera FOV is 58 on mobile / 46 on desktop. Drag to orbit with clamped vertical tilt.
-- Quick camera bar: **Stol**, **1. Taʼlim Portali**, **2. 3D Oʻyin**, **3. Telegram Bot**.
+- Quick camera bar: **Stol**, **1. Taʼlim Portali**, **2. 3D Oʻyin**, **3. Revilend Games**.
 - Wheel zoom, on-screen zoom buttons and a reset control; zoom distance is clamped per breakpoint.
 - **Avto sayr** glides through all four camera presets every 5.2 seconds and stops on manual navigation.
 - Fullscreen mode, floating light motes, pulsing pins and a pointer cursor over clickable monitors.
@@ -92,8 +96,10 @@ src/
 ├── components/
 │   ├── Header.jsx           # frosted navbar + segmented mode switcher
 │   ├── Hero.jsx             # 2D hero + metrics
-│   ├── Projects.jsx         # featured project card grid
-│   ├── ProjectDrawer.jsx    # shared project drawer (2D + 3D)
+│   ├── Projects.jsx         # filters, bento grid, spotlight project cards
+│   ├── ProjectDrawer.jsx    # shared project modal (2D + 3D)
+│   ├── CommandPalette.jsx   # ⌘K palette: sections, actions, links
+│   ├── SpotlightCard.jsx    # CSS-variable cursor spotlight wrapper
 │   ├── CyberRoomView.jsx    # Three.js room, orbit/walk cameras, textures, pins
 │   ├── ComputerScreen.jsx   # Windows 11 desktop: window manager, taskbar, Start menu and apps
 │   ├── Windows11Apps.jsx    # Notepad, Calculator, Settings, quick settings, calendar, wallpaper
@@ -122,13 +128,13 @@ src/lib/telemetry.js         # crash/WebGL reporting and the page-view ping
 - **The contact section has two modes, and neither ever fakes success.** Without configuration a static build has nowhere to deliver a message, so it shows a Telegram handoff to `t.me/revilend` and collects nothing. Set `VITE_CONTACT_ENDPOINT` (copy `.env.example` to `.env.local`) to the hosted bot's `POST /api/contact` route and a validated form appears instead. The form clears and reports success **only** after the endpoint answers 2xx with `{ "ok": true }`; a failed request shows an error with the Telegram fallback, and the visitor's text is kept so it is not lost. The original implementation showed "Xabar yuborildi" while sending nothing — that is what this design prevents.
 - **`main.py` is the bot behind that endpoint** (aiogram + aiohttp, `requirements.txt`). It serves `GET /` as a JSON health check (`contact_ready`) and `POST /api/contact` with `{ name, contact, message }`, forwarding the payload to `ADMIN_ID` in Telegram. The endpoint fails closed and never acknowledges a message it dropped: without `BOT_TOKEN` or `ADMIN_ID` it answers `503 contact_unavailable`, and it returns `{"ok": true}` only after Telegram accepted the send (`502 delivery_failed` otherwise, without leaking the underlying error). Hardening: user text is HTML-escaped and sent with `parse_mode="HTML"` so Markdown characters a visitor types stay literal; `name`/`contact`/`message` are capped at 80/120/3500 characters; each IP gets 5 requests per 10 minutes and the 6th answers `429` with `Retry-After`; allowed CORS origins come from `ALLOWED_ORIGINS` (default `https://revilend.uz,https://www.revilend.uz`) and a foreign `Origin` gets no `Access-Control-Allow-Origin`.
 - **Windows 11 desktop data is local.** Notepad text and personalization/quick-setting choices use `localStorage`; they never leave the browser and are not part of the deployed repository.
-- **Project data** lives in `src/data/projects.js`; card content, drawer content, pin IDs, project URLs and 3D screen associations are all driven from it, so a renamed id cannot leave a dead pin or link behind.
+- **Project data** lives in `src/data/projects.js`: twelve completed repositories with `id`, `index`, `category`, `featured`, `status`, `stack`, `repo`, an optional live `url`, an optional `shots` capture and an optional case study. Card content, modal content, filter counts, pin IDs, project URLs and 3D screen associations are all driven from it, so a renamed id cannot leave a dead pin or link behind — and only finished work is listed.
 - **`public/og.png`** is the 1200×630 share card behind `og:image` and `twitter:image`. Regenerate it from the hero if the headline or palette changes.
 - **Every project is addressable.** `/loyiha/<id>/` is a real HTML file emitted at build time by `build/projectPages.js` carrying that project's `<title>`, description, canonical URL and its own 1200×630 card (`public/og/<id>.jpg`), so a link shared in Telegram unfurls as *that project* instead of the homepage — crawlers never run the SPA, so updating meta tags in JavaScript would not work. `?project=<id>` is the fallback for hosts that cannot serve nested index files; GitHub Pages, Netlify and Cloudflare Pages serve `loyiha/<id>/` out of the box.
 - **Deep links and the Mini App.** Opening `/loyiha/<id>/` opens that drawer; closing it returns to `/`, in-page clicks push history so the browser back button works, and inside Telegram the native back button closes the drawer while `ready()`/`expand()` run and the client chrome is tinted `#080c14`. Outside Telegram every helper in `src/lib/telegram.js` is a no-op.
 - **Broken pages report themselves.** `src/lib/telemetry.js` forwards uncaught exceptions, unhandled rejections and `webglcontextlost` from the 3D canvas to the bot's `POST /api/report`, which escapes every field and delivers it to the admin chat — a page that breaks on a visitor's phone no longer fails silently. Reports are capped at three per page view and de-duplicated for an hour server-side, and the endpoint allows six per ten minutes per IP, so a broken render loop cannot flood Telegram. Everything stays off until `VITE_CONTACT_ENDPOINT` points at the bot; `/api/report` and `/api/ping` are derived from it unless `VITE_REPORT_ENDPOINT` / `VITE_PING_ENDPOINT` override them.
 - **Weekly summary.** Every Monday at 09:00 the bot sends views, unique visitors, contact submissions and frontend errors for the last seven days. Views come from a once-per-session `POST /api/ping`; visitors are counted through a per-process salted digest, so no IP address is stored. Counters are mirrored to `TELEMETRY_PATH` (memory only when unset) — a host with an ephemeral filesystem resets them on redeploy, and the summary states how many days it actually covers.
-- **Screenshots are real captures.** `assets-src/shots/<id>.png` hold what the shipped products actually look like (the live `teachermuzaffar.uz`, the Room 404 build's title screen). `npm run shots` resizes each master to 1440/720/390 px in AVIF and WebP (`public/shots/<id>/`), and `ProjectShot` serves them through `<picture>` — AVIF source, WebP source, then `<img>` — with `srcset`, per-slot `sizes`, `loading="lazy"` and `decoding="async"`. A project without a capture keeps its gradient placeholder: Telegram Auto-Bots has no image because its chat flow has no public surface to capture, so drop a `telegram-automation.png` master in and re-run the pipeline.
+- **Screenshots are real captures.** `assets-src/shots/<id>.png` hold what the shipped products actually look like (the live `teachermuzaffar.uz`, the shipped Horror Game title screen). `npm run shots` resizes each master to 1440/720/390 px in AVIF and WebP (`public/shots/<id>/`), and `ProjectShot` serves them through `<picture>` — AVIF source, WebP source, then `<img>` — with `srcset`, per-slot `sizes`, `loading="lazy"` and `decoding="async"`. A project without a capture keeps its gradient placeholder: Revilend Games has no image because its flow lives inside Telegram, so drop a `revilend-games.png` master in and re-run the pipeline. Those two captures are also the only projects with a per-project share card; the other ten pages fall back to `/og.png`.
 - **Share cards** are regenerated by opening `http://localhost:3000/tools/og-cards.html?id=<project-id>` and screenshotting the viewport at 1200×630 (JPEG, quality ≈88 ≈ 65 KB) into `public/og/<project-id>.jpg`.
 - **Direct links** point to `t.me/revilend` and `github.com/revilend`; update those handles if they change.
 - `PREVIEW_HOST` (optional env var) is passed to Vite's `allowedHosts` for hosted previews; no machine-specific hostname is committed.
