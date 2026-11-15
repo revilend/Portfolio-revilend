@@ -29,6 +29,14 @@ npm run build    # production bundle in dist/
 npm run preview  # serve the production build on port 3000
 ```
 
+Quality gates (all must pass before a change lands):
+
+```bash
+npm run lint         # ESLint: react + hooks rules, exhaustive-deps as error
+npm test             # Vitest unit tests (focus trap, project data invariants)
+npm run format       # Prettier write (check only: npm run format:check)
+```
+
 ## The two modes
 
 ### 2D Sayt
@@ -92,7 +100,8 @@ src/
 - **The 3D chunk is lazy.** The initial 2D bundle is about 60 KB gzipped and the interactive room is a separate chunk (~155 KB gzipped, with Three.js split into its own vendor chunk). The room is fetched on demand and prefetched after first paint — but skipped entirely when `navigator.connection.saveData` is set or the connection reports 2G.
 - **Contact is deliberately form-free.** A static build cannot deliver mail, so an earlier fake-submitting form (which showed "Xabar yuborildi" without sending anything) was replaced by a Telegram handoff. Messages go straight to `t.me/revilend`; nothing is collected or stored. To add a real endpoint later, introduce a server or form service and only render a success state after the request resolves.
 - **Windows 11 desktop data is local.** Notepad text and personalization/quick-setting choices use `localStorage`; they never leave the browser and are not part of the deployed repository.
-- **Project data** lives in `src/data/projects.js`; card content, drawer content, pin IDs and 3D screen associations are driven from the same IDs.
+- **Project data** lives in `src/data/projects.js`; card content, drawer content, pin IDs, project URLs and 3D screen associations are all driven from it, so a renamed id cannot leave a dead pin or link behind.
+- **`public/og.png`** is the 1200×630 share card behind `og:image` and `twitter:image`. Regenerate it from the hero if the headline or palette changes.
 - **Direct links** point to `t.me/revilend` and `github.com/revilend`; update those handles if they change.
 - `PREVIEW_HOST` (optional env var) is passed to Vite's `allowedHosts` for hosted previews; no machine-specific hostname is committed.
 - Scroll is locked while the 3D room or project drawer is open.
