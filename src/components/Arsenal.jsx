@@ -66,7 +66,12 @@ export default function Arsenal() {
           {GROUPS.map((group, index) => {
             const Icon = group.icon;
             return (
-              <Reveal key={group.title} delay={index * 100} className="h-full min-w-0">
+              <Reveal
+                key={group.title}
+                delay={index * 100}
+                parallax={0.05 + index * 0.02}
+                className="h-full min-w-0"
+              >
                 <div
                   className={`group relative flex h-full flex-col overflow-hidden glass rounded-2xl p-6 transition duration-500 hover:-translate-y-1 ${group.accent.hover}`}
                 >

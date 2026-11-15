@@ -209,7 +209,7 @@ export default function About({ onNotify }) {
     <section id="about" className="relative scroll-mt-24 py-24 sm:py-28">
       <div className="container-x">
         <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-12 lg:grid-cols-[1fr_1fr] lg:gap-16">
-          <Reveal className="min-w-0">
+          <Reveal className="min-w-0" parallax={0.03}>
             <SectionHeading
               index="03"
               label="Men haqimda"
@@ -248,7 +248,7 @@ export default function About({ onNotify }) {
             </ul>
           </Reveal>
 
-          <Reveal delay={120} className="min-w-0">
+          <Reveal delay={120} className="min-w-0" parallax={0.08}>
             <IdentityCard onNotify={onNotify} />
           </Reveal>
         </div>

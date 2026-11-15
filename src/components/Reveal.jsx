@@ -1,19 +1,16 @@
 import { useEffect, useRef, useState } from 'react';
+import { motionAllowed, onScrollFrame } from '../lib/scrollMotion.js';
 
-export default function Reveal({ children, className = '', delay = 0 }) {
+export default function Reveal({ children, className = '', delay = 0, parallax = 0 }) {
   const ref = useRef(null);
+  const innerRef = useRef(null);
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
     const node = ref.current;
     if (!node) return undefined;
 
-    if (!('IntersectionObserver' in window)) {
-      setVisible(true);
-      return undefined;
-    }
-
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    if (!('IntersectionObserver' in window) || !motionAllowed()) {
       setVisible(true);
       return undefined;
     }
@@ -32,6 +29,20 @@ export default function Reveal({ children, className = '', delay = 0 }) {
     return () => observer.disconnect();
   }, []);
 
+  // Parallax runs on the inner node: the outer one keeps owning the grid slot
+  // and the reveal transition, so the two never fight over one transform.
+  useEffect(() => {
+    if (!parallax) return undefined;
+    const inner = innerRef.current;
+    if (!inner) return undefined;
+
+    return onScrollFrame(ref.current, ({ scrollY, viewport, top, height }) => {
+      const distance = scrollY + viewport / 2 - (top + height / 2);
+      const offset = Math.max(-26, Math.min(26, distance * parallax));
+      inner.style.transform = `translate3d(0, ${offset.toFixed(2)}px, 0)`;
+    });
+  }, [parallax]);
+
   return (
     <div
       ref={ref}
@@ -40,7 +51,9 @@ export default function Reveal({ children, className = '', delay = 0 }) {
       } ${className}`}
       style={{ transitionDelay: visible ? `${delay}ms` : '0ms' }}
     >
-      {children}
+      <div ref={innerRef} className="h-full">
+        {children}
+      </div>
     </div>
   );
 }

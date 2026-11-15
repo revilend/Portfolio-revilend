@@ -1,3 +1,6 @@
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
+import { cwd } from 'node:process';
 import { describe, expect, it, vi } from 'vitest';
 import { projects } from '../src/data/projects.js';
 import { projectPages, renderProjectHtml } from './projectPages.js';
@@ -35,12 +38,30 @@ describe('renderProjectHtml', () => {
     expect(html).not.toContain('Umumiy tavsif');
   });
 
-  it('falls back to the site-wide card when a project has no capture', () => {
+  it('uses the project card even when the project has no capture', () => {
     const html = renderProjectHtml(SHELL, withoutShot);
 
     expect(html).toContain('<title>' + withoutShot.title + ' — Revilend.uz</title>');
     expect(html).toContain(`content="https://revilend.uz/loyiha/${withoutShot.id}/"`);
-    expect(html).toContain('content="https://revilend.uz/og.png"');
+    expect(html).toContain(`content="https://revilend.uz/og/${withoutShot.id}.jpg"`);
+    expect(html).not.toContain('https://revilend.uz/og.png');
+  });
+
+  it('never falls back to the site-wide card', () => {
+    for (const item of projects) {
+      const html = renderProjectHtml(SHELL, item);
+
+      expect(html).not.toContain('https://revilend.uz/og.png');
+      expect(html).toContain(`content="https://revilend.uz/og/${item.id}.jpg"`);
+    }
+  });
+
+  it('ships a generated card for every project', () => {
+    const directory = join(cwd(), 'public', 'og');
+
+    for (const item of projects) {
+      expect(existsSync(join(directory, `${item.id}.jpg`))).toBe(true);
+    }
   });
 
   it('keeps the app shell so the deep link still boots the SPA', () => {

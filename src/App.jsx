@@ -9,8 +9,11 @@ import Footer from './components/Footer.jsx';
 import Toast from './components/Toast.jsx';
 import ProjectDrawer from './components/ProjectDrawer.jsx';
 import CommandPalette from './components/CommandPalette.jsx';
+import ScrollProgress from './components/ScrollProgress.jsx';
+import ScrollScene from './components/ScrollScene.jsx';
 import { projects } from './data/projects.js';
 import { projectPath, readProjectId } from './lib/projectUrl.js';
+import { initSmoothScroll, scrollToId, setScrollLocked } from './lib/smoothScroll.js';
 import { initTelegramWebApp, setTelegramBackButton } from './lib/telegram.js';
 import { installErrorReporting, pingVisit } from './lib/telemetry.js';
 
@@ -98,7 +101,7 @@ export default function App() {
       setPendingContact(true);
       return;
     }
-    document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
+    scrollToId('contact');
   }, [mode, changeMode]);
 
   // Ctrl/Cmd+K opens the palette from anywhere, including the 3D room.
@@ -118,7 +121,7 @@ export default function App() {
   const navigateToSection = useCallback(
     (id) => {
       setPaletteOpen(false);
-      const scroll = () => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+      const scroll = () => scrollToId(id);
 
       if (mode === '3d') {
         changeMode('2d');
@@ -129,6 +132,12 @@ export default function App() {
     },
     [mode, changeMode]
   );
+
+  // Inertial scrolling for the whole 2D page; the module no-ops under
+  // prefers-reduced-motion so the native scroll is untouched there.
+  useEffect(() => {
+    initSmoothScroll();
+  }, []);
 
   // Telegram injects its WebApp SDK inside the Mini App; everywhere else this
   // is a no-op. Tinting the client chrome keeps the dark page seamless.
@@ -172,10 +181,12 @@ export default function App() {
     return () => window.clearTimeout(timer);
   }, []);
 
-  const scrollLocked = mode === '3d' || Boolean(activeProject);
+  const scrollLocked = mode === '3d' || Boolean(activeProject) || paletteOpen;
 
   useEffect(() => {
+    setScrollLocked(scrollLocked);
     if (!scrollLocked) return undefined;
+
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     return () => {
@@ -209,6 +220,7 @@ export default function App() {
 
       {mode === '2d' ? (
         <div key="2d" className="animate-fade-in">
+          <ScrollProgress />
           <a
             href="#main"
             className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[120] focus:rounded-lg focus:bg-electric focus:px-4 focus:py-2 focus:font-medium focus:text-ink-950"
@@ -221,11 +233,17 @@ export default function App() {
             className="pointer-events-none fixed inset-0 -z-10 overflow-hidden"
           >
             <div className="absolute inset-0 bg-ink-900" />
+            {/* The tunnel lives inside this background layer: it has to paint
+                above the opaque page fill, but still under every section. */}
+            <ScrollScene />
             <div className="absolute inset-x-0 top-0 h-[880px] opacity-[0.13] [background-image:radial-gradient(rgba(148,163,184,0.45)_0.6px,transparent_0.6px)] [background-size:24px_24px] [mask-image:linear-gradient(to_bottom,black,transparent_78%)]" />
             <div className="absolute inset-y-0 left-1/2 hidden w-full max-w-6xl -translate-x-1/2 border-x border-white/[0.025] lg:block" />
-            <div className="absolute -top-48 left-1/2 h-[560px] w-[900px] -translate-x-1/2 animate-glow-pulse rounded-full bg-electric/[0.06] blur-[140px]" />
-            <div className="absolute right-[-10%] top-[35%] h-[460px] w-[460px] animate-glow-pulse rounded-full bg-plasma/[0.09] blur-[130px] [animation-delay:2.5s]" />
-            <div className="absolute bottom-[-10%] left-[-5%] h-[420px] w-[420px] animate-glow-pulse rounded-full bg-cyan-500/[0.05] blur-[120px] [animation-delay:5s]" />
+            {/* Radial gradients instead of blurred boxes: the glows look the
+                same, but compositing a gradient is nearly free while a
+                140px blur re-rasterises on every animated frame. */}
+            <div className="absolute -top-48 left-1/2 h-[560px] w-[900px] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,rgba(0,242,254,0.14),rgba(0,242,254,0.05)_55%,transparent)]" />
+            <div className="absolute right-[-10%] top-[35%] h-[460px] w-[460px] rounded-full bg-[radial-gradient(closest-side,rgba(139,92,246,0.20),rgba(139,92,246,0.06)_55%,transparent)] [animation-delay:2.5s]" />
+            <div className="absolute bottom-[-10%] left-[-5%] h-[420px] w-[420px] rounded-full bg-[radial-gradient(closest-side,rgba(6,182,212,0.14),rgba(6,182,212,0.04)_55%,transparent)] [animation-delay:5s]" />
           </div>
 
           <main id="main" className="overflow-x-hidden">

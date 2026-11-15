@@ -228,34 +228,35 @@
     <script type="module">
       import { projects } from '../src/data/projects.js';
 
-      const ACCENTS = {
-        teachermuzaffar: {
-          accent: '#22d3ee',
-          text: '#a5f3fc',
-          border: 'rgba(34,211,238,0.3)',
-          soft: 'rgba(34,211,238,0.08)',
-          glow: 'rgba(34,211,238,0.20)',
-        },
-        'echoes-of-room-404': {
-          accent: '#a78bfa',
-          text: '#ddd6fe',
-          border: 'rgba(167,139,250,0.3)',
-          soft: 'rgba(167,139,250,0.08)',
-          glow: 'rgba(139,92,246,0.24)',
-        },
-        'telegram-automation': {
+      // Each category keeps its own tint, so twelve projects read as one family
+      // without twelve hand-written palettes drifting apart.
+      const THEMES = {
+        bot: {
           accent: '#34d399',
           text: '#bbf7d0',
           border: 'rgba(52,211,153,0.3)',
           soft: 'rgba(52,211,153,0.08)',
           glow: 'rgba(52,211,153,0.20)',
         },
+        web: {
+          accent: '#22d3ee',
+          text: '#a5f3fc',
+          border: 'rgba(34,211,238,0.3)',
+          soft: 'rgba(34,211,238,0.08)',
+          glow: 'rgba(34,211,238,0.20)',
+        },
+        game: {
+          accent: '#a78bfa',
+          text: '#ddd6fe',
+          border: 'rgba(167,139,250,0.3)',
+          soft: 'rgba(167,139,250,0.08)',
+          glow: 'rgba(139,92,246,0.24)',
+        },
       };
-      const FALLBACK = ACCENTS.teachermuzaffar;
 
       const id = new URLSearchParams(location.search).get('id');
       const project = projects.find((item) => item.id === id) ?? projects[0];
-      const theme = ACCENTS[project.id] ?? FALLBACK;
+      const theme = THEMES[project.category] ?? THEMES.web;
 
       const card = document.getElementById('card');
       card.style.setProperty('--accent', theme.accent);

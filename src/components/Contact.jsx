@@ -344,7 +344,7 @@ export default function Contact({ onNotify }) {
           />
 
           <div className="relative grid grid-cols-[minmax(0,1fr)] gap-12 lg:grid-cols-[0.95fr_1.05fr] lg:gap-16">
-            <Reveal className="min-w-0">
+            <Reveal className="min-w-0" parallax={0.03}>
               <SectionHeading
                 index="04"
                 label="Aloqa"
@@ -398,7 +398,7 @@ export default function Contact({ onNotify }) {
               </p>
             </Reveal>
 
-            <Reveal delay={120} className="min-w-0">
+            <Reveal delay={120} className="min-w-0" parallax={0.07}>
               {CONTACT_ENDPOINT ? <ContactForm onNotify={onNotify} /> : <TelegramPanel />}
             </Reveal>
           </div>

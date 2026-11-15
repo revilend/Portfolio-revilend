@@ -31,11 +31,9 @@ export function renderProjectHtml(
 ) {
   const url = projectUrl(project.id, site);
   const origin = site.replace(/\/+$/, '');
-  // Only a project with a real capture advertises its own card; everyone else
-  // uses the site-wide card instead of pointing at a file that does not exist.
-  const image = project.shots?.alt
-    ? `${origin}/${cardsDirectory}/${project.id}.${cardExtension}`
-    : `${origin}/og.png`;
+  // Every project ships its own 1200×630 card, so a link shared in Telegram
+  // unfurls as that project instead of a generic homepage preview.
+  const image = `${origin}/${cardsDirectory}/${project.id}.${cardExtension}`;
   const title = `${project.title} — Revilend.uz`;
   const description = project.description;
 

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { Fragment, useMemo, useState } from 'react';
 import { ArrowUpRight, Bot, ExternalLink, Gamepad2, Github, Globe2 } from 'lucide-react';
 import { PROJECT_CATEGORIES, projects } from '../data/projects.js';
 import { hasShots } from '../lib/projectShots.js';
@@ -243,20 +243,22 @@ export default function Projects({ onOpenProject }) {
 
         <div
           key={category}
-          className="mt-10 grid animate-fade-in grid-cols-1 gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-3"
+          className="mt-10 grid animate-fade-in grid-cols-1 gap-5 overflow-y-clip pb-6 sm:gap-6 md:grid-cols-2 lg:grid-cols-3"
         >
           {visible.map((project, index) => (
-            <Reveal
-              key={project.id}
-              delay={index * 60}
-              className={`h-full min-w-0 ${project.featured ? 'lg:col-span-2' : ''}`}
-            >
-              <ProjectCard
-                project={project}
-                featured={Boolean(project.featured)}
-                onOpen={onOpenProject}
-              />
-            </Reveal>
+            <Fragment key={project.id}>
+              <Reveal
+                delay={index * 60}
+                parallax={0.04 + (index % 3) * 0.02}
+                className={`h-full min-w-0 ${project.featured ? 'lg:col-span-2' : ''}`}
+              >
+                <ProjectCard
+                  project={project}
+                  featured={Boolean(project.featured)}
+                  onOpen={onOpenProject}
+                />
+              </Reveal>
+            </Fragment>
           ))}
         </div>
 

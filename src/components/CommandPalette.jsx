@@ -76,14 +76,11 @@ export default function CommandPalette({ open, mode, onClose, onNavigate, onMode
 
     setQuery('');
     setActive(0);
+    // App owns the scroll lock (it also covers the drawer and the 3D room),
+    // so one owner restores the page instead of two racing cleanups.
     const timer = window.setTimeout(() => inputRef.current?.focus(), 30);
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
 
-    return () => {
-      window.clearTimeout(timer);
-      document.body.style.overflow = previousOverflow;
-    };
+    return () => window.clearTimeout(timer);
   }, [open]);
 
   useEffect(() => {

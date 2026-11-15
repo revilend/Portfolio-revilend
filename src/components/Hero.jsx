@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import {
   ArrowDown,
   ArrowUpRight,
@@ -10,6 +11,7 @@ import {
   MessageCircle,
   Smartphone,
 } from 'lucide-react';
+import { onScrollFrame } from '../lib/scrollMotion.js';
 
 const METRICS = [
   { icon: Box, label: 'Three.js', value: '3D Web' },
@@ -115,16 +117,46 @@ function ProfilePanel() {
 }
 
 export default function Hero({ onEnter3D }) {
+  const sectionRef = useRef(null);
+  const stageRef = useRef(null);
+
+  // The headline recedes into depth as the page is scrolled: it scales back,
+  // drifts down and blurs, so the projects grid takes over the frame.
+  useEffect(() => {
+    const stage = stageRef.current;
+    if (!stage) return undefined;
+
+    return onScrollFrame(sectionRef.current, ({ scrollY, height }) => {
+      const progress = Math.min(1, Math.max(0, scrollY / Math.max(1, height * 0.92)));
+      stage.style.transform = `translate3d(0, ${(progress * 96).toFixed(1)}px, 0) scale(${(
+        1 -
+        progress * 0.1
+      ).toFixed(4)})`;
+      stage.style.opacity = Math.max(0.04, 1 - progress * 1.08).toFixed(3);
+      // Drop the blur once the hero is out of view: a blurred compositor layer
+      // left running behind the projects costs more than the effect is worth.
+      if (progress < 0.03 || progress > 0.72) stage.style.filter = 'none';
+      else stage.style.filter = `blur(${(progress * 3.4).toFixed(2)}px)`;
+    });
+  }, []);
+
   return (
-    <section id="top" className="relative isolate overflow-hidden pb-20 pt-36 sm:pb-28 sm:pt-40">
+    <section
+      id="top"
+      ref={sectionRef}
+      className="relative isolate overflow-hidden pb-20 pt-36 sm:pb-28 sm:pt-40"
+    >
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10">
         <div className="absolute inset-0 grid-lines mask-fade-top opacity-50" />
-        <div className="absolute -top-44 left-[42%] h-[560px] w-[880px] -translate-x-1/2 rounded-full bg-electric/[0.07] blur-[140px]" />
-        <div className="absolute -right-32 top-[12%] h-[460px] w-[460px] rounded-full bg-plasma/[0.09] blur-[130px]" />
+        <div className="absolute -top-44 left-[42%] h-[560px] w-[880px] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,rgba(0,242,254,0.16),rgba(0,242,254,0.05)_55%,transparent)]" />
+        <div className="absolute -right-32 top-[12%] h-[460px] w-[460px] rounded-full bg-[radial-gradient(closest-side,rgba(139,92,246,0.20),rgba(139,92,246,0.06)_55%,transparent)]" />
         <div className="absolute inset-x-0 bottom-0 h-44 bg-gradient-to-b from-transparent to-ink-900" />
       </div>
 
-      <div className="container-x relative">
+      <div
+        ref={stageRef}
+        className="container-x relative [transform-origin:50%_10%] [will-change:transform,opacity]"
+      >
         <div className="grid items-center gap-14 lg:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)] lg:gap-16">
           <div className="max-w-3xl animate-rise">
             <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/[0.06] px-3.5 py-1.5">
