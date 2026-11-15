@@ -40,6 +40,14 @@ npm test             # Vitest unit tests (focus trap, project data invariants)
 npm run format       # Prettier write (check only: npm run format:check)
 ```
 
+The contact API has its own suite:
+
+```bash
+python3 -m venv .venv
+.venv/bin/pip install -r requirements-dev.txt
+.venv/bin/python -m pytest tests -q   # 17 tests: 503, escaping, caps, rate limit, CORS
+```
+
 ## The two modes
 
 ### 2D Sayt
@@ -102,7 +110,7 @@ src/
 
 - **The 3D chunk is lazy.** The initial 2D bundle is about 60 KB gzipped and the interactive room is a separate chunk (~155 KB gzipped, with Three.js split into its own vendor chunk). The room is fetched on demand and prefetched after first paint — but skipped entirely when `navigator.connection.saveData` is set or the connection reports 2G.
 - **The contact section has two modes, and neither ever fakes success.** Without configuration a static build has nowhere to deliver a message, so it shows a Telegram handoff to `t.me/revilend` and collects nothing. Set `VITE_CONTACT_ENDPOINT` (copy `.env.example` to `.env.local`) to the hosted bot's `POST /api/contact` route and a validated form appears instead. The form clears and reports success **only** after the endpoint answers 2xx with `{ "ok": true }`; a failed request shows an error with the Telegram fallback, and the visitor's text is kept so it is not lost. The original implementation showed "Xabar yuborildi" while sending nothing — that is what this design prevents.
-- **`main.py` is the bot behind that endpoint** (aiogram + aiohttp, `requirements.txt`). It serves `GET /` as a health check and `POST /api/contact` with `{ name, contact, message }`, forwarding the payload to `ADMIN_ID` in Telegram. Two things must be set on the host or messages will be acknowledged but never delivered: `BOT_TOKEN` and `ADMIN_ID`. Its CORS header only allows `https://revilend.uz`, so adjust it if the site moves to another origin.
+- **`main.py` is the bot behind that endpoint** (aiogram + aiohttp, `requirements.txt`). It serves `GET /` as a JSON health check (`contact_ready`) and `POST /api/contact` with `{ name, contact, message }`, forwarding the payload to `ADMIN_ID` in Telegram. The endpoint fails closed and never acknowledges a message it dropped: without `BOT_TOKEN` or `ADMIN_ID` it answers `503 contact_unavailable`, and it returns `{"ok": true}` only after Telegram accepted the send (`502 delivery_failed` otherwise, without leaking the underlying error). Hardening: user text is HTML-escaped and sent with `parse_mode="HTML"` so Markdown characters a visitor types stay literal; `name`/`contact`/`message` are capped at 80/120/3500 characters; each IP gets 5 requests per 10 minutes and the 6th answers `429` with `Retry-After`; allowed CORS origins come from `ALLOWED_ORIGINS` (default `https://revilend.uz,https://www.revilend.uz`) and a foreign `Origin` gets no `Access-Control-Allow-Origin`.
 - **Windows 11 desktop data is local.** Notepad text and personalization/quick-setting choices use `localStorage`; they never leave the browser and are not part of the deployed repository.
 - **Project data** lives in `src/data/projects.js`; card content, drawer content, pin IDs, project URLs and 3D screen associations are all driven from it, so a renamed id cannot leave a dead pin or link behind.
 - **`public/og.png`** is the 1200×630 share card behind `og:image` and `twitter:image`. Regenerate it from the hero if the headline or palette changes.

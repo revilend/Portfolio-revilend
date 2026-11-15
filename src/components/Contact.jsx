@@ -23,7 +23,8 @@ const CONTACT_ENDPOINT = (import.meta.env.VITE_CONTACT_ENDPOINT ?? '').trim();
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const TELEGRAM_PATTERN = /^@?[a-zA-Z0-9_]{4,32}$/;
-const MAX_LENGTH = { name: 80, contact: 120, message: 4000 };
+// Mirrors main.py: Telegram caps a message at 4096 characters.
+const MAX_LENGTH = { name: 80, contact: 120, message: 3500 };
 
 const CHANNELS = [
   {
