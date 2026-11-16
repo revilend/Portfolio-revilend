@@ -150,6 +150,9 @@ export default function Hero({ onEnter3D }) {
         <div className="absolute inset-0 grid-lines mask-fade-top opacity-50" />
         <div className="absolute -top-44 left-[42%] h-[560px] w-[880px] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,rgba(0,242,254,0.16),rgba(0,242,254,0.05)_55%,transparent)]" />
         <div className="absolute -right-32 top-[12%] h-[460px] w-[460px] rounded-full bg-[radial-gradient(closest-side,rgba(139,92,246,0.20),rgba(139,92,246,0.06)_55%,transparent)]" />
+        {/* Keeps the eclipse readable as depth without letting its rim sit under
+            the headline: the scrim fades out before the right half of the hero. */}
+        <div className="absolute inset-0 bg-[linear-gradient(100deg,rgba(5,7,13,0.82)_0%,rgba(5,7,13,0.58)_34%,rgba(5,7,13,0.14)_60%,transparent_82%)]" />
         <div className="absolute inset-x-0 bottom-0 h-44 bg-gradient-to-b from-transparent to-ink-900" />
       </div>
 

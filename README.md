@@ -61,7 +61,7 @@ python3 -m venv .venv
 - `Ctrl`/`Cmd` + `K`, or the `⌘K` button in the header, opens a command palette for jumping to a section, toggling the 3D room and opening the Telegram/GitHub profiles.
 - Categorized tech stack: Frontend & 3D, Backend & Database, Automation & APIs.
 - Terminal identity card whose JSON is generated from the same object it copies, plus a direct-contact panel that hands the visitor to Telegram (there is no form and no data collection).
-- Sections and cards reveal on scroll with a short stagger; the hero glows and the background grid drift slowly. All motion respects `prefers-reduced-motion`.
+- Sections and cards reveal on scroll with a short stagger, and the hero scales and fades back as it leaves the viewport. Behind everything sits a full-viewport **Prism Eclipse** WebGL2 shader: a dark eclipse disc ringed by magenta-to-cyan aurora, where `u_scroll` grows the disc and speeds its rotation and `u_mouse` adds a small camera parallax. It paints one static frame under `prefers-reduced-motion`.
 
 ### 3D Xona
 
@@ -109,6 +109,7 @@ src/
 │   ├── Toast.jsx            # success notification
 │   ├── Footer.jsx
 │   ├── Reveal.jsx           # IntersectionObserver scroll reveal
+│   ├── EclipseShaderBackground.jsx # Prism Eclipse WebGL2 shader background
 │   ├── SectionHeading.jsx
 │   └── StatusBadge.jsx
 └── index.css                # Tailwind layers, theme primitives, motion
@@ -146,4 +147,4 @@ src/lib/telemetry.js         # crash/WebGL reporting and the page-view ping
 - Project drawer and the Windows desktop support Escape, restore focus to the trigger, and contain `Tab` inside the dialog so `aria-modal` is truthful.
 - Room render loop pauses when the tab is hidden; device pixel ratio is capped at 2; all geometries, materials and canvas textures are disposed on unmount.
 - Walk mode has keyboard controls plus an analog touch joystick; the desk prompt opens the Windows desktop without requiring pointer lock. Desktop app windows have labeled close, minimize and maximize controls.
-- Scroll reveals, ambient grid motion, auto-tour timing and 3D animations are reduced under `prefers-reduced-motion`.
+- Scroll reveals, the Prism Eclipse shader (one static frame instead of a render loop), auto-tour timing and 3D animations are reduced under `prefers-reduced-motion`.

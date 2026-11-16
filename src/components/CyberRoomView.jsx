@@ -18,20 +18,108 @@ import { projects } from '../data/projects.js';
 import { attachWebglDiagnostics } from '../lib/telemetry.js';
 import { THEME } from '../theme.js';
 
-const VIEWS = [
+// Three rooms share one building shell, left to right: 01 studio, 02 gallery,
+// 03 arcade. Each partition wall carries a sliding cyber door at DOOR_Z, so the
+// room pills, the doors and the walk-through all address the same three rooms.
+const STUDIO_X = -7.4;
+const GALLERY_X = 0;
+const ARCADE_X = 7.4;
+const WALL_12 = -3.8;
+const WALL_23 = 3.8;
+const DOOR_Z = 1.85;
+const DOOR_HALF_WIDTH = 0.86;
+
+const ROOMS = [
   {
-    key: 'desk',
-    label: 'Stol',
-    target: [0, 1.52, -0.3],
-    radius: 4.7,
-    mobileRadius: 6.6,
+    key: 'studio',
+    label: '01 Ish kabineti',
+    target: [STUDIO_X, 1.55, -0.2],
+    radius: 4.6,
+    mobileRadius: 6.4,
     theta: 0,
     phi: 1.38,
+    thetaLimit: 0.5,
   },
+  {
+    key: 'gallery',
+    label: '02 Loyihalar',
+    target: [GALLERY_X, 2.3, -3.0],
+    radius: 5.2,
+    mobileRadius: 9.4,
+    theta: 0,
+    phi: 1.4,
+    thetaLimit: 0.5,
+  },
+  {
+    key: 'arcade',
+    label: '03 Oʻyin & Musiqa',
+    target: [ARCADE_X, 2.0, -3.0],
+    radius: 5.2,
+    mobileRadius: 8.2,
+    theta: 0,
+    phi: 1.4,
+    thetaLimit: 0.5,
+  },
+];
+
+const OVERVIEW = {
+  key: 'overview',
+  label: 'Umumiy koʻrinish',
+  target: [GALLERY_X, 2.5, 0.8],
+  radius: 6.4,
+  mobileRadius: 7.2,
+  theta: 0,
+  phi: 1.4,
+  fov: 66,
+  thetaLimit: 0.4,
+};
+
+// Each door knows the two rooms it joins and the neon legend above the opening
+// on either side. `side` -1 faces the room on the left, +1 the room on the right.
+const DOORS = [
+  {
+    id: 'door-12',
+    x: WALL_12,
+    rooms: ['studio', 'gallery'],
+    signs: [
+      { side: -1, label: '02 • LOYIHALAR XONASI →', color: '#22d3ee' },
+      { side: 1, label: '01 • ISH KABINETI ←', color: '#a855f7' },
+    ],
+  },
+  {
+    id: 'door-23',
+    x: WALL_23,
+    rooms: ['gallery', 'arcade'],
+    signs: [
+      { side: -1, label: '03 • OʻYIN & MUSIQA →', color: '#d946ef' },
+      { side: 1, label: '02 • LOYIHALAR XONASI ←', color: '#22d3ee' },
+    ],
+  },
+];
+
+// Twelve gallery screens in three rows of four inside room 02.
+const GALLERY_COLUMNS = [-2.5, -0.85, 0.85, 2.5];
+const GALLERY_ROWS = [3.4, 2.32, 1.24];
+const GALLERY = [
+  { id: 'revilend-games', label: 'Revilend Games' },
+  { id: 'stars-savdo', label: 'Stars Savdo' },
+  { id: 'mlbb-savdo', label: 'MLBB Savdo' },
+  { id: 'pulsarcoin-bot', label: 'PulsarCoin' },
+  { id: 'teachermuzaffar', label: 'teachermuzaffar.uz' },
+  { id: 'konushma', label: 'Konuşma' },
+  { id: 'dinleme-turkce', label: 'Dinleme Türkçe' },
+  { id: 'english-learning', label: 'English Learning' },
+  { id: 'horror-game', label: 'Horror Game' },
+  { id: 'parkour', label: 'Parkour' },
+  { id: 'xronos-game', label: 'Xronos Game' },
+  { id: 'dino-trex', label: 'Dino T-Rex' },
+];
+
+const DESK_VIEWS = [
   {
     key: 'teachermuzaffar',
     label: '1. Taʼlim Portali',
-    target: [-0.35, 1.92, -0.55],
+    target: [STUDIO_X - 0.35, 1.92, -0.55],
     radius: 2.25,
     mobileRadius: 5.2,
     theta: 0.04,
@@ -40,7 +128,7 @@ const VIEWS = [
   {
     key: 'horror-game',
     label: '2. 3D Oʻyin',
-    target: [1.55, 1.92, -0.5],
+    target: [STUDIO_X + 1.55, 1.92, -0.5],
     radius: 2.05,
     mobileRadius: 3.3,
     theta: -0.4,
@@ -49,7 +137,7 @@ const VIEWS = [
   {
     key: 'revilend-games',
     label: '3. Revilend Games',
-    target: [-1.95, 1.45, 0.05],
+    target: [STUDIO_X - 1.95, 1.45, 0.05],
     radius: 1.9,
     mobileRadius: 2.8,
     theta: 0.38,
@@ -57,12 +145,22 @@ const VIEWS = [
   },
 ];
 
+const GALLERY_VIEWS = GALLERY.map((entry, index) => ({
+  key: `gallery-${entry.id}`,
+  label: entry.label,
+  target: [GALLERY_COLUMNS[index % 4], GALLERY_ROWS[Math.floor(index / 4)], -3.75],
+  radius: 2.1,
+  mobileRadius: 3.4,
+  theta: 0,
+  phi: 1.44,
+}));
+
 // Anchors live here because they are 3D-only; ids come from the shared project
 // data so a renamed or removed project can never leave a dead pin behind.
 const PIN_META = {
-  teachermuzaffar: { label: 'teachermuzaffar.uz', anchor: [-0.35, 2.72, -0.4] },
-  'horror-game': { label: 'Horror Game', anchor: [1.55, 2.8, -0.35] },
-  'revilend-games': { label: 'Revilend Games', anchor: [-1.95, 1.95, 0.2] },
+  teachermuzaffar: { label: 'teachermuzaffar.uz', anchor: [STUDIO_X - 0.35, 2.72, -0.4] },
+  'horror-game': { label: 'Horror Game', anchor: [STUDIO_X + 1.55, 2.8, -0.35] },
+  'revilend-games': { label: 'Revilend Games', anchor: [STUDIO_X - 1.95, 1.95, 0.2] },
 };
 
 const PINS = projects
@@ -72,14 +170,16 @@ const PINS = projects
 const SEAT_VIEW = {
   key: 'seat',
   label: 'Stol oldi',
-  target: [0, 1.82, -0.65],
+  target: [STUDIO_X, 1.82, -0.65],
   radius: 2.2,
   mobileRadius: 3.6,
   theta: 0,
   phi: 1.58,
 };
 
-const VIEW_MAP = Object.fromEntries([...VIEWS, SEAT_VIEW].map((view) => [view.key, view]));
+const VIEW_MAP = Object.fromEntries(
+  [...ROOMS, ...DESK_VIEWS, ...GALLERY_VIEWS, SEAT_VIEW, OVERVIEW].map((view) => [view.key, view])
+);
 
 function VirtualJoystick({ onChange }) {
   const padRef = useRef(null);
@@ -624,14 +724,243 @@ function drawFloorGlow(ctx, width, height) {
   ctx.fillRect(0, 0, width, height);
 }
 
+function drawGalleryCard(ctx, width, height, project, label, accent) {
+  const background = ctx.createLinearGradient(0, 0, width, height);
+  background.addColorStop(0, '#081119');
+  background.addColorStop(0.6, '#050a12');
+  background.addColorStop(1, '#0a0f1c');
+  ctx.fillStyle = background;
+  ctx.fillRect(0, 0, width, height);
+
+  ctx.strokeStyle = 'rgba(148,163,184,0.10)';
+  ctx.lineWidth = 1;
+  for (let x = 0; x < width; x += 44) {
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, height);
+    ctx.stroke();
+  }
+  for (let y = 0; y < height; y += 44) {
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(width, y);
+    ctx.stroke();
+  }
+
+  const glow = ctx.createRadialGradient(
+    width * 0.8,
+    height * 0.2,
+    0,
+    width * 0.8,
+    height * 0.2,
+    width * 0.75
+  );
+  glow.addColorStop(0, `${accent}44`);
+  glow.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, 0, width, height);
+
+  ctx.fillStyle = accent;
+  ctx.fillRect(36, 44, 4, 74);
+
+  ctx.fillStyle = 'rgba(148,163,184,0.85)';
+  ctx.font = '500 18px "JetBrains Mono", monospace';
+  ctx.fillText(`SYSTEM / ${project?.index ?? '00'}`, 58, 62);
+
+  ctx.fillStyle = '#f2feff';
+  ctx.font = '600 38px "Space Grotesk", sans-serif';
+  ctx.fillText(label, 58, 104);
+
+  const stack = (project?.stack ?? []).slice(0, 3).join(' · ');
+  ctx.fillStyle = accent;
+  ctx.font = '400 17px "JetBrains Mono", monospace';
+  ctx.fillText(stack, 58, 142);
+
+  ctx.fillStyle = 'rgba(226,232,240,0.09)';
+  ctx.fillRect(58, 176, width - 116, 2);
+
+  ctx.fillStyle = 'rgba(148,163,184,0.6)';
+  ctx.font = '400 15px monospace';
+  ctx.fillText((project?.status?.label ?? 'Onlayn').toUpperCase(), 58, height - 34);
+
+  ctx.textAlign = 'right';
+  ctx.fillStyle = 'rgba(148,163,184,0.45)';
+  ctx.fillText('github.com/revilend', width - 58, height - 34);
+  ctx.textAlign = 'left';
+}
+
+function drawArcadeMarquee(ctx, width, height) {
+  ctx.clearRect(0, 0, width, height);
+  ctx.fillStyle = '#050810';
+  ctx.fillRect(0, 0, width, height);
+  ctx.strokeStyle = 'rgba(0,242,254,0.5)';
+  ctx.lineWidth = 4;
+  ctx.strokeRect(6, 6, width - 12, height - 12);
+
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  const gradient = ctx.createLinearGradient(0, 0, width, 0);
+  gradient.addColorStop(0, '#22d3ee');
+  gradient.addColorStop(0.5, '#f0fdff');
+  gradient.addColorStop(1, '#a855f7');
+  ctx.fillStyle = gradient;
+  ctx.shadowColor = 'rgba(0,242,254,0.85)';
+  ctx.shadowBlur = 26;
+  ctx.font = '700 62px "Space Grotesk", sans-serif';
+  ctx.fillText('REVILEND GAMES', width / 2, height / 2 + 2);
+  ctx.shadowBlur = 0;
+
+  ctx.fillStyle = 'rgba(148,163,184,0.75)';
+  ctx.font = '500 16px "JetBrains Mono", monospace';
+  ctx.fillText('ARCADE · 1 CREDIT', width / 2, height - 22);
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'alphabetic';
+}
+
+function drawArcadeScreen(ctx, width, height) {
+  const background = ctx.createLinearGradient(0, 0, 0, height);
+  background.addColorStop(0, '#05080f');
+  background.addColorStop(1, '#02040a');
+  ctx.fillStyle = background;
+  ctx.fillRect(0, 0, width, height);
+
+  ctx.fillStyle = 'rgba(52,211,153,0.14)';
+  for (let y = 0; y < height; y += 34) ctx.fillRect(0, y, width, 1);
+
+  ctx.fillStyle = '#67e8f9';
+  ctx.font = '700 44px "Space Grotesk", sans-serif';
+  ctx.fillText('PLAYER 1', 36, 78);
+
+  ctx.fillStyle = '#f472b6';
+  ctx.textAlign = 'right';
+  ctx.fillText('HI 9999', width - 36, 78);
+  ctx.textAlign = 'left';
+
+  const blocks = [
+    [90, 196, '#22d3ee'],
+    [126, 196, '#22d3ee'],
+    [90, 230, '#22d3ee'],
+    [330, 166, '#a855f7'],
+    [366, 166, '#a855f7'],
+    [366, 200, '#a855f7'],
+    [150, 296, '#34d399'],
+    [186, 296, '#34d399'],
+    [222, 296, '#34d399'],
+    [258, 296, '#34d399'],
+  ];
+  blocks.forEach(([x, y, color]) => {
+    ctx.fillStyle = color;
+    ctx.fillRect(x, y, 30, 30);
+  });
+
+  ctx.fillStyle = 'rgba(226,232,240,0.85)';
+  ctx.font = '500 20px "JetBrains Mono", monospace';
+  ctx.fillText('PRESS START', 36, height - 48);
+
+  ctx.fillStyle = 'rgba(0,242,254,0.35)';
+  ctx.fillRect(36, height - 30, width - 72, 3);
+}
+
+function drawMusicSign(ctx, width, height) {
+  ctx.clearRect(0, 0, width, height);
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+
+  ctx.font = '700 74px "Space Grotesk", sans-serif';
+  ctx.shadowColor = 'rgba(217,70,239,0.9)';
+  ctx.shadowBlur = 34;
+  ctx.fillStyle = '#f5d0fe';
+  ctx.fillText('@revilendmusic', width / 2, height / 2 - 16);
+
+  ctx.shadowBlur = 18;
+  ctx.fillStyle = 'rgba(34,211,238,0.85)';
+  ctx.font = '500 20px "JetBrains Mono", monospace';
+  ctx.fillText('SOUND / SETS / LOOPS', width / 2, height - 30);
+
+  ctx.shadowBlur = 0;
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'alphabetic';
+}
+
+function drawDoorSign(ctx, width, height, label, accent) {
+  ctx.clearRect(0, 0, width, height);
+
+  const background = ctx.createLinearGradient(0, 0, width, 0);
+  background.addColorStop(0, 'rgba(5,10,18,0.94)');
+  background.addColorStop(0.5, 'rgba(9,20,31,0.98)');
+  background.addColorStop(1, 'rgba(5,10,18,0.94)');
+  ctx.fillStyle = background;
+  ctx.fillRect(0, 0, width, height);
+
+  ctx.strokeStyle = accent;
+  ctx.lineWidth = 4;
+  ctx.strokeRect(4, 4, width - 8, height - 8);
+
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.shadowColor = accent;
+  ctx.shadowBlur = 26;
+  ctx.fillStyle = '#e6fbff';
+  ctx.font = '600 48px "JetBrains Mono", monospace';
+  ctx.fillText(label, width / 2, height / 2 + 2);
+
+  ctx.shadowBlur = 0;
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'alphabetic';
+}
+
+function drawNightCity(ctx, width, height) {
+  const sky = ctx.createLinearGradient(0, 0, 0, height);
+  sky.addColorStop(0, '#02040b');
+  sky.addColorStop(0.55, '#061021');
+  sky.addColorStop(1, '#0a1a2e');
+  ctx.fillStyle = sky;
+  ctx.fillRect(0, 0, width, height);
+
+  for (let index = 0; index < 140; index += 1) {
+    const x = Math.random() * width;
+    const y = Math.random() * height * 0.6;
+    const alpha = 0.2 + Math.random() * 0.6;
+    ctx.fillStyle = `rgba(226,244,255,${alpha.toFixed(2)})`;
+    ctx.fillRect(x, y, 1.6, 1.6);
+  }
+
+  const horizon = height * 0.72;
+  const buildings = 16;
+  for (let index = 0; index < buildings; index += 1) {
+    const buildingWidth = width / buildings;
+    const x = index * buildingWidth;
+    const buildingHeight = 40 + Math.random() * 170;
+    const y = horizon - buildingHeight;
+    ctx.fillStyle = index % 2 === 0 ? '#060b16' : '#050912';
+    ctx.fillRect(x, y, buildingWidth - 4, buildingHeight);
+
+    for (let row = 0; row < buildingHeight / 18; row += 1) {
+      for (let column = 0; column < 3; column += 1) {
+        if (Math.random() > 0.42) continue;
+        ctx.fillStyle = Math.random() > 0.5 ? 'rgba(125,249,255,0.55)' : 'rgba(196,181,253,0.45)';
+        ctx.fillRect(x + 6 + column * 14, y + 10 + row * 18, 6, 8);
+      }
+    }
+  }
+
+  const haze = ctx.createLinearGradient(0, horizon - 60, 0, height);
+  haze.addColorStop(0, 'rgba(34,211,238,0)');
+  haze.addColorStop(0.55, 'rgba(34,211,238,0.10)');
+  haze.addColorStop(1, 'rgba(139,92,246,0.16)');
+  ctx.fillStyle = haze;
+  ctx.fillRect(0, horizon - 60, width, height - horizon + 60);
+}
+
 export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
   const mountRef = useRef(null);
   const pinRefs = useRef({});
+  const doorTooltipRef = useRef(null);
   const cameraApiRef = useRef(null);
   const openProjectRef = useRef(onOpenProject);
   const walkAxisRef = useRef({ x: 0, y: 0 });
   const nearDeskRef = useRef(false);
-  const [activeView, setActiveView] = useState('desk');
+  const [activeView, setActiveView] = useState('studio');
   const [webglError, setWebglError] = useState(false);
   const [autoTour, setAutoTour] = useState(false);
   const [walkMode, setWalkMode] = useState(false);
@@ -671,7 +1000,6 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
       cameraApiRef.current?.stopWalk();
       setWalkMode(false);
       setNearDesk(false);
-      setActiveView('desk');
     } else {
       cameraApiRef.current?.startWalk();
       setWalkMode(true);
@@ -682,7 +1010,6 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
     cameraApiRef.current?.stopWalk();
     setWalkMode(false);
     setNearDesk(false);
-    setActiveView('desk');
   }, []);
 
   const sitAtComputer = useCallback(() => {
@@ -698,6 +1025,7 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
     setActiveView('desk');
     // Oʻrindan turgandan soʻng stol oldida, joystick bilan yurishga tayyor holda qaytamiz.
     cameraApiRef.current?.stand();
+    setActiveView('studio');
   }, []);
 
   const toggleFullscreen = useCallback(async () => {
@@ -729,10 +1057,10 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
         else if (key === 'e' && nearDesk) sitAtComputer();
         return;
       }
-      if (key === '1') focusView('teachermuzaffar');
-      else if (key === '2') focusView('horror-game');
-      else if (key === '3') focusView('revilend-games');
-      else if (key === '0' || key === 'r') focusView('desk');
+      if (key === '1') focusView('studio');
+      else if (key === '2') focusView('gallery');
+      else if (key === '3') focusView('arcade');
+      else if (key === '0' || key === 'r') focusView('overview');
       else if (key === '+' || key === '=') cameraApiRef.current?.zoom(0.88);
       else if (key === '-' || key === '_') cameraApiRef.current?.zoom(1.14);
       else if (key === 't') setAutoTour((value) => !value);
@@ -758,8 +1086,8 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
 
     let index = 0;
     const step = () => {
-      index = (index + 1) % VIEWS.length;
-      const view = VIEWS[index];
+      index = (index + 1) % ROOMS.length;
+      const view = ROOMS[index];
       setActiveView(view.key);
       cameraApiRef.current?.focus(view.key);
     };
@@ -823,19 +1151,19 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
     scene.add(keyLight);
 
     const deskLight = new THREE.PointLight(THEME.electric, 4.5, 10, 2);
-    deskLight.position.set(0, 1.75, 1.3);
+    deskLight.position.set(STUDIO_X, 1.75, 1.3);
     scene.add(deskLight);
 
     const rimLeft = new THREE.PointLight(THEME.plasma, 8, 16, 2);
-    rimLeft.position.set(-4.5, 3, -1.5);
+    rimLeft.position.set(STUDIO_X - 3.1, 3, -1.5);
     scene.add(rimLeft);
 
     const rimRight = new THREE.PointLight('#7c3aed', 6, 14, 2);
-    rimRight.position.set(4.6, 2.4, 1.4);
+    rimRight.position.set(ARCADE_X, 2.4, 1.4);
     scene.add(rimRight);
 
     const signLight = new THREE.PointLight(THEME.cyan, 6, 10, 2);
-    signLight.position.set(0, 3.3, -2.7);
+    signLight.position.set(STUDIO_X, 3.3, -2.7);
     scene.add(signLight);
 
     const makeTexture = (width, height, draw) => {
@@ -856,12 +1184,6 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
     const neonTexture = makeTexture(1600, 360, drawNeonSign);
     const keyboardTexture = makeTexture(1024, 420, drawKeyboard);
     const floorGlowTexture = makeTexture(256, 256, drawFloorGlow);
-    const posterOneTexture = makeTexture(560, 760, (ctx, width, height) =>
-      drawWallPoster(ctx, width, height, THEME.cyan, 'SPATIAL INTERFACES', '01')
-    );
-    const posterTwoTexture = makeTexture(560, 760, (ctx, width, height) =>
-      drawWallPoster(ctx, width, height, '#a78bfa', 'SYSTEM ARCHITECTURE', '02')
-    );
 
     const frameMaterial = new THREE.MeshStandardMaterial({
       color: '#0a121c',
@@ -894,15 +1216,21 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
       roughness: 0.98,
     });
 
-    const addMesh = (mesh, castShadow = true, receiveShadow = true) => {
+    const addMesh = (mesh, castShadow = true, receiveShadow = true, parent = scene) => {
       mesh.castShadow = castShadow;
       mesh.receiveShadow = receiveShadow;
-      scene.add(mesh);
+      parent.add(mesh);
       return mesh;
     };
 
+    // Everything that belongs to room 01 hangs off this group, so moving the
+    // studio is one position change instead of twenty coordinate edits.
+    const studio = new THREE.Group();
+    studio.position.x = STUDIO_X;
+    scene.add(studio);
+
     const ROOM = {
-      width: 14.4,
+      width: 22.4,
       depth: 12.8,
       centerZ: 2.2,
       height: 5.2,
@@ -921,7 +1249,7 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
     floor.rotation.x = -Math.PI / 2;
     floor.position.set(0, 0, ROOM.centerZ);
 
-    const grid = new THREE.GridHelper(ROOM.width, 32, THEME.electric, THEME.cyanDeep);
+    const grid = new THREE.GridHelper(ROOM.width, 44, THEME.electric, THEME.cyanDeep);
     grid.scale.z = ROOM.depth / ROOM.width;
     grid.position.set(0, 0.012, ROOM.centerZ);
     grid.material.transparent = true;
@@ -931,7 +1259,7 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
     scene.add(grid);
 
     const floorGlow = new THREE.Mesh(
-      new THREE.PlaneGeometry(11, 9),
+      new THREE.PlaneGeometry(6.6, 7.4),
       new THREE.MeshBasicMaterial({
         map: floorGlowTexture,
         transparent: true,
@@ -943,12 +1271,13 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
     );
     floorGlow.rotation.x = -Math.PI / 2;
     floorGlow.position.set(0, 0.015, 1.2);
-    scene.add(floorGlow);
+    studio.add(floorGlow);
 
     const rug = addMesh(
       new THREE.Mesh(new THREE.PlaneGeometry(6.5, 3.8), rugMaterial),
       false,
-      true
+      true,
+      studio
     );
     rug.rotation.x = -Math.PI / 2;
     rug.position.set(0, 0.018, 2.05);
@@ -959,7 +1288,7 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
     );
     rugInset.rotation.x = -Math.PI / 2;
     rugInset.position.set(0, 0.022, 2.05);
-    scene.add(rugInset);
+    studio.add(rugInset);
 
     [-1, 1].forEach((side) => {
       const rugLine = new THREE.Mesh(
@@ -967,7 +1296,7 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
         new THREE.MeshBasicMaterial({ color: THEME.cyanDeep, toneMapped: false })
       );
       rugLine.position.set(0, 0.028, 2.05 + side * 1.62);
-      scene.add(rugLine);
+      studio.add(rugLine);
     });
 
     const backWall = addMesh(
@@ -999,6 +1328,133 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
       true
     );
     ceiling.position.set(0, ROOM.height + 0.06, ROOM.centerZ);
+
+    // ---- Partition walls and the two sliding doors ----------------------
+    // Each partition is split into a back segment, a front segment and a
+    // lintel, which leaves a real doorway the camera can glide through.
+    [WALL_12, WALL_23].forEach((wallX) => {
+      [
+        [ROOM.backZ + 0.09, DOOR_Z - DOOR_HALF_WIDTH],
+        [DOOR_Z + DOOR_HALF_WIDTH, ROOM.frontZ - 0.09],
+      ].forEach(([z0, z1]) => {
+        const segment = addMesh(
+          new THREE.Mesh(new THREE.BoxGeometry(0.16, ROOM.height, z1 - z0), wallMaterial),
+          false,
+          true
+        );
+        segment.position.set(wallX, ROOM.height / 2, (z0 + z1) / 2);
+      });
+
+      const lintelWall = addMesh(
+        new THREE.Mesh(
+          new THREE.BoxGeometry(0.16, ROOM.height - 2.62, DOOR_HALF_WIDTH * 2),
+          wallMaterial
+        ),
+        false,
+        true
+      );
+      lintelWall.position.set(wallX, (ROOM.height + 2.62) / 2, DOOR_Z);
+    });
+
+    const doorTargets = [];
+    const doors = [];
+
+    const buildDoor = (config) => {
+      const group = new THREE.Group();
+      group.position.set(config.x, 0, 0);
+      scene.add(group);
+
+      const glowMaterial = new THREE.MeshBasicMaterial({
+        color: config.signs[0].color,
+        transparent: true,
+        opacity: 0.42,
+        toneMapped: false,
+      });
+
+      // Neon jambs and header around the opening.
+      [
+        [0.07, 2.62, 0.07, 0, 1.31, DOOR_Z - DOOR_HALF_WIDTH],
+        [0.07, 2.62, 0.07, 0, 1.31, DOOR_Z + DOOR_HALF_WIDTH],
+        [0.07, 0.07, DOOR_HALF_WIDTH * 2, 0, 2.62, DOOR_Z],
+      ].forEach(([width, height, depth, x, y, z]) => {
+        const strip = new THREE.Mesh(new THREE.BoxGeometry(width, height, depth), glowMaterial);
+        strip.position.set(x, y, z);
+        group.add(strip);
+      });
+
+      const panelMaterial = new THREE.MeshStandardMaterial({
+        color: '#0a1a26',
+        metalness: 0.55,
+        roughness: 0.2,
+        transparent: true,
+        opacity: 0.84,
+        emissive: new THREE.Color(config.signs[0].color),
+        emissiveIntensity: 0.14,
+      });
+      const panel = new THREE.Mesh(
+        new THREE.BoxGeometry(0.08, 2.52, DOOR_HALF_WIDTH * 2 - 0.06),
+        panelMaterial
+      );
+      panel.position.set(0, 1.26, DOOR_Z);
+      panel.castShadow = true;
+      group.add(panel);
+
+      const seam = new THREE.Mesh(
+        new THREE.BoxGeometry(0.09, 2.3, 0.02),
+        new THREE.MeshBasicMaterial({ color: config.signs[0].color, toneMapped: false })
+      );
+      seam.position.set(0, 1.26, DOOR_Z);
+      group.add(seam);
+
+      const handle = new THREE.Mesh(
+        new THREE.BoxGeometry(0.09, 0.5, 0.04),
+        new THREE.MeshStandardMaterial({ color: '#dbeafe', metalness: 0.9, roughness: 0.2 })
+      );
+      handle.position.set(0, 1.1, DOOR_Z + 0.55);
+      group.add(handle);
+
+      // One neon legend per side, so each room reads its own destination.
+      config.signs.forEach(({ side, label, color }) => {
+        const sign = new THREE.Mesh(
+          new THREE.PlaneGeometry(2.4, 0.44),
+          new THREE.MeshBasicMaterial({
+            map: makeTexture(768, 140, (ctx, width, height) =>
+              drawDoorSign(ctx, width, height, label, color)
+            ),
+            transparent: true,
+            depthWrite: false,
+            toneMapped: false,
+          })
+        );
+        sign.position.set(side * 0.12, 3.11, DOOR_Z);
+        sign.rotation.y = (side * Math.PI) / 2;
+        group.add(sign);
+      });
+
+      const light = new THREE.PointLight(config.signs[0].color, 1.8, 5.4, 2);
+      light.position.set(0, 2.35, DOOR_Z);
+      group.add(light);
+
+      group.traverse((object) => {
+        if (!object.isMesh) return;
+        object.userData.doorId = config.id;
+        doorTargets.push(object);
+      });
+
+      doors.push({
+        ...config,
+        panel,
+        panelMaterial,
+        glowMaterial,
+        light,
+        progress: 0,
+        target: 0,
+        hover: 0,
+        anchor: new THREE.Vector3(config.x, 3.0, DOOR_Z),
+      });
+    };
+
+    DOORS.forEach(buildDoor);
 
     [
       [ROOM.width, 0.12, 0.08, 0, 0.06, ROOM.backZ + 0.14],
@@ -1052,17 +1508,8 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
     frontLight.position.set(0, 3.4, 6.6);
     scene.add(frontLight);
 
-    [-5.6, 5.6].forEach((x) => {
-      const bar = new THREE.Mesh(
-        new THREE.BoxGeometry(0.035, 2.4, 0.035),
-        new THREE.MeshBasicMaterial({ color: '#6d28d9', toneMapped: false })
-      );
-      bar.position.set(x, 3.1, ROOM.backZ + 0.16);
-      scene.add(bar);
-    });
-
     const neonSign = new THREE.Mesh(
-      new THREE.PlaneGeometry(4.8, 1.08),
+      new THREE.PlaneGeometry(4.2, 0.95),
       new THREE.MeshBasicMaterial({
         map: neonTexture,
         transparent: true,
@@ -1070,24 +1517,30 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
         toneMapped: false,
       })
     );
-    neonSign.position.set(0, 3.6, ROOM.backZ + 0.16);
-    scene.add(neonSign);
+    neonSign.position.set(0, 4.52, ROOM.backZ + 0.16);
+    studio.add(neonSign);
 
+    // Two framed posters on the studio's front wall, so walking back out of the
+    // room still has something to look at.
     [
-      { texture: posterOneTexture, x: -4.65 },
-      { texture: posterTwoTexture, x: 4.65 },
-    ].forEach(({ texture, x }) => {
-      const posterFrame = new THREE.Mesh(new THREE.BoxGeometry(1.56, 2.06, 0.06), frameMaterial);
-      posterFrame.position.set(x, 3.0, ROOM.backZ + 0.13);
-      posterFrame.castShadow = true;
-      scene.add(posterFrame);
+      { color: THEME.cyan, label: 'SPATIAL INTERFACES', index: '01', x: -2.3 },
+      { color: '#a78bfa', label: 'SYSTEM ARCHITECTURE', index: '02', x: 2.3 },
+    ].forEach(({ color, label, index, x }) => {
+      const texture = makeTexture(560, 760, (ctx, width, height) =>
+        drawWallPoster(ctx, width, height, color, label, index)
+      );
+      const posterFrame = new THREE.Mesh(new THREE.BoxGeometry(1.3, 1.72, 0.06), frameMaterial);
+      posterFrame.position.set(x, 3.1, ROOM.frontZ - 0.14);
+      posterFrame.rotation.y = Math.PI;
+      studio.add(posterFrame);
 
       const poster = new THREE.Mesh(
-        new THREE.PlaneGeometry(1.4, 1.9),
+        new THREE.PlaneGeometry(1.16, 1.58),
         new THREE.MeshBasicMaterial({ map: texture, toneMapped: false })
       );
-      poster.position.set(x, 3.0, ROOM.backZ + 0.17);
-      scene.add(poster);
+      poster.position.set(x, 3.1, ROOM.frontZ - 0.09);
+      poster.rotation.y = Math.PI;
+      studio.add(poster);
     });
 
     const shelf = addMesh(
@@ -1108,39 +1561,6 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
       book.castShadow = true;
       scene.add(book);
     });
-
-    const doorGroup = new THREE.Group();
-    doorGroup.position.set(3.35, 0, ROOM.frontZ - 0.16);
-
-    const doorPanel = new THREE.Mesh(
-      new THREE.BoxGeometry(1.54, 2.72, 0.07),
-      new THREE.MeshStandardMaterial({ color: '#0b1722', metalness: 0.38, roughness: 0.62 })
-    );
-    doorPanel.position.y = 1.36;
-    doorPanel.castShadow = true;
-    doorGroup.add(doorPanel);
-
-    [
-      [-0.84, 1.4, 0.1, 2.9],
-      [0.84, 1.4, 0.1, 2.9],
-      [0, 2.84, 1.78, 0.1],
-    ].forEach(([x, y, width, height]) => {
-      const framePart = new THREE.Mesh(new THREE.BoxGeometry(width, height, 0.12), trimMaterial);
-      framePart.position.set(x, y, 0.01);
-      doorGroup.add(framePart);
-    });
-
-    const handle = new THREE.Mesh(
-      new THREE.SphereGeometry(0.065, 16, 16),
-      new THREE.MeshStandardMaterial({ color: '#8b9aab', metalness: 0.9, roughness: 0.22 })
-    );
-    handle.position.set(0.55, 1.28, -0.06);
-    doorGroup.add(handle);
-    scene.add(doorGroup);
-
-    const doorLight = new THREE.PointLight('#4cc2ff', 1.5, 4.5, 2);
-    doorLight.position.set(3.35, 3.15, ROOM.frontZ - 0.5);
-    scene.add(doorLight);
 
     const plant = new THREE.Group();
     plant.position.set(5.35, 0, -2.5);
@@ -1206,7 +1626,7 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
     mugHandle.position.set(0.11, 0.1, 0);
     mugHandle.rotation.y = Math.PI / 2;
     mug.add(mugHandle);
-    scene.add(mug);
+    studio.add(mug);
 
     const notebook = new THREE.Mesh(
       new THREE.BoxGeometry(0.55, 0.025, 0.4),
@@ -1215,7 +1635,7 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
     notebook.position.set(2.3, 1.085, -0.18);
     notebook.rotation.y = 0.12;
     notebook.castShadow = true;
-    scene.add(notebook);
+    studio.add(notebook);
 
     const pen = new THREE.Mesh(
       new THREE.CylinderGeometry(0.012, 0.012, 0.34, 8),
@@ -1224,9 +1644,14 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
     pen.position.set(2.52, 1.1, -0.1);
     pen.rotation.z = Math.PI / 2;
     pen.rotation.y = 0.35;
-    scene.add(pen);
+    studio.add(pen);
 
-    const deskTop = addMesh(new THREE.Mesh(new THREE.BoxGeometry(6, 0.14, 1.75), deskMaterial));
+    const deskTop = addMesh(
+      new THREE.Mesh(new THREE.BoxGeometry(6, 0.14, 1.75), deskMaterial),
+      true,
+      true,
+      studio
+    );
     deskTop.position.set(0, 1.0, 0);
 
     const legGeometry = new THREE.BoxGeometry(0.1, 0.93, 0.1);
@@ -1236,7 +1661,7 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
       [-2.7, 0.65],
       [2.7, 0.65],
     ].forEach(([x, z]) => {
-      const leg = addMesh(new THREE.Mesh(legGeometry, darkMetal));
+      const leg = addMesh(new THREE.Mesh(legGeometry, darkMetal), true, true, studio);
       leg.position.set(x, 0.465, z);
     });
 
@@ -1245,14 +1670,14 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
       new THREE.MeshBasicMaterial({ color: THEME.electric, toneMapped: false })
     );
     frontStrip.position.set(0, 0.92, 0.87);
-    scene.add(frontStrip);
+    studio.add(frontStrip);
 
     const backStrip = new THREE.Mesh(
       new THREE.BoxGeometry(3.4, 0.03, 0.03),
       new THREE.MeshBasicMaterial({ color: THEME.plasma, toneMapped: false })
     );
     backStrip.position.set(0, 0.92, -0.87);
-    scene.add(backStrip);
+    studio.add(backStrip);
 
     const clickTargets = [];
 
@@ -1293,7 +1718,7 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
 
       group.position.set(x, y, z);
       group.rotation.y = rotationY;
-      scene.add(group);
+      studio.add(group);
       return group;
     };
 
@@ -1355,10 +1780,10 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
 
     clickTargets.push(laptopScreen, lid);
     laptop.add(lidPivot);
-    scene.add(laptop);
+    studio.add(laptop);
 
     const rack = new THREE.Group();
-    rack.position.set(-3.5, 0, -1.15);
+    rack.position.set(-3.0, 0, -1.15);
 
     const tower = new THREE.Mesh(
       new THREE.BoxGeometry(0.9, 2.35, 0.85),
@@ -1396,7 +1821,208 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
     );
     rackStrip.position.set(0.43, 1.2, 0.1);
     rack.add(rackStrip);
-    scene.add(rack);
+    studio.add(rack);
+
+    // ---- Zone 2: gallery wall -------------------------------------------
+    // Six holographic screens on the left half of the back wall. Each frame has
+    // its own emissive material so hovering lights up exactly one card.
+    const galleryGlow = [];
+    const galleryAccents = { bot: '#34d399', web: '#22d3ee', game: '#a78bfa' };
+
+    GALLERY.forEach((entry, index) => {
+      const project = projects.find((item) => item.id === entry.id);
+      const accent = galleryAccents[project?.category] ?? galleryAccents.web;
+      const x = GALLERY_COLUMNS[index % 4];
+      const y = GALLERY_ROWS[Math.floor(index / 4)];
+
+      const cardFrameMaterial = frameMaterial.clone();
+      cardFrameMaterial.emissive = new THREE.Color(accent);
+      cardFrameMaterial.emissiveIntensity = 0.2;
+
+      const frame = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.86, 0.07), cardFrameMaterial);
+      frame.position.set(x, y, ROOM.backZ + 0.12);
+      frame.castShadow = true;
+      frame.receiveShadow = true;
+      frame.userData.projectId = entry.id;
+      frame.userData.focusKey = `gallery-${entry.id}`;
+      scene.add(frame);
+
+      const screen = new THREE.Mesh(
+        new THREE.PlaneGeometry(1.06, 0.7),
+        new THREE.MeshBasicMaterial({
+          map: makeTexture(560, 360, (ctx, width, height) =>
+            drawGalleryCard(ctx, width, height, project, entry.label, accent)
+          ),
+          toneMapped: false,
+        })
+      );
+      screen.position.set(x, y, ROOM.backZ + 0.17);
+      screen.userData.projectId = entry.id;
+      screen.userData.focusKey = `gallery-${entry.id}`;
+      scene.add(screen);
+      clickTargets.push(screen, frame);
+
+      const underlineMaterial = new THREE.MeshBasicMaterial({
+        color: accent,
+        transparent: true,
+        opacity: 0.3,
+        toneMapped: false,
+      });
+      const underline = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.03, 0.03), underlineMaterial);
+      underline.position.set(x, y - 0.5, ROOM.backZ + 0.2);
+      scene.add(underline);
+
+      galleryGlow.push(
+        { material: cardFrameMaterial, kind: 'standard', projectId: entry.id, value: 0.2 },
+        { material: underlineMaterial, kind: 'basic', projectId: entry.id, value: 0.2 }
+      );
+    });
+
+    const galleryLight = new THREE.PointLight('#67e8f9', 4.2, 14, 2);
+    galleryLight.position.set(GALLERY_X, 3.1, -2.4);
+    scene.add(galleryLight);
+
+    // ---- Zone 3: arcade and music corner --------------------------------
+    const arcade = new THREE.Group();
+    arcade.position.set(ARCADE_X, 0, -3.62);
+
+    const cabinetMaterial = new THREE.MeshStandardMaterial({
+      color: '#090f18',
+      metalness: 0.62,
+      roughness: 0.42,
+    });
+
+    const cabinet = new THREE.Mesh(new THREE.BoxGeometry(1.5, 2.35, 0.95), cabinetMaterial);
+    cabinet.position.y = 1.175;
+    cabinet.castShadow = true;
+    cabinet.receiveShadow = true;
+    arcade.add(cabinet);
+
+    const cabinetMarquee = new THREE.Mesh(
+      new THREE.PlaneGeometry(1.3, 0.4),
+      new THREE.MeshBasicMaterial({
+        map: makeTexture(512, 160, drawArcadeMarquee),
+        toneMapped: false,
+      })
+    );
+    cabinetMarquee.position.set(0, 2.22, 0.49);
+    arcade.add(cabinetMarquee);
+
+    const cabinetScreen = new THREE.Mesh(
+      new THREE.PlaneGeometry(1.14, 0.84),
+      new THREE.MeshBasicMaterial({
+        map: makeTexture(512, 384, drawArcadeScreen),
+        toneMapped: false,
+      })
+    );
+    cabinetScreen.position.set(0, 1.6, 0.49);
+    arcade.add(cabinetScreen);
+
+    const cabinetPanel = new THREE.Mesh(
+      new THREE.BoxGeometry(1.5, 0.16, 0.5),
+      new THREE.MeshStandardMaterial({ color: '#121c29', metalness: 0.55, roughness: 0.5 })
+    );
+    cabinetPanel.position.set(0, 1.03, 0.62);
+    arcade.add(cabinetPanel);
+
+    const joystick = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.022, 0.022, 0.17, 8),
+      new THREE.MeshStandardMaterial({ color: '#94a3b8', metalness: 0.9, roughness: 0.24 })
+    );
+    joystick.position.set(-0.36, 1.15, 0.62);
+    arcade.add(joystick);
+
+    const joystickBall = new THREE.Mesh(
+      new THREE.SphereGeometry(0.05, 12, 10),
+      new THREE.MeshStandardMaterial({
+        color: THEME.electric,
+        emissive: THEME.electric,
+        emissiveIntensity: 0.9,
+      })
+    );
+    joystickBall.position.set(-0.36, 1.25, 0.62);
+    arcade.add(joystickBall);
+
+    [
+      [-0.04, '#f472b6'],
+      [0.1, '#facc15'],
+      [0.24, '#34d399'],
+    ].forEach(([x, color]) => {
+      const button = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.045, 0.045, 0.03, 14),
+        new THREE.MeshStandardMaterial({ color, emissive: color, emissiveIntensity: 0.45 })
+      );
+      button.position.set(x, 1.12, 0.66);
+      button.rotation.x = Math.PI / 2;
+      arcade.add(button);
+    });
+
+    scene.add(arcade);
+
+    // Equalizer bars: the geometry is translated so scaling on Y anchors each
+    // bar to the bottom instead of growing in both directions.
+    const eqBars = [];
+    for (let index = 0; index < 16; index += 1) {
+      const barGeometry = new THREE.BoxGeometry(0.055, 1, 0.05);
+      barGeometry.translate(0, 0.5, 0);
+      const barMaterial = new THREE.MeshBasicMaterial({
+        color: index % 2 === 0 ? THEME.electric : THEME.plasma,
+        transparent: true,
+        opacity: 0.85,
+        toneMapped: false,
+      });
+      const bar = new THREE.Mesh(barGeometry, barMaterial);
+      bar.position.set(ARCADE_X - 1.4 + index * 0.18, 2.6, ROOM.backZ + 0.14);
+      bar.scale.y = 0.3;
+      bar.userData.base = 0.26 + (index % 4) * 0.07;
+      scene.add(bar);
+      eqBars.push(bar);
+    }
+
+    const musicSign = new THREE.Mesh(
+      new THREE.PlaneGeometry(2.7, 0.66),
+      new THREE.MeshBasicMaterial({
+        map: makeTexture(768, 220, drawMusicSign),
+        transparent: true,
+        depthWrite: false,
+        toneMapped: false,
+      })
+    );
+    musicSign.position.set(ARCADE_X, 3.62, ROOM.backZ + 0.16);
+    scene.add(musicSign);
+
+    const musicLight = new THREE.PointLight('#d946ef', 5, 9, 2);
+    musicLight.position.set(ARCADE_X, 3.3, -3.1);
+    scene.add(musicLight);
+
+    // ---- Panoramic night-city window (room 01, above the desk) ----------
+    const windowPlane = new THREE.Mesh(
+      new THREE.PlaneGeometry(6.0, 1.35),
+      new THREE.MeshBasicMaterial({
+        map: makeTexture(1024, 512, drawNightCity),
+        toneMapped: false,
+      })
+    );
+    windowPlane.position.set(0, 3.35, ROOM.backZ + 0.15);
+    studio.add(windowPlane);
+
+    [2.03, 2.72, 3.98].forEach((y) => {
+      const rail = new THREE.Mesh(new THREE.BoxGeometry(6.2, 0.07, 0.08), trimMaterial);
+      rail.position.set(0, y, ROOM.backZ + 0.2);
+      studio.add(rail);
+    });
+    [-2.98, 2.98].forEach((x) => {
+      const post = new THREE.Mesh(new THREE.BoxGeometry(0.07, 1.42, 0.08), trimMaterial);
+      post.position.set(x, 3.35, ROOM.backZ + 0.2);
+      studio.add(post);
+    });
+    const windowMullion = new THREE.Mesh(new THREE.BoxGeometry(0.05, 1.35, 0.08), trimMaterial);
+    windowMullion.position.set(0, 3.35, ROOM.backZ + 0.2);
+    studio.add(windowMullion);
+
+    const cityLight = new THREE.PointLight('#4cc2ff', 3.2, 11, 2);
+    cityLight.position.set(STUDIO_X, 2.6, -3.3);
+    scene.add(cityLight);
 
     const pinObjects = PINS.map((pin, index) => ({
       ...pin,
@@ -1407,9 +2033,9 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
     const dustCount = 260;
     const dustPositions = new Float32Array(dustCount * 3);
     for (let index = 0; index < dustCount; index += 1) {
-      dustPositions[index * 3] = (Math.random() - 0.5) * 11.8;
+      dustPositions[index * 3] = (Math.random() - 0.5) * 21.4;
       dustPositions[index * 3 + 1] = 0.3 + Math.random() * 4.5;
-      dustPositions[index * 3 + 2] = -3.8 + Math.random() * 11.4;
+      dustPositions[index * 3 + 2] = -3.8 + Math.random() * 12;
     }
     const dustGeometry = new THREE.BufferGeometry();
     dustGeometry.setAttribute('position', new THREE.BufferAttribute(dustPositions, 3));
@@ -1425,7 +2051,7 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
     const dust = new THREE.Points(dustGeometry, dustMaterial);
     scene.add(dust);
 
-    const initialView = VIEW_MAP.desk;
+    const initialView = VIEW_MAP.studio;
     const compact = window.innerWidth < 768;
     const cameraState = {
       target: new THREE.Vector3(...initialView.target),
@@ -1436,18 +2062,25 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
       goalTheta: initialView.theta,
       phi: initialView.phi,
       goalPhi: initialView.phi,
+      goalFov: initialView.fov ?? (compact ? 58 : 46),
+      thetaLimit: initialView.thetaLimit ?? 0.86,
     };
 
     const WALK_EYE = 1.62;
     const WALK_RADIUS = 0.32;
-    const WALK_BOUNDS = { minX: -6.52, maxX: 6.52, minZ: -3.55, maxZ: 7.9 };
+    const WALK_BOUNDS = { minX: -10.4, maxX: 10.4, minZ: -3.4, maxZ: 7.9 };
     const walkState = {
       active: false,
-      position: new THREE.Vector3(0, WALK_EYE, 3.4),
+      position: new THREE.Vector3(STUDIO_X, WALK_EYE, 3.4),
       yaw: 0,
       pitch: 0,
       bob: 0,
     };
+    // Which room the visitor stands in. Kept in a ref so walking never triggers
+    // a React render per frame; the HUD is only updated when it changes.
+    let walkRoom = 'studio';
+    const roomAt = (x) => (x < WALL_12 ? 'studio' : x < WALL_23 ? 'gallery' : 'arcade');
+    const roomCenterFor = (x) => (x < WALL_12 ? STUDIO_X : x < WALL_23 ? GALLERY_X : ARCADE_X);
     const walkKeys = { forward: false, back: false, left: false, right: false, sprint: false };
 
     const resetWalkInput = () => {
@@ -1471,14 +2104,24 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
         z > minZ - WALK_RADIUS &&
         z < maxZ + WALK_RADIUS;
 
-      return (
-        intersects(-3.02, 3.02, -0.98, 0.98) ||
-        intersects(-3.98, -3.02, -1.76, -0.54) ||
-        intersects(4.96, 5.74, -2.89, -2.11)
-      );
+      const deskSolid =
+        intersects(STUDIO_X - 3.02, STUDIO_X + 3.02, -0.98, 0.98) ||
+        intersects(STUDIO_X - 3.98, STUDIO_X - 2.98, -1.76, -0.54) ||
+        intersects(ARCADE_X - 2.43, ARCADE_X - 1.67, -2.9, -2.1) ||
+        // The arcade cabinet stands proud of the back wall in room 03.
+        intersects(ARCADE_X - 0.95, ARCADE_X + 0.95, -4.2, -3.02);
+
+      // Partition walls only open where a door has actually slid aside.
+      const wallSolid = doors.some((door) => {
+        if (Math.abs(x - door.x) > 0.55) return false;
+        const inGap = Math.abs(z - DOOR_Z) < DOOR_HALF_WIDTH - 0.24;
+        return !inGap || door.progress < 0.65;
+      });
+
+      return deskSolid || wallSolid;
     };
 
-    const isNearDeskPosition = (x, z) => Math.abs(x) < 2.85 && z > 1.14 && z < 2.42;
+    const isNearDeskPosition = (x, z) => Math.abs(x - STUDIO_X) < 2.85 && z > 1.14 && z < 2.42;
 
     const updateNearDesk = () => {
       if (!walkState.active) return;
@@ -1493,13 +2136,16 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
       const mobile = window.innerWidth < 768;
       cameraState.goalTarget.set(...view.target);
       cameraState.goalRadius = clampRadius(mobile ? view.mobileRadius : view.radius);
-      cameraState.goalTheta = THREE.MathUtils.clamp(view.theta, -0.86, 0.86);
+      const limit = view.thetaLimit ?? 0.86;
+      cameraState.thetaLimit = limit;
+      cameraState.goalTheta = THREE.MathUtils.clamp(view.theta, -limit, limit);
       cameraState.goalPhi = THREE.MathUtils.clamp(view.phi, 1.12, 1.53);
+      cameraState.goalFov = view.fov ?? (mobile ? 58 : 46);
     };
 
     const clampRadius = (value) => {
       const mobile = window.innerWidth < 768;
-      return THREE.MathUtils.clamp(value, mobile ? 2.1 : 1.35, 7.8);
+      return THREE.MathUtils.clamp(value, mobile ? 2.1 : 1.35, 9.6);
     };
 
     const zoom = (factor) => {
@@ -1524,9 +2170,11 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
         WALK_BOUNDS.maxZ
       );
       if (isWalkBlocked(walkState.position.x, walkState.position.z)) {
-        walkState.position.x = 0;
+        walkState.position.x = STUDIO_X;
         walkState.position.z = 2.05;
       }
+      walkRoom = roomAt(walkState.position.x);
+      setActiveView(walkRoom);
       walkState.yaw = Math.atan2(-direction.x, -direction.z);
       walkState.pitch = THREE.MathUtils.clamp(
         Math.asin(THREE.MathUtils.clamp(direction.y, -1, 1)),
@@ -1580,7 +2228,7 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
       resetWalkInput();
       nearDeskRef.current = false;
       setNearDesk(false);
-      focus('desk');
+      focus(roomAt(walkState.position.x));
     };
 
     const sit = () => {
@@ -1596,7 +2244,7 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
     const stand = () => {
       releasePointerLock();
       walkState.active = true;
-      walkState.position.set(0, WALK_EYE, 2.05);
+      walkState.position.set(STUDIO_X, WALK_EYE, 2.05);
       walkState.yaw = 0;
       walkState.pitch = -0.06;
       walkState.bob = 0;
@@ -1624,13 +2272,61 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
       pointer.x = ((clientX - rect.left) / rect.width) * 2 - 1;
       pointer.y = -((clientY - rect.top) / rect.height) * 2 + 1;
       raycaster.setFromCamera(pointer, camera);
+
+      const doorHits = raycaster.intersectObjects(doorTargets, false);
+      if (doorHits.length) {
+        const door = doors.find((item) => item.id === doorHits[0].object.userData.doorId);
+        if (door) return { door };
+      }
+
       const intersections = raycaster.intersectObjects(clickTargets, false);
       return intersections.find((intersection) => intersection.object.userData.projectId) ?? null;
     };
 
+    let hoveredProjectId = null;
+    let hoveredDoorId = null;
+
+    // Doors are two-way: whatever room the camera is pointed at, entering walks
+    // through to the room on the other side of the partition.
+    let doorTravel = null;
+
+    const enterDoor = (id) => {
+      const door = doors.find((item) => item.id === id);
+      if (!door) return;
+      door.target = 1;
+      setAutoTour(false);
+      const currentRoom = roomAt(cameraState.goalTarget.x);
+      const nextRoom = door.rooms.find((room) => room !== currentRoom) ?? door.rooms[0];
+      setActiveView(nextRoom);
+
+      // Aim for the open doorway first, then for the room beyond it, so the
+      // glide reads as walking through the door instead of through the wall.
+      cameraState.thetaLimit = 0.5;
+      cameraState.goalTheta = 0;
+      cameraState.goalPhi = 1.48;
+      cameraState.goalRadius = clampRadius(2.4);
+      cameraState.goalTarget.set(door.x, 1.72, DOOR_Z);
+      doorTravel = { room: nextRoom, time: 0.6 };
+    };
+
     const pick = (clientX, clientY) => {
       const hit = hitTest(clientX, clientY);
-      if (hit) openProjectRef.current?.(hit.object.userData.projectId);
+      if (!hit) return;
+
+      if (hit.door) {
+        enterDoor(hit.door.id);
+        return;
+      }
+
+      const { projectId, focusKey } = hit.object.userData;
+      // Gallery screens frame themselves before the drawer opens; the desk
+      // monitors keep their existing behaviour.
+      if (focusKey && VIEW_MAP[focusKey]) {
+        setAutoTour(false);
+        setActiveView(focusKey);
+        focus(focusKey);
+      }
+      if (projectId) openProjectRef.current?.(projectId);
     };
 
     const handlePointerDown = (event) => {
@@ -1655,7 +2351,10 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
 
     const handlePointerMove = (event) => {
       if (!drag.active) {
-        canvas.style.cursor = hitTest(event.clientX, event.clientY) ? 'pointer' : 'grab';
+        const hovered = hitTest(event.clientX, event.clientY);
+        hoveredProjectId = hovered?.object?.userData.projectId ?? null;
+        hoveredDoorId = hovered?.door?.id ?? null;
+        canvas.style.cursor = hovered ? 'pointer' : 'grab';
         return;
       }
       const deltaX = event.clientX - drag.x;
@@ -1672,8 +2371,8 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
       }
       cameraState.goalTheta = THREE.MathUtils.clamp(
         cameraState.goalTheta - deltaX * 0.005,
-        -0.86,
-        0.86
+        -cameraState.thetaLimit,
+        cameraState.thetaLimit
       );
       cameraState.goalPhi = THREE.MathUtils.clamp(cameraState.goalPhi - deltaY * 0.004, 1.12, 1.53);
     };
@@ -1686,6 +2385,8 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
     };
 
     const handlePointerLeave = () => {
+      hoveredProjectId = null;
+      hoveredDoorId = null;
       if (!drag.active) canvas.style.cursor = 'grab';
     };
 
@@ -1761,6 +2462,7 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
     const clock = new THREE.Clock();
     const offsetVector = new THREE.Vector3();
     const pinVector = new THREE.Vector3();
+    const doorVector = new THREE.Vector3();
 
     const animate = () => {
       frameId = requestAnimationFrame(animate);
@@ -1842,26 +2544,107 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
           camera.updateProjectionMatrix();
         }
       } else {
+        if (doorTravel) {
+          doorTravel.time -= delta;
+          if (doorTravel.time <= 0) {
+            focus(doorTravel.room);
+            doorTravel = null;
+          }
+        }
+
         cameraState.target.lerp(cameraState.goalTarget, ease);
         cameraState.radius += (cameraState.goalRadius - cameraState.radius) * ease;
         cameraState.theta += (cameraState.goalTheta - cameraState.theta) * ease;
         cameraState.phi += (cameraState.goalPhi - cameraState.phi) * ease;
-        cameraState.theta = THREE.MathUtils.clamp(cameraState.theta, -0.86, 0.86);
+        cameraState.theta = THREE.MathUtils.clamp(
+          cameraState.theta,
+          -cameraState.thetaLimit,
+          cameraState.thetaLimit
+        );
         cameraState.phi = THREE.MathUtils.clamp(cameraState.phi, 1.12, 1.53);
 
         offsetVector.setFromSphericalCoords(cameraState.radius, cameraState.phi, cameraState.theta);
         camera.position.copy(cameraState.target).add(offsetVector);
         camera.position.y = Math.min(camera.position.y, ROOM.height - 0.32);
+        // Keep the orbit camera inside the room it is looking at, so dragging or
+        // zooming can never push it through a partition wall.
+        const roomCenterX = roomCenterFor(cameraState.target.x);
+        camera.position.x = THREE.MathUtils.clamp(
+          camera.position.x,
+          roomCenterX - 3.1,
+          roomCenterX + 3.1
+        );
+        camera.position.z = THREE.MathUtils.clamp(
+          camera.position.z,
+          ROOM.backZ + 0.8,
+          ROOM.frontZ - 0.8
+        );
         camera.lookAt(cameraState.target);
 
-        if (Math.abs(camera.fov - orbitFov) > 0.01) {
-          camera.fov += (orbitFov - camera.fov) * ease;
+        const targetFov = cameraState.goalFov ?? orbitFov;
+        if (Math.abs(camera.fov - targetFov) > 0.01) {
+          camera.fov += (targetFov - camera.fov) * ease;
           camera.updateProjectionMatrix();
         }
       }
 
+      // Doors open as the visitor walks up to them, close again once they leave,
+      // and report the room they are standing in so the HUD pill stays honest.
+      if (walkState.active) {
+        doors.forEach((door) => {
+          const distance = Math.hypot(walkState.position.x - door.x, walkState.position.z - DOOR_Z);
+          if (distance < 2.2) door.target = 1;
+          else if (distance > 3.0 && door.target === 1) door.target = 0;
+        });
+
+        const currentRoom = roomAt(walkState.position.x);
+        if (currentRoom !== walkRoom) {
+          walkRoom = currentRoom;
+          setActiveView(currentRoom);
+        }
+      }
+
+      doors.forEach((door) => {
+        const isHovered = door.id === hoveredDoorId;
+        door.hover += ((isHovered ? 1 : 0) - door.hover) * (1 - Math.exp(-9 * delta));
+        door.progress += (door.target - door.progress) * (1 - Math.exp(-6 * delta));
+        door.panel.position.z = DOOR_Z + door.progress * (DOOR_HALF_WIDTH * 2 - 0.06);
+        door.panelMaterial.emissiveIntensity = 0.12 + door.progress * 0.32 + door.hover * 0.28;
+        door.glowMaterial.opacity = 0.32 + door.hover * 0.42;
+        door.light.intensity = 1.3 + door.progress * 1.5 + door.hover * 1.3;
+      });
+
       const viewportWidth = mount.clientWidth || 1;
       const viewportHeight = mount.clientHeight || 1;
+
+      const tooltip = doorTooltipRef.current;
+      if (tooltip) {
+        let activeDoor = doors.find((door) => door.id === hoveredDoorId) ?? null;
+        if (!activeDoor && walkState.active) {
+          activeDoor =
+            doors.find(
+              (door) =>
+                Math.hypot(walkState.position.x - door.x, walkState.position.z - DOOR_Z) < 2.4
+            ) ?? null;
+        }
+
+        if (activeDoor) {
+          doorVector.copy(activeDoor.anchor).project(camera);
+          const tooltipX = (doorVector.x * 0.5 + 0.5) * viewportWidth;
+          const tooltipY = (-doorVector.y * 0.5 + 0.5) * viewportHeight;
+          const tooltipVisible =
+            doorVector.z < 1 &&
+            tooltipX > 20 &&
+            tooltipX < viewportWidth - 20 &&
+            tooltipY > 16 &&
+            tooltipY < viewportHeight - 16;
+          tooltip.style.transform = `translate3d(${tooltipX}px, ${tooltipY}px, 0) translate(-50%, -100%)`;
+          tooltip.style.opacity = tooltipVisible ? '1' : '0';
+        } else {
+          tooltip.style.opacity = '0';
+        }
+      }
+
       const pinTop = window.innerWidth < 768 ? 150 : 96;
       const pinBottom = window.innerWidth < 768 ? 190 : 150;
 
@@ -1891,6 +2674,20 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
       });
       signLight.intensity = 5.5 + Math.sin(elapsed * 1.6) * 1.1;
 
+      // Hover glow eases per screen, so moving across the gallery reads as a
+      // light travelling along the wall instead of a row of switches.
+      galleryGlow.forEach((entry) => {
+        const goal = entry.projectId === hoveredProjectId ? 1 : 0.2;
+        entry.value += (goal - entry.value) * (1 - Math.exp(-10 * delta));
+        if (entry.kind === 'standard') entry.material.emissiveIntensity = entry.value * 1.5;
+        else entry.material.opacity = 0.22 + entry.value * 0.55;
+      });
+
+      eqBars.forEach((bar, index) => {
+        bar.scale.y = bar.userData.base + Math.abs(Math.sin(elapsed * 2.2 + index * 0.55)) * 0.6;
+      });
+      musicLight.intensity = 4.2 + Math.sin(elapsed * 3.1) * 1.2;
+
       dust.position.x = Math.sin(elapsed * 0.12) * 0.18;
       dust.position.y = Math.sin(elapsed * 0.24) * 0.06;
       dustMaterial.opacity = 0.42 + Math.sin(elapsed * 0.8) * 0.12;
@@ -1907,9 +2704,7 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
         ? window.innerWidth < 768
           ? 66
           : 60
-        : window.innerWidth < 768
-          ? 58
-          : 46;
+        : (cameraState.goalFov ?? (window.innerWidth < 768 ? 58 : 46));
       camera.updateProjectionMatrix();
     };
 
@@ -1973,7 +2768,7 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
         ref={mountRef}
         className="absolute inset-0 h-full w-full cursor-grab touch-none"
         role="region"
-        aria-label="Revilend interaktiv 3D cyber xona"
+        aria-label="Revilend interaktiv 3D studio"
       />
 
       <div
@@ -1996,6 +2791,15 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
           </div>
         </div>
       ) : null}
+
+      <div
+        ref={doorTooltipRef}
+        aria-hidden="true"
+        className="pointer-events-none absolute left-0 top-0 z-20 whitespace-nowrap rounded-full border border-electric/40 bg-ink-900/90 px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.1em] text-electric opacity-0 shadow-[0_14px_40px_rgba(0,0,0,0.55)] backdrop-blur-md transition-opacity duration-150"
+        style={{ willChange: 'transform' }}
+      >
+        Kirish uchun bosing / Eshikni ochish
+      </div>
 
       {walkMode || computerOpen ? null : (
         <div className="pointer-events-none absolute inset-0 z-10">
@@ -2095,10 +2899,10 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
                 <div className="pointer-events-auto flex w-full flex-wrap items-center justify-center gap-2">
                   <div
                     role="group"
-                    aria-label="3D kamera manzillari"
+                    aria-label="3D xonalar"
                     className="no-scrollbar flex max-w-full items-center gap-1 overflow-x-auto rounded-full border border-slate-700/60 bg-ink-900/85 p-1.5 shadow-2xl backdrop-blur-xl"
                   >
-                    {VIEWS.map((view) => (
+                    {ROOMS.map((view) => (
                       <button
                         key={view.key}
                         type="button"
@@ -2152,7 +2956,7 @@ export default function CyberRoomView({ onOpenProject, drawerOpen = false }) {
                     </button>
                     <button
                       type="button"
-                      onClick={() => focusView('desk')}
+                      onClick={() => focusView('overview')}
                       title="Kamerani qayta tiklash (R)"
                       aria-label="Kamerani qayta tiklash"
                       className="grid h-8 w-8 place-items-center rounded-full text-slate-400 transition hover:bg-slate-800/80 hover:text-white active:scale-95"
