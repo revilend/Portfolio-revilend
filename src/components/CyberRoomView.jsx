@@ -98,7 +98,7 @@ const DOORS = [
 ];
 
 // Twelve gallery screens in three rows of four inside room 02.
-const GALLERY_COLUMNS = [-2.5, -0.85, 0.85, 2.5];
+const GALLERY_COLUMNS = [-2.3, -0.77, 0.77, 2.3];
 const GALLERY_ROWS = [3.4, 2.32, 1.24];
 const GALLERY = [
   { id: 'revilend-games', label: 'Revilend Games' },
